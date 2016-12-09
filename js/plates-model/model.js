@@ -1,15 +1,15 @@
 import Surface from './surface';
-import Point from './point';
+import Point, { OCEAN, CONTINENT } from './point';
 import Plate from './plate';
 
 export const MIN_HEIGHT = -1;
 export const MAX_HEIGHT = 1;
 
-function generatePlate(minX, maxX, minY, maxY, height) {
+function generatePlate(minX, maxX, minY, maxY, type, height) {
   const plate = new Plate(0, 0);
   for (let x = minX; x < maxX; x += 1) {
     for (let y = minY; y < maxY; y += 1) {
-      const point = new Point(x, y, height, plate);
+      const point = new Point(x, y, type, height, plate);
       plate.points.push(point);
     }
   }
@@ -32,8 +32,12 @@ export default class Model {
     this.updateSurfaceHeight();
   }
 
-  get data() {
-    return this.surface.data;
+  get maxHeight() {
+    return this.surface.maxHeight;
+  }
+
+  get points() {
+    return this.surface.points;
   }
 
   updateSurfaceHeight() {
@@ -47,8 +51,8 @@ export default class Model {
 
   testInit() {
     const { width, height } = this.options;
-    const ocean = generatePlate(0, width * 0.5, 0, height, -0.5);
-    const continent = generatePlate(width * 0.5, width, 0, height, 0.01);
+    const ocean = generatePlate(0, width * 0.5, 0, height, OCEAN, -0.5);
+    const continent = generatePlate(width * 0.5, width, 0, height, CONTINENT, 0.01);
     this.plates.push(ocean);
     this.plates.push(continent);
   }

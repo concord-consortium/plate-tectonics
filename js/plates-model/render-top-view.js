@@ -11,6 +11,7 @@ const DEF_COLOR_MAP = colormap({
 });
 
 function heightToShade(val) {
+  if (val == null) return 0;
   return Math.floor((val - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT) * N_SHADES);
 }
 

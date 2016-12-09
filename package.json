@@ -18,6 +18,7 @@
   "homepage": "https://github.com/concord-consortium/plate-tectonics#readme",
   "dependencies": {
     "babel-polyfill": "^6.16.0",
+    "binarysearch": "^1.0.0",
     "colormap": "^2.2.0",
     "material-ui": "^0.16.4",
     "react": "^15.4.1",

@@ -1,10 +1,15 @@
+import bs from 'binarysearch';
 import { MIN_HEIGHT, MAX_HEIGHT } from './model';
+import { OCEAN, CONTINENT } from './point';
 
-const DARK = 64;
-const LIGHT = 200;
+const COLORS = {
+  nothing: 220,
+  [OCEAN]: 128,
+  [CONTINENT]: 64,
+};
 
-export default function renderCrossSection(canvas, data, crossSectionY) {
-  const maxX = data.length;
+export default function renderCrossSection(canvas, points, crossSectionY) {
+  const maxX = points.length;
   if (maxX !== canvas.width) {
     throw new Error('Data has to have the same width as canvas');
   }
@@ -14,14 +19,19 @@ export default function renderCrossSection(canvas, data, crossSectionY) {
 
   const heightData = [];
   for (let x = 0; x < maxX; x += 1) {
-    const h = canvasHeight - canvasHeight * (data[x][crossSectionY] - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
+    const h = (points[x][crossSectionY] || []).map(point =>
+      canvasHeight - canvasHeight * (point.height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT));
     heightData.push(h);
   }
 
   for (let x = 0; x < maxX; x += 1) {
     for (let y = 0; y < canvasHeight; y += 1) {
       const idx = (y * maxX + x) * 4;
-      const color = y >= heightData[x] ? DARK : LIGHT;
+      let color = COLORS.nothing;
+      if (y >= heightData[x][0]) {
+        const pointIdx = bs.closest(heightData[x], y);
+        color = COLORS[points[x][y][pointIdx].type];
+      }
       imageData.data[idx] = color;
       imageData.data[idx + 1] = color;
       imageData.data[idx + 2] = color;

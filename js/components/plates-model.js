@@ -27,8 +27,8 @@ export default class PlatesModel extends PureComponent {
   rafCallback() {
     // this.rafId = requestAnimationFrame(this.rafCallback);
     this.model.step();
-    renderTopView(this.topView, this.model.data);
-    renderCrossSection(this.crossSectionView, this.model.data, HEIGHT * 0.5);
+    renderTopView(this.topView, this.model.maxHeight);
+    renderCrossSection(this.crossSectionView, this.model.points, HEIGHT * 0.5);
   }
 
   render() {
