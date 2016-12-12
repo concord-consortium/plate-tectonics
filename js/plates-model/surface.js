@@ -48,4 +48,14 @@ export default class Surface {
       bs.insert(this.points[point.x][point.y], point, sortByHeightDesc);
     }
   }
+
+  forEachCollision(callback) {
+    for (let x = 0; x < this.width; x += 1) {
+      for (let y = 0; y < this.height; y += 1) {
+        if (this.points[x][y] && this.points[x][y].length > 1) {
+          callback(this.points[x][y]);
+        }
+      }
+    }
+  }
 }

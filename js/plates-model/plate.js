@@ -7,9 +7,21 @@ export default class Plate {
     this.points = [];
   }
 
+  notEmpty() {
+    return this.points.length > 0;
+  }
+
   move(timeStep) {
     this.x += this.vx * timeStep;
     this.y += this.vy * timeStep;
+  }
+
+  removePointsBelow(minHeight) {
+    this.points = this.points.filter(p => p.height >= minHeight);
+  }
+
+  getDisplacement(timeStep) {
+    return Math.sqrt(this.vx * this.vx + this.vy * this.vy) * timeStep;
   }
 
   getBBox() {
