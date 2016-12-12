@@ -26,9 +26,15 @@ function sortByHeightDesc(a, b) {
 }
 
 export default class Surface {
-  constructor(options) {
-    this.maxHeight = getGrid(options.width, options.height);
-    this.points = getGrid(options.width, options.height);
+  constructor({ width, height }) {
+    this.width = width;
+    this.height = height;
+    this.reset();
+  }
+
+  reset() {
+    this.maxHeight = getGrid(this.width, this.height);
+    this.points = getGrid(this.width, this.height);
   }
 
   setPoint(point) {
@@ -38,7 +44,8 @@ export default class Surface {
     if (!this.points[point.x][point.y]) {
       this.points[point.x][point.y] = [point];
     } else {
-      bs.insert(this.points, point, sortByHeightDesc);
+      // Collision!
+      bs.insert(this.points[point.x][point.y], point, sortByHeightDesc);
     }
   }
 }

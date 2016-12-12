@@ -9,9 +9,10 @@ const DEF_COLOR_MAP = colormap({
   format: 'rgb',     // "hex" or "rgb" or "rgbaString"
   alpha: 1,
 });
+const NO_PLATE_COLOR = [220, 220, 220];
 
 function heightToShade(val) {
-  if (val == null) return 0;
+  if (val == null) return -1;
   return Math.floor((val - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT) * N_SHADES);
 }
 
@@ -26,7 +27,8 @@ export default function renderTopView(canvas, data, colorMap = DEF_COLOR_MAP) {
 
   for (let i = 0; i < n; i += 1) {
     for (let j = 0; j < m; j += 1) {
-      const color = colorMap[heightToShade(data[i][j])];
+      const shade = heightToShade(data[i][j]);
+      const color = shade > 0 ? colorMap[shade] : NO_PLATE_COLOR;
       const dataIdx = (j * n + i) * 4;
       imageData.data[dataIdx] = color[0];
       imageData.data[dataIdx + 1] = color[1];

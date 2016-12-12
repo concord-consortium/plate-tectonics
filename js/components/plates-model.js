@@ -17,6 +17,8 @@ export default class PlatesModel extends PureComponent {
       width: WIDTH,
       height: HEIGHT,
     });
+    window.model = this.model;
+    window.mComp = this;
     this.rafCallback();
   }
 
@@ -25,7 +27,7 @@ export default class PlatesModel extends PureComponent {
   }
 
   rafCallback() {
-    // this.rafId = requestAnimationFrame(this.rafCallback);
+    this.rafId = requestAnimationFrame(this.rafCallback);
     this.model.step();
     renderTopView(this.topView, this.model.maxHeight);
     renderCrossSection(this.crossSectionView, this.model.points, HEIGHT * 0.5);
