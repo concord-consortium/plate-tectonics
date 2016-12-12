@@ -17,19 +17,19 @@ function heightToShade(val) {
 }
 
 export default function renderTopView(canvas, data, colorMap = DEF_COLOR_MAP) {
-  const n = data.length;
-  const m = data[0].length;
-  if (n !== canvas.height || m !== canvas.width) {
+  const maxX = data.length;
+  const maxY = data[0].length;
+  if (maxX !== canvas.width || maxY !== canvas.height) {
     throw new Error('Data has to have the same dimensions as canvas');
   }
   const ctx = canvas.getContext('2d');
   const imageData = ctx.createImageData(canvas.width, canvas.height);
 
-  for (let i = 0; i < n; i += 1) {
-    for (let j = 0; j < m; j += 1) {
-      const shade = heightToShade(data[i][j]);
+  for (let x = 0; x < maxX; x += 1) {
+    for (let y = 0; y < maxY; y += 1) {
+      const shade = heightToShade(data[x][y]);
       const color = shade > 0 ? colorMap[shade] : NO_PLATE_COLOR;
-      const dataIdx = (j * n + i) * 4;
+      const dataIdx = (y * maxX + x) * 4;
       imageData.data[dataIdx] = color[0];
       imageData.data[dataIdx + 1] = color[1];
       imageData.data[dataIdx + 2] = color[2];

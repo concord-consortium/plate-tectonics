@@ -4,9 +4,11 @@ import Plate from './plate';
 
 export const MIN_HEIGHT = -1;
 export const MAX_HEIGHT = 1;
+const BASIC_OCEAN_HEIGHT = -0.5;
+const BASIC_CONTINENT_HEIGHT = 0.01;
 
 function generatePlate({ width, height, type, pointsHeight, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
-  const plate = new Plate({ x, y, vx, vy });
+  const plate = new Plate({ x, y, vx, vy, maxX, maxY });
   for (let px = 0; px < width; px += 1) {
     for (let py = 0; py < height; py += 1) {
       const point = new Point({ x: px, y: py, height: pointsHeight, type, plate, maxX, maxY });
@@ -68,7 +70,7 @@ export default class Model {
           // Ocean - continent collision.
           const oceanPoint = p1.type === OCEAN ? p1 : p2;
           const continentPoint = p1.type === CONTINENT ? p1 : p2;
-          oceanPoint.collideWithContinent(continentPoint);
+          oceanPoint.collideWithContinent(continentPoint, this.timeStep);
         }
       }
     });
@@ -76,10 +78,9 @@ export default class Model {
 
   updatePoints() {
     this.plates.forEach((plate) => {
-      const plateDisplacement = plate.getDisplacement(this.timeStep);
       plate.points.forEach((point) => {
         // E.g. handle ongoing collisions, subduction and so on.
-        point.update(plateDisplacement);
+        point.update();
       });
     });
   }
@@ -102,7 +103,7 @@ export default class Model {
       width: width * 0.5,
       height,
       type: OCEAN,
-      pointsHeight: -0.5,
+      pointsHeight: BASIC_OCEAN_HEIGHT,
       vx: 2.5,
       vy: 0,
       maxX: width,
@@ -114,7 +115,9 @@ export default class Model {
       width: width * 0.5,
       height,
       type: CONTINENT,
-      pointsHeight: 0.01,
+      pointsHeight: BASIC_CONTINENT_HEIGHT,
+      vx: 0,
+      vy: 0,
       maxX: width,
       maxY: height,
     });

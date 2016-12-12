@@ -1,9 +1,11 @@
 export default class Plate {
-  constructor({ x, y, vx, vy }) {
+  constructor({ x, y, vx, vy, maxX, maxY }) {
     this.x = x;
     this.y = y;
     this.vx = vx;
     this.vy = vy;
+    this.maxX = maxX;
+    this.maxY = maxY;
     this.points = [];
   }
 
@@ -14,6 +16,10 @@ export default class Plate {
   move(timeStep) {
     this.x += this.vx * timeStep;
     this.y += this.vy * timeStep;
+    if (this.x > this.maxX) this.x = this.x % this.maxX;
+    if (this.x < 0) this.x += this.maxX;
+    if (this.y > this.maxY) this.y = this.y % this.maxY;
+    if (this.y < 0) this.y += this.maxY;
   }
 
   removePointsBelow(minHeight) {

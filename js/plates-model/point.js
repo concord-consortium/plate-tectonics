@@ -18,6 +18,8 @@ export default class Point {
     this.maxY = maxY;
     // When this value is defined, it means that point has collided with some other point.
     this.subductionDist = null;
+    this.subductionDisplacement = null;
+    this.preSubductionHeight = null;
   }
 
   get x() {
@@ -28,20 +30,35 @@ export default class Point {
     return Math.round(this.relY + this.plate.y) % this.maxY;
   }
 
+  get vx() {
+    return this.plate.vx;
+  }
+
+  get vy() {
+    return this.plate.vy;
+  }
+
   get subduction() {
     return this.subductionDist !== null;
   }
 
-  collideWithContinent() {
+  getRelativeVelocity(otherPoint) {
+    const vxDiff = this.vx - otherPoint.vx;
+    const vyDiff = this.vy - otherPoint.vy;
+    return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
+  }
+
+  collideWithContinent(otherPoint, timeStep) {
     if (!this.subduction) {
       this.subductionDist = 0;
       this.preSubductionHeight = this.height;
     }
+    this.subductionDisplacement = this.getRelativeVelocity(otherPoint) * timeStep;
   }
 
-  update(plateDisplacement) {
+  update() {
     if (this.subduction) {
-      this.subductionDist += plateDisplacement;
+      this.subductionDist += this.subductionDisplacement;
       this.height = this.preSubductionHeight + subductionHeightChange(this.subductionDist);
     }
   }
