@@ -1,7 +1,7 @@
 import colormap from 'colormap';
 import { MIN_HEIGHT, MAX_HEIGHT } from './model';
 
-const N_SHADES = 70;
+const N_SHADES = 200;
 
 const DEF_COLOR_MAP = colormap({
   colormap: 'jet',   // pick a builtin colormap or add your own

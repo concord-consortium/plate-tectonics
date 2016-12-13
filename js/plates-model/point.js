@@ -3,6 +3,10 @@ export const CONTINENT = 1;
 
 const SUBDUCTION_RATIO = -0.00015;
 
+const VOLCANIC_ACTIVITY_HEIGHT_DIFF = 0.005;
+const VOLCANIC_ACT_MIN_DIST = 20;
+const VOLCANIC_ACT_MAX_DIST = 60;
+
 function subductionHeightChange(subductionDist) {
   return SUBDUCTION_RATIO * subductionDist * subductionDist;
 }
@@ -54,12 +58,23 @@ export default class Point {
       this.preSubductionHeight = this.height;
     }
     this.subductionDisplacement = this.getRelativeVelocity(otherPoint) * timeStep;
+
+    if (this.subductionDist > VOLCANIC_ACT_MIN_DIST &&
+        this.subductionDist < VOLCANIC_ACT_MAX_DIST) {
+      const normalizedDist = (this.subductionDist - VOLCANIC_ACT_MIN_DIST) / (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+      const volcanicActProbability = Math.min(1 - normalizedDist, normalizedDist) / 0.5;
+      otherPoint.height += VOLCANIC_ACTIVITY_HEIGHT_DIFF * Math.pow(volcanicActProbability, 1.5);
+    }
   }
 
   update() {
     if (this.subduction) {
       this.subductionDist += this.subductionDisplacement;
       this.height = this.preSubductionHeight + subductionHeightChange(this.subductionDist);
+    }
+
+    if (this.height > 1) {
+      this.height = 1;
     }
   }
 }
