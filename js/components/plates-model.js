@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import Model from '../plates-model/model';
 import renderTopView from '../plates-model/render-top-view';
+import renderHotSpots from '../plates-model/render-hot-spots';
 import renderCrossSection from '../plates-model/render-cross-section';
 
 const WIDTH = 512;
@@ -30,6 +31,7 @@ export default class PlatesModel extends PureComponent {
     this.rafId = requestAnimationFrame(this.rafCallback);
     this.model.step();
     renderTopView(this.topView, this.model.maxHeight);
+    //renderHotSpots(this.topView, this.model.hotSpots);
     renderCrossSection(this.crossSectionView, this.model.points, HEIGHT * 0.5);
   }
 

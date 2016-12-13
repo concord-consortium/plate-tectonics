@@ -13,7 +13,7 @@ const NO_PLATE_COLOR = [220, 220, 220];
 
 function heightToShade(val) {
   if (val == null) return -1;
-  return Math.floor((val - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT) * N_SHADES);
+  return Math.floor((val - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT) * (N_SHADES - 1));
 }
 
 export default function renderTopView(canvas, data, colorMap = DEF_COLOR_MAP) {

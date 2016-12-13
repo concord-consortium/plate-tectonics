@@ -1,6 +1,7 @@
 import Surface from './surface';
 import Point, { OCEAN, CONTINENT } from './point';
 import Plate from './plate';
+import HotSpot from './hot-spot';
 
 export const MIN_HEIGHT = -1;
 export const MAX_HEIGHT = 1;
@@ -9,8 +10,8 @@ const BASIC_CONTINENT_HEIGHT = 0.01;
 
 function generatePlate({ width, height, type, pointsHeight, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
   const plate = new Plate({ x, y, vx, vy, maxX, maxY });
-  for (let px = 0; px < width; px += 1) {
-    for (let py = 0; py < height; py += 1) {
+  for (let px = x; px < x + width; px += 1) {
+    for (let py = y; py < y + height; py += 1) {
       const point = new Point({ x: px, y: py, height: pointsHeight, type, plate, maxX, maxY });
       plate.points.push(point);
     }
@@ -30,10 +31,13 @@ export default class Model {
 
   step() {
     this.movePlates();
-    this.updateSurfaceHeight();
+    this.updateSurface();
     this.handleCollisions();
+    this.activateHotSpots();
     this.updatePoints();
+    this.updateHotSpots();
     this.removePointsBelowMinHeight();
+    this.removeDeadHotSpots();
     this.removeEmptyPlates();
   }
 
@@ -45,13 +49,17 @@ export default class Model {
     return this.surface.points;
   }
 
+  get hotSpots() {
+    return [].concat([], ...this.plates.map(p => p.hotSpots));
+  }
+
   movePlates() {
     this.plates.forEach((plate) => {
       plate.move(this.timeStep);
     });
   }
 
-  updateSurfaceHeight() {
+  updateSurface() {
     this.surface.reset();
     this.plates.forEach((plate) => {
       const points = plate.points;
@@ -71,8 +79,29 @@ export default class Model {
           const oceanPoint = p1.type === OCEAN ? p1 : p2;
           const continentPoint = p1.type === CONTINENT ? p1 : p2;
           oceanPoint.collideWithContinent(continentPoint, this.timeStep);
+
+          if (Math.random() < oceanPoint.volcanicActProbability) {
+            const continentPlate = continentPoint.plate;
+            const newHotSpot = new HotSpot({
+              x: continentPoint.x,
+              y: continentPoint.y,
+              radius: oceanPoint.volcanicActProbability * Math.random() * 500 + 5,
+              plate: continentPlate,
+            });
+            continentPlate.addHotSpot(newHotSpot);
+          }
         }
       }
+    });
+  }
+
+  activateHotSpots() {
+    this.plates.forEach((plate) => {
+      plate.inactiveHotSpots.forEach((hotSpot) => {
+        const points = this.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
+        points.forEach(point => point.applyVolcanicActivity(hotSpot));
+        hotSpot.active = true;
+      });
     });
   }
 
@@ -85,9 +114,23 @@ export default class Model {
     });
   }
 
+  updateHotSpots() {
+    this.plates.forEach((plate) => {
+      plate.hotSpots.forEach((hotSpot) => {
+        hotSpot.update(this.timeStep);
+      });
+    });
+  }
+
   removePointsBelowMinHeight() {
     this.plates.forEach((plate) => {
       plate.removePointsBelow(MIN_HEIGHT);
+    });
+  }
+
+  removeDeadHotSpots() {
+    this.plates.forEach((plate) => {
+      plate.removeDeadHotSpots();
     });
   }
 

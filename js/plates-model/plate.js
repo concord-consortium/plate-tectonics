@@ -7,6 +7,11 @@ export default class Plate {
     this.maxX = maxX;
     this.maxY = maxY;
     this.points = [];
+    this.hotSpots = [];
+  }
+
+  get inactiveHotSpots() {
+    return this.hotSpots.filter(hs => !hs.active);
   }
 
   notEmpty() {
@@ -24,6 +29,20 @@ export default class Plate {
 
   removePointsBelow(minHeight) {
     this.points = this.points.filter(p => p.height >= minHeight);
+  }
+
+  removeDeadHotSpots() {
+    this.hotSpots = this.hotSpots.filter(hs => hs.alive);
+  }
+
+  addHotSpot(newHotSpot) {
+    // TODO OPTIMIZE
+    // Brutal way, but it's initial test if hot spot idea works at all. If so, we should implement fast way to check
+    // if hot spots are colliding and which points lie inside them (k-trees?).
+    for (let i = 0, len = this.hotSpots.length; i < len; i += 1) {
+      if (this.hotSpots[i].collides(newHotSpot)) return;
+    }
+    this.hotSpots.push(newHotSpot);
   }
 
   getDisplacement(timeStep) {
