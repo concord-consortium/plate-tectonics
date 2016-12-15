@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import Slider from 'material-ui/Slider';
+import Toggle from 'material-ui/Toggle';
 import Model from '../plates-model/model';
 import renderTopView from '../plates-model/render-top-view';
 import renderHotSpots from '../plates-model/render-hot-spots';
@@ -15,9 +16,11 @@ export default class PlatesModel extends PureComponent {
     super(props);
     this.state = {
       crossSectionY: HEIGHT * 0.5,
+      hotSpotsRendering: false,
     };
     this.rafCallback = this.rafCallback.bind(this);
     this.handleCrossSectionYChange = this.handleCrossSectionYChange.bind(this);
+    this.handleRenderHotSpotsChange = this.handleRenderHotSpotsChange.bind(this);
   }
 
   componentDidMount() {
@@ -35,11 +38,13 @@ export default class PlatesModel extends PureComponent {
   }
 
   rafCallback() {
-    const { crossSectionY } = this.state;
+    const { crossSectionY, hotSpotsRendering } = this.state;
     this.rafId = requestAnimationFrame(this.rafCallback);
     this.model.step();
     renderTopView(this.topView, this.model.maxHeight);
-    //renderHotSpots(this.topView, this.model.hotSpots);
+    if (hotSpotsRendering) {
+      renderHotSpots(this.topView, this.model.hotSpots);
+    }
     renderCrossSection(this.crossSectionView, this.model.points, HEIGHT - Math.round(crossSectionY));
   }
 
@@ -47,8 +52,12 @@ export default class PlatesModel extends PureComponent {
     this.setState({ crossSectionY: Math.round(value) });
   }
 
+  handleRenderHotSpotsChange(event, value) {
+    this.setState({ hotSpotsRendering: value });
+  }
+
   render() {
-    const { crossSectionY } = this.state;
+    const { crossSectionY, hotSpotsRendering } = this.state;
     return (
       <div className="plates-model">
         <div>
@@ -66,6 +75,12 @@ export default class PlatesModel extends PureComponent {
           <div>
             <canvas ref={(c) => { this.crossSectionView = c; }} width={WIDTH} height={100} />
           </div>
+        </div>
+        <div>
+          <Toggle
+            label='"Hot spots" rendering' labelPosition="right"
+            toggled={hotSpotsRendering} onToggle={this.handleRenderHotSpotsChange}
+          />
         </div>
       </div>
     );

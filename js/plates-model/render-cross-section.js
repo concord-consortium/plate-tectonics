@@ -1,11 +1,12 @@
 import bs from 'binarysearch';
-import { MIN_HEIGHT, MAX_HEIGHT } from './model';
+import { WATER_LEVEL, MIN_HEIGHT, MAX_HEIGHT } from './model';
 import { OCEAN, CONTINENT } from './point';
 
 const COLORS = {
-  nothing: 220,
-  [OCEAN]: 128,
-  [CONTINENT]: 64,
+  nothing: [220, 220, 220],
+  water: [2, 156, 212],
+  [CONTINENT]: [128, 128, 128],
+  [OCEAN]: [64, 64, 64],
 };
 
 export default function renderCrossSection(canvas, points, crossSectionY) {
@@ -23,18 +24,19 @@ export default function renderCrossSection(canvas, points, crossSectionY) {
       canvasHeight - canvasHeight * (point.height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT));
     heightData.push(h);
   }
+  const waterLevel = canvasHeight - canvasHeight * (WATER_LEVEL - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
 
   for (let x = 0; x < maxX; x += 1) {
     for (let y = 0; y < canvasHeight; y += 1) {
       const idx = (y * maxX + x) * 4;
-      let color = COLORS.nothing;
+      let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
         const pointIdx = bs.closest(heightData[x], y);
         color = COLORS[points[x][y][pointIdx].type];
       }
-      imageData.data[idx] = color;
-      imageData.data[idx + 1] = color;
-      imageData.data[idx + 2] = color;
+      imageData.data[idx] = color[0];
+      imageData.data[idx + 1] = color[1];
+      imageData.data[idx + 2] = color[2];
       imageData.data[idx + 3] = 255;
     }
   }

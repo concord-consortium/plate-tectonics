@@ -2,8 +2,8 @@ export const OCEAN = 0;
 export const CONTINENT = 1;
 
 const SUBDUCTION_RATIO = -0.00015;
-const VOLCANIC_ACT_MIN_DIST = 0;
-const VOLCANIC_ACT_MAX_DIST = 60;
+const VOLCANIC_ACT_MIN_DIST = 10;
+const VOLCANIC_ACT_MAX_DIST = 50;
 
 function subductionHeightChange(subductionDist) {
   return SUBDUCTION_RATIO * subductionDist * subductionDist;
@@ -19,7 +19,7 @@ export default class Point {
     this.plate = plate;
     // Subduction properties:
     this.subductionDist = null;
-    this.subductionDisplacement = null;
+    this.subductionVelocity = null;
     this.preSubductionHeight = null;
     // Volcanic activity properties:
     this.volcanicHotSpot = false;
@@ -46,6 +46,10 @@ export default class Point {
     return this.subductionDist !== null;
   }
 
+  get volcanicAct() {
+    return this.volcanicHotSpot !== null;
+  }
+
   get volcanicActProbability() {
     if (!this.subduction) return 0;
     const normalizedDist = (this.subductionDist - VOLCANIC_ACT_MIN_DIST) /
@@ -59,12 +63,12 @@ export default class Point {
     return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
   }
 
-  collideWithContinent(otherPoint, timeStep) {
+  collideWithContinent(otherPoint) {
     if (!this.subduction) {
       this.subductionDist = 0;
       this.preSubductionHeight = this.height;
     }
-    this.subductionDisplacement = this.getRelativeVelocity(otherPoint) * timeStep;
+    this.subductionVelocity = this.getRelativeVelocity(otherPoint);
   }
 
   applyVolcanicActivity(hotSpot) {
@@ -73,14 +77,14 @@ export default class Point {
     this.distFromVolcanoCenter = hotSpot.dist(this);
   }
 
-  update() {
+  update(timeStep) {
     if (this.subduction) {
-      this.subductionDist += this.subductionDisplacement;
+      this.subductionDist += this.subductionVelocity * timeStep;
       this.height = this.preSubductionHeight + subductionHeightChange(this.subductionDist);
     }
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
-      this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter);
+      this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
     } else {
       this.volcanicHotSpot = null;
       this.distFromVolcanoCenter = null;

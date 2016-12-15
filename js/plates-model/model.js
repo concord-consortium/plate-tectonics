@@ -5,14 +5,20 @@ import HotSpot from './hot-spot';
 
 export const MIN_HEIGHT = -1;
 export const MAX_HEIGHT = 1;
-const BASIC_OCEAN_HEIGHT = -0.5;
-const BASIC_CONTINENT_HEIGHT = 0.01;
+export const BASIC_OCEAN_HEIGHT = -0.5;
+export const WATER_LEVEL = 0;
 
-function generatePlate({ width, height, type, pointsHeight, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
+function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
+  let pointHeight;
   const plate = new Plate({ x, y, vx, vy, maxX, maxY });
   for (let px = x; px < x + width; px += 1) {
     for (let py = y; py < y + height; py += 1) {
-      const point = new Point({ x: px, y: py, height: pointsHeight, type, plate, maxX, maxY });
+      if (type === OCEAN) {
+        pointHeight = BASIC_OCEAN_HEIGHT;
+      } else {
+        pointHeight = Math.min(0.1, BASIC_OCEAN_HEIGHT + Math.pow(3 * ((px - x) / width), 0.5));
+      }
+      const point = new Point({ x: px, y: py, height: pointHeight, type, plate, maxX, maxY });
       plate.points.push(point);
     }
   }
@@ -78,14 +84,15 @@ export default class Model {
           // Ocean - continent collision.
           const oceanPoint = p1.type === OCEAN ? p1 : p2;
           const continentPoint = p1.type === CONTINENT ? p1 : p2;
-          oceanPoint.collideWithContinent(continentPoint, this.timeStep);
+          oceanPoint.collideWithContinent(continentPoint);
 
-          if (Math.random() < oceanPoint.volcanicActProbability) {
+          if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
             const continentPlate = continentPoint.plate;
             const newHotSpot = new HotSpot({
               x: continentPoint.x,
               y: continentPoint.y,
-              radius: oceanPoint.volcanicActProbability * Math.random() * 500 + 5,
+              radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+              strength: oceanPoint.getRelativeVelocity(continentPoint),
               plate: continentPlate,
             });
             continentPlate.addHotSpot(newHotSpot);
@@ -109,7 +116,7 @@ export default class Model {
     this.plates.forEach((plate) => {
       plate.points.forEach((point) => {
         // E.g. handle ongoing collisions, subduction and so on.
-        point.update();
+        point.update(this.timeStep);
       });
     });
   }
@@ -146,7 +153,6 @@ export default class Model {
       width: width * 0.5,
       height,
       type: OCEAN,
-      pointsHeight: BASIC_OCEAN_HEIGHT,
       vx: 2.5,
       vy: 0,
       maxX: width,
@@ -158,7 +164,6 @@ export default class Model {
       width: width * 0.5,
       height,
       type: CONTINENT,
-      pointsHeight: BASIC_CONTINENT_HEIGHT,
       vx: 0,
       vy: 0,
       maxX: width,
