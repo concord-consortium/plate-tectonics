@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - 6
+install:
+  - travis_retry npm install
+script: npm run lint
+cache:
+  directories:
+    - node_modules
