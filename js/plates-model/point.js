@@ -4,6 +4,8 @@ export const CONTINENT = 1;
 const SUBDUCTION_RATIO = -0.00015;
 const VOLCANIC_ACT_MIN_DIST = 20;
 const VOLCANIC_ACT_MAX_DIST = 70;
+// Limit amount of time that given point can undergo volcanic activity.
+const MAX_VOLCANIC_ACT_TIME = 100;
 
 // Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
 // pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
@@ -14,9 +16,9 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
 
 export default class Point {
   constructor({ x, y, type, height, plate }) {
-    // Make sure that relative coords are always positive to make other calculations easier.
-    this.relX = x > plate.x ? x - plate.x : x - plate.x + plate.maxX;
-    this.relY = y > plate.y ? y - plate.y : y - plate.y + plate.maxY;
+    // Make sure that relative coords are always positive and rounded to make other calculations easier.
+    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
     this.type = type;
     this.height = height;
     this.plate = plate;
@@ -27,6 +29,7 @@ export default class Point {
     // Volcanic activity properties:
     this.volcanicHotSpot = false;
     this.distFromVolcanoCenter = null;
+    this.volcanicActTime = 0;
   }
 
   get x() {
@@ -51,6 +54,10 @@ export default class Point {
 
   get volcanicAct() {
     return this.volcanicHotSpot !== null;
+  }
+
+  get volcanicActAllowed() {
+    return this.volcanicActTime < MAX_VOLCANIC_ACT_TIME;
   }
 
   get volcanicActProbability() {
@@ -87,6 +94,7 @@ export default class Point {
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
       this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
+      this.volcanicActTime += timeStep;
     } else {
       this.volcanicHotSpot = null;
       this.distFromVolcanoCenter = null;

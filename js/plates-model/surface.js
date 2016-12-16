@@ -1,17 +1,5 @@
 import bs from 'binarysearch';
 
-function getTestData(width, height) {
-  const data = [];
-  for (let i = 0; i < width; i += 1) {
-    const row = [];
-    data.push(row);
-    for (let j = 0; j < height; j += 1) {
-      row.push(((j / height) * 2) - 1); // [-1, 1] range
-    }
-  }
-  return data;
-}
-
 function getGrid(width, height) {
   const data = [];
   for (let i = 0; i < width; i += 1) {
@@ -30,15 +18,18 @@ function dist(x1, y1, x2, y2) {
 }
 
 export default class Surface {
-  constructor({ width, height }) {
+  constructor({ width, height, plates = [] }) {
     this.width = width;
     this.height = height;
-    this.reset();
-  }
+    this.maxHeight = getGrid(width, height);
+    this.points = getGrid(width, height);
 
-  reset() {
-    this.maxHeight = getGrid(this.width, this.height);
-    this.points = getGrid(this.width, this.height);
+    plates.forEach((plate) => {
+      const points = plate.points;
+      for (let i = 0, len = points.length; i < len; i += 1) {
+        this.setPoint(points[i]);
+      }
+    });
   }
 
   setPoint(point) {

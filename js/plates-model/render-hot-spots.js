@@ -1,5 +1,4 @@
 export default function renderHotSpots(canvas, hotSpots) {
-  const canvHeight = canvas.height;
   const ctx = canvas.getContext('2d');
   ctx.strokeStyle = '#ff0000';
   hotSpots.forEach((hotSpot) => {

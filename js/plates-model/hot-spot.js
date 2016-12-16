@@ -6,8 +6,8 @@ const LIFE_LENGTH_RATIO = 0.5;
 export default class HotSpot {
   constructor({ x, y, radius, strength, plate }) {
     // Make sure that relative coords are always positive to make other calculations easier.
-    this.relX = x > plate.x ? x - plate.x : x - plate.x + plate.maxX;
-    this.relY = y > plate.y ? y - plate.y : y - plate.y + plate.maxY;
+    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
     this.radius = radius;
     this.strength = strength;
     this.plate = plate;

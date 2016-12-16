@@ -18,7 +18,7 @@ function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX
       } else {
         pointHeight = Math.min(0.1, BASIC_OCEAN_HEIGHT + Math.pow(3 * ((px - x) / width), 0.5));
       }
-      const point = new Point({ x: px, y: py, height: pointHeight, type, plate, maxX, maxY });
+      const point = new Point({ x: px, y: py, height: pointHeight, type, plate });
       plate.points.push(point);
     }
   }
@@ -30,8 +30,9 @@ export default class Model {
     this.width = width;
     this.height = height;
     this.timeStep = timeStep;
-    this.surface = new Surface({ width, height });
     this.plates = [];
+    this.prevSurface = null;
+    this.surface = new Surface({ width, height, plates: this.plates });
     this.testInit();
   }
 
@@ -45,6 +46,7 @@ export default class Model {
     this.removePointsBelowMinHeight();
     this.removeDeadHotSpots();
     this.removeEmptyPlates();
+    // this.addNewPoints();
   }
 
   get maxHeight() {
@@ -66,13 +68,8 @@ export default class Model {
   }
 
   updateSurface() {
-    this.surface.reset();
-    this.plates.forEach((plate) => {
-      const points = plate.points;
-      for (let i = 0, len = points.length; i < len; i += 1) {
-        this.surface.setPoint(points[i]);
-      }
-    });
+    this.prevSurface = this.surface;
+    this.surface = new Surface({ width: this.width, height: this.height, plates: this.plates });
   }
 
   handleCollisions() {
@@ -106,8 +103,20 @@ export default class Model {
     this.plates.forEach((plate) => {
       plate.inactiveHotSpots.forEach((hotSpot) => {
         const points = this.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
-        points.forEach(point => point.applyVolcanicActivity(hotSpot));
+        let volcanicActAllowed = true;
+        points.forEach((point) => {
+          if (!point.volcanicActAllowed) {
+            volcanicActAllowed = false;
+          }
+          point.applyVolcanicActivity(hotSpot);
+        });
         hotSpot.active = true;
+        // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.
+        // Don't remove hot spot immediately, so we don't try to create new hot spots immediately in the next step.
+        // We could control that point by point, but it would cause more noisy look of the volcanoes / mountains.
+        if (!volcanicActAllowed) {
+          hotSpot.strength = 0;
+        }
       });
     });
   }
@@ -143,6 +152,26 @@ export default class Model {
 
   removeEmptyPlates() {
     this.plates = this.plates.filter(p => p.notEmpty());
+  }
+
+  // This handles divergent boundaries.
+  addNewPoints() {
+    const { width, height, surface, prevSurface } = this;
+    for (let x = 0; x < width; x += 1) {
+      for (let y = 0; y < height; y += 1) {
+        // If there's some point missing, create a new ocean crust and add it to the plate that
+        // was in the same location before.
+        if (!surface.points[x][y]) {
+          const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
+          if (plate) {
+            const newPoint = new Point({ x, y, type: OCEAN, height: BASIC_OCEAN_HEIGHT, plate });
+            plate.points.push(newPoint);
+            // Update surface object too, so prevSurface in the next step is valid!
+            surface.points[x][y] = [newPoint];
+          }
+        }
+      }
+    }
   }
 
   testInit() {
