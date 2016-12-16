@@ -153,7 +153,7 @@ export default class Model {
       width: width * 0.5,
       height,
       type: OCEAN,
-      vx: 2.5,
+      vx: 2,
       vy: 0,
       maxX: width,
       maxY: height,

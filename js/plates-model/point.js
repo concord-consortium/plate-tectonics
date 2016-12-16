@@ -2,11 +2,14 @@ export const OCEAN = 0;
 export const CONTINENT = 1;
 
 const SUBDUCTION_RATIO = -0.00015;
-const VOLCANIC_ACT_MIN_DIST = 10;
-const VOLCANIC_ACT_MAX_DIST = 50;
+const VOLCANIC_ACT_MIN_DIST = 20;
+const VOLCANIC_ACT_MAX_DIST = 70;
 
-function subductionHeightChange(subductionDist) {
-  return SUBDUCTION_RATIO * subductionDist * subductionDist;
+// Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
+// pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
+// function rather than linear.
+function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
+  return SUBDUCTION_RATIO * subductionVelocity * timeStep * subductionDist;
 }
 
 export default class Point {
@@ -66,7 +69,6 @@ export default class Point {
   collideWithContinent(otherPoint) {
     if (!this.subduction) {
       this.subductionDist = 0;
-      this.preSubductionHeight = this.height;
     }
     this.subductionVelocity = this.getRelativeVelocity(otherPoint);
   }
@@ -80,7 +82,7 @@ export default class Point {
   update(timeStep) {
     if (this.subduction) {
       this.subductionDist += this.subductionVelocity * timeStep;
-      this.height = this.preSubductionHeight + subductionHeightChange(this.subductionDist);
+      this.height += subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
     }
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
