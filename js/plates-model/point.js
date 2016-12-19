@@ -1,9 +1,9 @@
 export const OCEAN = 0;
 export const CONTINENT = 1;
 
+export const VOLCANIC_ACT_MIN_DIST = 20;
+export const VOLCANIC_ACT_MAX_DIST = 70;
 const SUBDUCTION_RATIO = -0.00015;
-const VOLCANIC_ACT_MIN_DIST = 20;
-const VOLCANIC_ACT_MAX_DIST = 70;
 // Limit amount of time that given point can undergo volcanic activity.
 const MAX_VOLCANIC_ACT_TIME = 100;
 
@@ -25,7 +25,6 @@ export default class Point {
     // Subduction properties:
     this.subductionDist = null;
     this.subductionVelocity = null;
-    this.preSubductionHeight = null;
     // Volcanic activity properties:
     this.volcanicHotSpot = false;
     this.distFromVolcanoCenter = null;

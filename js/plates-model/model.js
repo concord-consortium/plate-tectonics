@@ -46,7 +46,7 @@ export default class Model {
     this.removePointsBelowMinHeight();
     this.removeDeadHotSpots();
     this.removeEmptyPlates();
-    // this.addNewPoints();
+    this.addNewPoints();
   }
 
   get maxHeight() {
