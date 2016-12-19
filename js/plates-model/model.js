@@ -1,12 +1,8 @@
 import Surface from './surface';
+import config from './config';
 import Point, { OCEAN, CONTINENT } from './point';
 import Plate from './plate';
 import HotSpot from './hot-spot';
-
-export const MIN_HEIGHT = -1;
-export const MAX_HEIGHT = 1;
-export const BASIC_OCEAN_HEIGHT = -0.5;
-export const WATER_LEVEL = 0;
 
 function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
   let pointHeight;
@@ -14,9 +10,9 @@ function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX
   for (let px = x; px < x + width; px += 1) {
     for (let py = y; py < y + height; py += 1) {
       if (type === OCEAN) {
-        pointHeight = BASIC_OCEAN_HEIGHT;
+        pointHeight = config.newOceanHeight;
       } else {
-        pointHeight = Math.min(0.1, BASIC_OCEAN_HEIGHT + Math.pow(3 * ((px - x) / width), 0.5));
+        pointHeight = Math.min(0.1, config.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
       }
       const point = new Point({ x: px, y: py, height: pointHeight, type, plate });
       plate.points.push(point);
@@ -140,7 +136,7 @@ export default class Model {
 
   removePointsBelowMinHeight() {
     this.plates.forEach((plate) => {
-      plate.removePointsBelow(MIN_HEIGHT);
+      plate.removePointsBelow(config.minHeight);
     });
   }
 
@@ -164,7 +160,7 @@ export default class Model {
         if (!surface.points[x][y]) {
           const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
           if (plate) {
-            const newPoint = new Point({ x, y, type: OCEAN, height: BASIC_OCEAN_HEIGHT, plate });
+            const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate });
             plate.points.push(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.points[x][y] = [newPoint];

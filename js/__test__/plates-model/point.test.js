@@ -1,4 +1,5 @@
-import Point, { VOLCANIC_ACT_MIN_DIST, VOLCANIC_ACT_MAX_DIST } from '../../plates-model/point';
+import Point from '../../plates-model/point';
+import config from '../../plates-model/config';
 
 const plate = { x: 50, y: 51, maxX: 100, maxY: 100 };
 const defConfig = { x: plate.x + 10, y: plate.y + 10, plate };
@@ -34,18 +35,18 @@ describe('Point', () => {
   test('Volcanic activity probability changes within subduction area', () => {
     const p = new Point(defConfig);
     expect(p.volcanicActProbability).toEqual(0);
-    p.subductionDist = VOLCANIC_ACT_MIN_DIST;
+    p.subductionDist = config.volcanicActMinDist;
     expect(p.volcanicActProbability).toEqual(0);
-    p.subductionDist = VOLCANIC_ACT_MIN_DIST + 0.2 * (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+    p.subductionDist = config.volcanicActMinDist + 0.2 * (config.volcanicActMaxDist - config.volcanicActMinDist);
     expect(p.volcanicActProbability).toBeGreaterThan(0);
     expect(p.volcanicActProbability).toBeLessThan(1);
     // Middle of subduction area.
-    p.subductionDist = VOLCANIC_ACT_MIN_DIST + 0.5 * (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+    p.subductionDist = config.volcanicActMinDist + 0.5 * (config.volcanicActMaxDist - config.volcanicActMinDist);
     expect(p.volcanicActProbability).toEqual(1);
-    p.subductionDist = VOLCANIC_ACT_MIN_DIST + 0.8 * (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+    p.subductionDist = config.volcanicActMinDist + 0.8 * (config.volcanicActMaxDist - config.volcanicActMinDist);
     expect(p.volcanicActProbability).toBeGreaterThan(0);
     expect(p.volcanicActProbability).toBeLessThan(1);
-    p.subductionDist = VOLCANIC_ACT_MAX_DIST;
+    p.subductionDist = config.volcanicActMaxDist;
     expect(p.volcanicActProbability).toEqual(0);
   });
 });

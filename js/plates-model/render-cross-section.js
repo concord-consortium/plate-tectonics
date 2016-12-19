@@ -1,5 +1,5 @@
 import bs from 'binarysearch';
-import { WATER_LEVEL, MIN_HEIGHT, MAX_HEIGHT } from './model';
+import config from './config';
 import { OCEAN, CONTINENT } from './point';
 
 const COLORS = {
@@ -21,10 +21,10 @@ export default function renderCrossSection(canvas, points, crossSectionY) {
   const heightData = [];
   for (let x = 0; x < maxX; x += 1) {
     const h = (points[x][crossSectionY] || []).map(point =>
-      canvasHeight - canvasHeight * (point.height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT));
+      canvasHeight - canvasHeight * (point.height - config.minHeight) / (config.maxHeight - config.minHeight));
     heightData.push(h);
   }
-  const waterLevel = canvasHeight - canvasHeight * (WATER_LEVEL - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
+  const waterLevel = canvasHeight - canvasHeight * (config.waterLevel - config.minHeight) / (config.maxHeight - config.minHeight);
 
   for (let x = 0; x < maxX; x += 1) {
     for (let y = 0; y < canvasHeight; y += 1) {

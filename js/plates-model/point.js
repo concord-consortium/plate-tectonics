@@ -1,17 +1,13 @@
+import config from './config';
+
 export const OCEAN = 0;
 export const CONTINENT = 1;
-
-export const VOLCANIC_ACT_MIN_DIST = 20;
-export const VOLCANIC_ACT_MAX_DIST = 70;
-const SUBDUCTION_RATIO = -0.00015;
-// Limit amount of time that given point can undergo volcanic activity.
-const MAX_VOLCANIC_ACT_TIME = 100;
 
 // Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
 // pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
 // function rather than linear.
 function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
-  return SUBDUCTION_RATIO * subductionVelocity * timeStep * subductionDist;
+  return config.subductionRatio * subductionVelocity * timeStep * subductionDist;
 }
 
 export default class Point {
@@ -22,6 +18,7 @@ export default class Point {
     this.type = type;
     this.height = height;
     this.plate = plate;
+    this.age = 0;
     // Subduction properties:
     this.subductionDist = null;
     this.subductionVelocity = null;
@@ -56,13 +53,13 @@ export default class Point {
   }
 
   get volcanicActAllowed() {
-    return this.volcanicActTime < MAX_VOLCANIC_ACT_TIME;
+    return this.volcanicActTime < config.volcanicActMaxTime;
   }
 
   get volcanicActProbability() {
     if (!this.subduction) return 0;
-    const normalizedDist = (this.subductionDist - VOLCANIC_ACT_MIN_DIST) /
-                           (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+    const normalizedDist = (this.subductionDist - config.volcanicActMinDist) /
+                           (config.volcanicActMaxDist - config.volcanicActMinDist);
     return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
   }
 
@@ -86,9 +83,14 @@ export default class Point {
   }
 
   update(timeStep) {
+    if (this.type === OCEAN && this.age < config.oceanicCrustCoolingTime) {
+      // Oceanic crust cools down and becomes denser.
+      this.height -= config.oceanicCrustCoolingRatio * timeStep;
+    }
+
     if (this.subduction) {
       this.subductionDist += this.subductionVelocity * timeStep;
-      this.height += subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
+      this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
     }
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
@@ -102,5 +104,7 @@ export default class Point {
     if (this.height > 1) {
       this.height = 1;
     }
+
+    this.age += timeStep;
   }
 }

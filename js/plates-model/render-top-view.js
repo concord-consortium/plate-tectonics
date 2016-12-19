@@ -1,5 +1,5 @@
 import colormap from 'colormap';
-import { MIN_HEIGHT, MAX_HEIGHT } from './model';
+import config from './config';
 
 const N_SHADES = 200;
 
@@ -13,7 +13,7 @@ const NO_PLATE_COLOR = [220, 220, 220];
 
 function heightToShade(val) {
   if (val == null) return -1;
-  return Math.floor((val - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT) * (N_SHADES - 1));
+  return Math.floor((val - config.minHeight) / (config.maxHeight - config.minHeight) * (N_SHADES - 1));
 }
 
 export default function renderTopView(canvas, data, colorMap = DEF_COLOR_MAP) {

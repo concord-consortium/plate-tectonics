@@ -1,5 +1,4 @@
-const HEIGHT_CHANGE_RATIO = 0.0008;
-const LIFE_LENGTH_RATIO = 0.5;
+import config from './config';
 
 // Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
 // It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
@@ -12,7 +11,7 @@ export default class HotSpot {
     this.strength = strength;
     this.plate = plate;
     this.active = false;
-    this.lifeLeft = LIFE_LENGTH_RATIO * radius;
+    this.lifeLeft = config.volcanoLifeLengthRatio * radius;
   }
 
   get x() {
@@ -41,7 +40,7 @@ export default class HotSpot {
 
   heightChange(dist) {
     const normDist = dist / this.radius;
-    return HEIGHT_CHANGE_RATIO * (1 - normDist) * this.radius * this.strength;
+    return config.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
   }
 
   update(timeStep) {
