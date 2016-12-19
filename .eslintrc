@@ -4,8 +4,8 @@
     "no-mixed-operators": [0],
     "no-param-reassign": [0],
     "no-restricted-properties": [0],
-    "max-len": [1, 120],
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    "max-len": [2, 120],
+    "react/jsx-filename-extension": [1, { "extensions": [".js"] }]
   },
   "env": {
     "browser": true,

@@ -9,25 +9,28 @@ const COLORS = {
   [OCEAN]: [64, 64, 64],
 };
 
+function normalizedHeight(val) {
+  return (val - config.minHeight) / (config.maxHeight - config.minHeight);
+}
+
 export default function renderCrossSection(canvas, points, crossSectionY) {
   const maxX = points.length;
   if (maxX !== canvas.width) {
     throw new Error('Data has to have the same width as canvas');
   }
   const ctx = canvas.getContext('2d');
-  const canvasHeight = canvas.height;
+  const canvHeight = canvas.height;
   const imageData = ctx.createImageData(canvas.width, canvas.height);
 
   const heightData = [];
   for (let x = 0; x < maxX; x += 1) {
-    const h = (points[x][crossSectionY] || []).map(point =>
-      canvasHeight - canvasHeight * (point.height - config.minHeight) / (config.maxHeight - config.minHeight));
+    const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
     heightData.push(h);
   }
-  const waterLevel = canvasHeight - canvasHeight * (config.waterLevel - config.minHeight) / (config.maxHeight - config.minHeight);
+  const waterLevel = canvHeight - canvHeight * normalizedHeight(config.waterLevel);
 
   for (let x = 0; x < maxX; x += 1) {
-    for (let y = 0; y < canvasHeight; y += 1) {
+    for (let y = 0; y < canvHeight; y += 1) {
       const idx = (y * maxX + x) * 4;
       let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
