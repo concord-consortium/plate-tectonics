@@ -29456,7 +29456,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(679);
+	__webpack_require__(695);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37387,23 +37387,27 @@
 
 	var _Slider2 = _interopRequireDefault(_Slider);
 
-	var _model = __webpack_require__(658);
+	var _Toggle = __webpack_require__(658);
+
+	var _Toggle2 = _interopRequireDefault(_Toggle);
+
+	var _model = __webpack_require__(673);
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _renderTopView = __webpack_require__(664);
+	var _renderTopView = __webpack_require__(680);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(673);
+	var _renderHotSpots = __webpack_require__(689);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(674);
+	var _renderCrossSection = __webpack_require__(690);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
-	__webpack_require__(675);
+	__webpack_require__(691);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37425,10 +37429,12 @@
 	    var _this = _possibleConstructorReturn(this, (PlatesModel.__proto__ || Object.getPrototypeOf(PlatesModel)).call(this, props));
 
 	    _this.state = {
-	      crossSectionY: HEIGHT * 0.5
+	      crossSectionY: HEIGHT * 0.5,
+	      hotSpotsRendering: false
 	    };
 	    _this.rafCallback = _this.rafCallback.bind(_this);
 	    _this.handleCrossSectionYChange = _this.handleCrossSectionYChange.bind(_this);
+	    _this.handleRenderHotSpotsChange = _this.handleRenderHotSpotsChange.bind(_this);
 	    return _this;
 	  }
 
@@ -37451,12 +37457,16 @@
 	  }, {
 	    key: 'rafCallback',
 	    value: function rafCallback() {
-	      var crossSectionY = this.state.crossSectionY;
+	      var _state = this.state,
+	          crossSectionY = _state.crossSectionY,
+	          hotSpotsRendering = _state.hotSpotsRendering;
 
 	      this.rafId = requestAnimationFrame(this.rafCallback);
 	      this.model.step();
 	      (0, _renderTopView2.default)(this.topView, this.model.maxHeight);
-	      //renderHotSpots(this.topView, this.model.hotSpots);
+	      if (hotSpotsRendering) {
+	        (0, _renderHotSpots2.default)(this.topView, this.model.hotSpots);
+	      }
 	      (0, _renderCrossSection2.default)(this.crossSectionView, this.model.points, HEIGHT - Math.round(crossSectionY));
 	    }
 	  }, {
@@ -37465,11 +37475,18 @@
 	      this.setState({ crossSectionY: Math.round(value) });
 	    }
 	  }, {
+	    key: 'handleRenderHotSpotsChange',
+	    value: function handleRenderHotSpotsChange(event, value) {
+	      this.setState({ hotSpotsRendering: value });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var _this2 = this;
 
-	      var crossSectionY = this.state.crossSectionY;
+	      var _state2 = this.state,
+	          crossSectionY = _state2.crossSectionY,
+	          hotSpotsRendering = _state2.hotSpotsRendering;
 
 	      return _react2.default.createElement(
 	        'div',
@@ -37503,6 +37520,14 @@
 	                _this2.crossSectionView = c;
 	              }, width: WIDTH, height: 100 })
 	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          _react2.default.createElement(_Toggle2.default, {
+	            label: '"Hot spots" rendering', labelPosition: 'right',
+	            toggled: hotSpotsRendering, onToggle: this.handleRenderHotSpotsChange
+	          })
 	        )
 	      );
 	    }
@@ -40866,23 +40891,1898 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.MAX_HEIGHT = exports.MIN_HEIGHT = undefined;
+	exports.default = undefined;
+
+	var _Toggle = __webpack_require__(659);
+
+	var _Toggle2 = _interopRequireDefault(_Toggle);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _Toggle2.default;
+
+/***/ },
+/* 659 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _transitions = __webpack_require__(643);
+
+	var _transitions2 = _interopRequireDefault(_transitions);
+
+	var _Paper = __webpack_require__(660);
+
+	var _Paper2 = _interopRequireDefault(_Paper);
+
+	var _EnhancedSwitch = __webpack_require__(663);
+
+	var _EnhancedSwitch2 = _interopRequireDefault(_EnhancedSwitch);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getStyles(props, context, state) {
+	  var disabled = props.disabled,
+	      elementStyle = props.elementStyle,
+	      trackSwitchedStyle = props.trackSwitchedStyle,
+	      thumbSwitchedStyle = props.thumbSwitchedStyle,
+	      trackStyle = props.trackStyle,
+	      thumbStyle = props.thumbStyle,
+	      iconStyle = props.iconStyle,
+	      rippleStyle = props.rippleStyle,
+	      labelStyle = props.labelStyle;
+	  var _context$muiTheme = context.muiTheme,
+	      baseTheme = _context$muiTheme.baseTheme,
+	      toggle = _context$muiTheme.toggle;
+
+
+	  var toggleSize = 20;
+	  var toggleTrackWidth = 36;
+	  var styles = {
+	    icon: {
+	      width: 36,
+	      padding: '4px 0px 6px 2px'
+	    },
+	    ripple: {
+	      top: -10,
+	      left: -10,
+	      color: state.switched ? toggle.thumbOnColor : baseTheme.palette.textColor
+	    },
+	    toggleElement: {
+	      width: toggleTrackWidth
+	    },
+	    track: {
+	      transition: _transitions2.default.easeOut(),
+	      width: '100%',
+	      height: 14,
+	      borderRadius: 30,
+	      backgroundColor: toggle.trackOffColor
+	    },
+	    thumb: {
+	      transition: _transitions2.default.easeOut(),
+	      position: 'absolute',
+	      top: 1,
+	      left: 0,
+	      width: toggleSize,
+	      height: toggleSize,
+	      lineHeight: '24px',
+	      borderRadius: '50%',
+	      backgroundColor: toggle.thumbOffColor
+	    },
+	    trackWhenSwitched: {
+	      backgroundColor: toggle.trackOnColor
+	    },
+	    thumbWhenSwitched: {
+	      backgroundColor: toggle.thumbOnColor,
+	      left: '100%'
+	    },
+	    trackWhenDisabled: {
+	      backgroundColor: toggle.trackDisabledColor
+	    },
+	    thumbWhenDisabled: {
+	      backgroundColor: toggle.thumbDisabledColor
+	    },
+	    label: {
+	      color: disabled ? toggle.labelDisabledColor : toggle.labelColor,
+	      width: 'calc(100% - ' + (toggleTrackWidth + 10) + 'px)'
+	    }
+	  };
+
+	  (0, _simpleAssign2.default)(styles.track, trackStyle, state.switched && styles.trackWhenSwitched, state.switched && trackSwitchedStyle, disabled && styles.trackWhenDisabled);
+
+	  (0, _simpleAssign2.default)(styles.thumb, thumbStyle, state.switched && styles.thumbWhenSwitched, state.switched && thumbSwitchedStyle, disabled && styles.thumbWhenDisabled);
+
+	  if (state.switched) {
+	    styles.thumb.marginLeft = 0 - styles.thumb.width;
+	  }
+
+	  (0, _simpleAssign2.default)(styles.icon, iconStyle);
+
+	  (0, _simpleAssign2.default)(styles.ripple, rippleStyle);
+
+	  (0, _simpleAssign2.default)(styles.label, labelStyle);
+
+	  (0, _simpleAssign2.default)(styles.toggleElement, elementStyle);
+
+	  return styles;
+	}
+
+	var Toggle = function (_Component) {
+	  (0, _inherits3.default)(Toggle, _Component);
+
+	  function Toggle() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
+	    (0, _classCallCheck3.default)(this, Toggle);
+
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Toggle.__proto__ || (0, _getPrototypeOf2.default)(Toggle)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+	      switched: false
+	    }, _this.handleStateChange = function (newSwitched) {
+	      _this.setState({
+	        switched: newSwitched
+	      });
+	    }, _this.handleToggle = function (event, isInputChecked) {
+	      if (_this.props.onToggle) {
+	        _this.props.onToggle(event, isInputChecked);
+	      }
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+	  }
+
+	  (0, _createClass3.default)(Toggle, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      var _props = this.props,
+	          toggled = _props.toggled,
+	          defaultToggled = _props.defaultToggled,
+	          valueLink = _props.valueLink;
+
+
+	      if (toggled || defaultToggled || valueLink && valueLink.value) {
+	        this.setState({
+	          switched: true
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'isToggled',
+	    value: function isToggled() {
+	      return this.refs.enhancedSwitch.isSwitched();
+	    }
+	  }, {
+	    key: 'setToggled',
+	    value: function setToggled(newToggledValue) {
+	      this.refs.enhancedSwitch.setSwitched(newToggledValue);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props2 = this.props,
+	          defaultToggled = _props2.defaultToggled,
+	          elementStyle = _props2.elementStyle,
+	          onToggle = _props2.onToggle,
+	          trackSwitchedStyle = _props2.trackSwitchedStyle,
+	          thumbSwitchedStyle = _props2.thumbSwitchedStyle,
+	          toggled = _props2.toggled,
+	          other = (0, _objectWithoutProperties3.default)(_props2, ['defaultToggled', 'elementStyle', 'onToggle', 'trackSwitchedStyle', 'thumbSwitchedStyle', 'toggled']);
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+	      var styles = getStyles(this.props, this.context, this.state);
+
+	      var toggleElement = _react2.default.createElement(
+	        'div',
+	        { style: prepareStyles((0, _simpleAssign2.default)({}, styles.toggleElement)) },
+	        _react2.default.createElement('div', { style: prepareStyles((0, _simpleAssign2.default)({}, styles.track)) }),
+	        _react2.default.createElement(_Paper2.default, { style: styles.thumb, circle: true, zDepth: 1 })
+	      );
+
+	      var enhancedSwitchProps = {
+	        ref: 'enhancedSwitch',
+	        inputType: 'checkbox',
+	        switchElement: toggleElement,
+	        rippleStyle: styles.ripple,
+	        rippleColor: styles.ripple.color,
+	        iconStyle: styles.icon,
+	        trackStyle: styles.track,
+	        thumbStyle: styles.thumb,
+	        labelStyle: styles.label,
+	        switched: this.state.switched,
+	        onSwitch: this.handleToggle,
+	        onParentShouldUpdate: this.handleStateChange,
+	        labelPosition: this.props.labelPosition
+	      };
+
+	      if (this.props.hasOwnProperty('toggled')) {
+	        enhancedSwitchProps.checked = toggled;
+	      } else if (this.props.hasOwnProperty('defaultToggled')) {
+	        enhancedSwitchProps.defaultChecked = defaultToggled;
+	      }
+
+	      return _react2.default.createElement(_EnhancedSwitch2.default, (0, _extends3.default)({}, other, enhancedSwitchProps));
+	    }
+	  }]);
+	  return Toggle;
+	}(_react.Component);
+
+	Toggle.defaultProps = {
+	  defaultToggled: false,
+	  disabled: false,
+	  labelPosition: 'left'
+	};
+	Toggle.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? Toggle.propTypes = {
+	  /**
+	   * Determines whether the Toggle is initially turned on.
+	   * **Warning:** This cannot be used in conjunction with `toggled`.
+	   * Decide between using a controlled or uncontrolled input element and remove one of these props.
+	   * More info: https://fb.me/react-controlled-components
+	   */
+	  defaultToggled: _react.PropTypes.bool,
+	  /**
+	   * Will disable the toggle if true.
+	   */
+	  disabled: _react.PropTypes.bool,
+	  /**
+	   * Overrides the inline-styles of the Toggle element.
+	   */
+	  elementStyle: _react.PropTypes.object,
+	  /**
+	   * Overrides the inline-styles of the Icon element.
+	   */
+	  iconStyle: _react.PropTypes.object,
+	  /**
+	   * Overrides the inline-styles of the input element.
+	   */
+	  inputStyle: _react.PropTypes.object,
+	  /**
+	   * Label for toggle.
+	   */
+	  label: _react.PropTypes.node,
+	  /**
+	   * Where the label will be placed next to the toggle.
+	   */
+	  labelPosition: _react.PropTypes.oneOf(['left', 'right']),
+	  /**
+	   * Overrides the inline-styles of the Toggle element label.
+	   */
+	  labelStyle: _react.PropTypes.object,
+	  /**
+	   * Callback function that is fired when the toggle switch is toggled.
+	   */
+	  onToggle: _react.PropTypes.func,
+	  /**
+	   * Override style of ripple.
+	   */
+	  rippleStyle: _react.PropTypes.object,
+	  /**
+	   * Override the inline-styles of the root element.
+	   */
+	  style: _react.PropTypes.object,
+	  /**
+	   * Override style for thumb.
+	   */
+	  thumbStyle: _react.PropTypes.object,
+	  /**
+	  * Override the inline styles for thumb when the toggle switch is toggled on.
+	  */
+	  thumbSwitchedStyle: _react.PropTypes.object,
+	  /**
+	   * Toggled if set to true.
+	   */
+	  toggled: _react.PropTypes.bool,
+	  /**
+	   * Override style for track.
+	   */
+	  trackStyle: _react.PropTypes.object,
+	  /**
+	  * Override the inline styles for track when the toggle switch is toggled on.
+	  */
+	  trackSwitchedStyle: _react.PropTypes.object,
+	  /**
+	   * ValueLink prop for when using controlled toggle.
+	   */
+	  valueLink: _react.PropTypes.object
+	} : void 0;
+	exports.default = Toggle;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 660 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _Paper = __webpack_require__(661);
+
+	var _Paper2 = _interopRequireDefault(_Paper);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _Paper2.default;
+
+/***/ },
+/* 661 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _propTypes = __webpack_require__(662);
+
+	var _propTypes2 = _interopRequireDefault(_propTypes);
+
+	var _transitions = __webpack_require__(643);
+
+	var _transitions2 = _interopRequireDefault(_transitions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getStyles(props, context) {
+	  var rounded = props.rounded,
+	      circle = props.circle,
+	      transitionEnabled = props.transitionEnabled,
+	      zDepth = props.zDepth;
+	  var _context$muiTheme = context.muiTheme,
+	      baseTheme = _context$muiTheme.baseTheme,
+	      paper = _context$muiTheme.paper;
+
+
+	  return {
+	    root: {
+	      color: paper.color,
+	      backgroundColor: paper.backgroundColor,
+	      transition: transitionEnabled && _transitions2.default.easeOut(),
+	      boxSizing: 'border-box',
+	      fontFamily: baseTheme.fontFamily,
+	      WebkitTapHighlightColor: 'rgba(0,0,0,0)', // Remove mobile color flashing (deprecated)
+	      boxShadow: paper.zDepthShadows[zDepth - 1], // No shadow for 0 depth papers
+	      borderRadius: circle ? '50%' : rounded ? '2px' : '0px'
+	    }
+	  };
+	}
+
+	var Paper = function (_Component) {
+	  (0, _inherits3.default)(Paper, _Component);
+
+	  function Paper() {
+	    (0, _classCallCheck3.default)(this, Paper);
+	    return (0, _possibleConstructorReturn3.default)(this, (Paper.__proto__ || (0, _getPrototypeOf2.default)(Paper)).apply(this, arguments));
+	  }
+
+	  (0, _createClass3.default)(Paper, [{
+	    key: 'render',
+	    value: function render() {
+	      var _props = this.props,
+	          children = _props.children,
+	          circle = _props.circle,
+	          rounded = _props.rounded,
+	          style = _props.style,
+	          transitionEnabled = _props.transitionEnabled,
+	          zDepth = _props.zDepth,
+	          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'circle', 'rounded', 'style', 'transitionEnabled', 'zDepth']);
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+	      var styles = getStyles(this.props, this.context);
+
+	      return _react2.default.createElement(
+	        'div',
+	        (0, _extends3.default)({}, other, { style: prepareStyles((0, _simpleAssign2.default)(styles.root, style)) }),
+	        children
+	      );
+	    }
+	  }]);
+	  return Paper;
+	}(_react.Component);
+
+	Paper.defaultProps = {
+	  circle: false,
+	  rounded: true,
+	  transitionEnabled: true,
+	  zDepth: 1
+	};
+	Paper.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? Paper.propTypes = {
+	  /**
+	   * Children passed into the paper element.
+	   */
+	  children: _react.PropTypes.node,
+	  /**
+	   * Set to true to generate a circlular paper container.
+	   */
+	  circle: _react.PropTypes.bool,
+	  /**
+	   * By default, the paper container will have a border radius.
+	   * Set this to false to generate a container with sharp corners.
+	   */
+	  rounded: _react.PropTypes.bool,
+	  /**
+	   * Override the inline-styles of the root element.
+	   */
+	  style: _react.PropTypes.object,
+	  /**
+	   * Set to false to disable CSS transitions for the paper element.
+	   */
+	  transitionEnabled: _react.PropTypes.bool,
+	  /**
+	   * This number represents the zDepth of the paper shadow.
+	   */
+	  zDepth: _propTypes2.default.zDepth
+	} : void 0;
+	exports.default = Paper;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 662 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(299);
+
+	var horizontal = _react.PropTypes.oneOf(['left', 'middle', 'right']);
+	var vertical = _react.PropTypes.oneOf(['top', 'center', 'bottom']);
+
+	exports.default = {
+
+	  corners: _react.PropTypes.oneOf(['bottom-left', 'bottom-right', 'top-left', 'top-right']),
+
+	  horizontal: horizontal,
+
+	  vertical: vertical,
+
+	  origin: _react.PropTypes.shape({
+	    horizontal: horizontal,
+	    vertical: vertical
+	  }),
+
+	  cornersAndCenter: _react.PropTypes.oneOf(['bottom-center', 'bottom-left', 'bottom-right', 'top-center', 'top-left', 'top-right']),
+
+	  stringOrNumber: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
+
+	  zDepth: _react.PropTypes.oneOf([0, 1, 2, 3, 4, 5])
+
+	};
+
+/***/ },
+/* 663 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactEventListener = __webpack_require__(664);
+
+	var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
+
+	var _keycode = __webpack_require__(642);
+
+	var _keycode2 = _interopRequireDefault(_keycode);
+
+	var _transitions = __webpack_require__(643);
+
+	var _transitions2 = _interopRequireDefault(_transitions);
+
+	var _FocusRipple = __webpack_require__(644);
+
+	var _FocusRipple2 = _interopRequireDefault(_FocusRipple);
+
+	var _TouchRipple = __webpack_require__(669);
+
+	var _TouchRipple2 = _interopRequireDefault(_TouchRipple);
+
+	var _Paper = __webpack_require__(660);
+
+	var _Paper2 = _interopRequireDefault(_Paper);
+
+	var _warning = __webpack_require__(617);
+
+	var _warning2 = _interopRequireDefault(_warning);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function getStyles(props, context) {
+	  var baseTheme = context.muiTheme.baseTheme;
+
+
+	  return {
+	    root: {
+	      cursor: props.disabled ? 'not-allowed' : 'pointer',
+	      position: 'relative',
+	      overflow: 'visible',
+	      display: 'table',
+	      height: 'auto',
+	      width: '100%'
+	    },
+	    input: {
+	      position: 'absolute',
+	      cursor: 'inherit',
+	      pointerEvents: 'all',
+	      opacity: 0,
+	      width: '100%',
+	      height: '100%',
+	      zIndex: 2,
+	      left: 0,
+	      boxSizing: 'border-box',
+	      padding: 0,
+	      margin: 0
+	    },
+	    controls: {
+	      display: 'flex',
+	      width: '100%',
+	      height: '100%'
+	    },
+	    label: {
+	      float: 'left',
+	      position: 'relative',
+	      display: 'block',
+	      width: 'calc(100% - 60px)',
+	      lineHeight: '24px',
+	      color: baseTheme.palette.textColor,
+	      fontFamily: baseTheme.fontFamily
+	    },
+	    wrap: {
+	      transition: _transitions2.default.easeOut(),
+	      float: 'left',
+	      position: 'relative',
+	      display: 'block',
+	      flexShrink: 0,
+	      width: 60 - baseTheme.spacing.desktopGutterLess,
+	      marginRight: props.labelPosition === 'right' ? baseTheme.spacing.desktopGutterLess : 0,
+	      marginLeft: props.labelPosition === 'left' ? baseTheme.spacing.desktopGutterLess : 0
+	    },
+	    ripple: {
+	      color: props.rippleColor || baseTheme.palette.primary1Color,
+	      height: '200%',
+	      width: '200%',
+	      top: -12,
+	      left: -12
+	    }
+	  };
+	}
+
+	var EnhancedSwitch = function (_Component) {
+	  (0, _inherits3.default)(EnhancedSwitch, _Component);
+
+	  function EnhancedSwitch() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
+	    (0, _classCallCheck3.default)(this, EnhancedSwitch);
+
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = EnhancedSwitch.__proto__ || (0, _getPrototypeOf2.default)(EnhancedSwitch)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+	      isKeyboardFocused: false
+	    }, _this.handleChange = function (event) {
+	      _this.tabPressed = false;
+	      _this.setState({
+	        isKeyboardFocused: false
+	      });
+
+	      var isInputChecked = _this.refs.checkbox.checked;
+
+	      if (!_this.props.hasOwnProperty('checked') && _this.props.onParentShouldUpdate) {
+	        _this.props.onParentShouldUpdate(isInputChecked);
+	      }
+
+	      if (_this.props.onSwitch) {
+	        _this.props.onSwitch(event, isInputChecked);
+	      }
+	    }, _this.handleKeyDown = function (event) {
+	      var code = (0, _keycode2.default)(event);
+
+	      if (code === 'tab') {
+	        _this.tabPressed = true;
+	      }
+	      if (_this.state.isKeyboardFocused && code === 'space') {
+	        _this.handleChange(event);
+	      }
+	    }, _this.handleKeyUp = function (event) {
+	      if (_this.state.isKeyboardFocused && (0, _keycode2.default)(event) === 'space') {
+	        _this.handleChange(event);
+	      }
+	    }, _this.handleMouseDown = function (event) {
+	      // only listen to left clicks
+	      if (event.button === 0) {
+	        _this.refs.touchRipple.start(event);
+	      }
+	    }, _this.handleMouseUp = function () {
+	      _this.refs.touchRipple.end();
+	    }, _this.handleMouseLeave = function () {
+	      _this.refs.touchRipple.end();
+	    }, _this.handleTouchStart = function (event) {
+	      _this.refs.touchRipple.start(event);
+	    }, _this.handleTouchEnd = function () {
+	      _this.refs.touchRipple.end();
+	    }, _this.handleBlur = function (event) {
+	      _this.setState({
+	        isKeyboardFocused: false
+	      });
+
+	      if (_this.props.onBlur) {
+	        _this.props.onBlur(event);
+	      }
+	    }, _this.handleFocus = function (event) {
+	      // setTimeout is needed becuase the focus event fires first
+	      // Wait so that we can capture if this was a keyboard focus
+	      // or touch focus
+	      setTimeout(function () {
+	        if (_this.tabPressed) {
+	          _this.setState({
+	            isKeyboardFocused: true
+	          });
+	        }
+	      }, 150);
+
+	      if (_this.props.onFocus) {
+	        _this.props.onFocus(event);
+	      }
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+	  }
+
+	  (0, _createClass3.default)(EnhancedSwitch, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var inputNode = this.refs.checkbox;
+	      if ((!this.props.switched || inputNode.checked !== this.props.switched) && this.props.onParentShouldUpdate) {
+	        this.props.onParentShouldUpdate(inputNode.checked);
+	      }
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps) {
+	      var hasCheckedProp = nextProps.hasOwnProperty('checked');
+	      var hasToggledProp = nextProps.hasOwnProperty('toggled');
+	      var hasNewDefaultProp = nextProps.hasOwnProperty('defaultChecked') && nextProps.defaultChecked !== this.props.defaultChecked;
+
+	      if (hasCheckedProp || hasToggledProp || hasNewDefaultProp) {
+	        var switched = nextProps.checked || nextProps.toggled || nextProps.defaultChecked || false;
+
+	        this.setState({
+	          switched: switched
+	        });
+
+	        if (this.props.onParentShouldUpdate && switched !== this.props.switched) {
+	          this.props.onParentShouldUpdate(switched);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'isSwitched',
+	    value: function isSwitched() {
+	      return this.refs.checkbox.checked;
+	    }
+
+	    // no callback here because there is no event
+
+	  }, {
+	    key: 'setSwitched',
+	    value: function setSwitched(newSwitchedValue) {
+	      if (!this.props.hasOwnProperty('checked') || this.props.checked === false) {
+	        if (this.props.onParentShouldUpdate) {
+	          this.props.onParentShouldUpdate(newSwitchedValue);
+	        }
+	        this.refs.checkbox.checked = newSwitchedValue;
+	      } else {
+	        process.env.NODE_ENV !== "production" ? (0, _warning2.default)(false, 'Material-UI: Cannot call set method while checked is defined as a property.') : void 0;
+	      }
+	    }
+	  }, {
+	    key: 'getValue',
+	    value: function getValue() {
+	      return this.refs.checkbox.value;
+	    }
+
+	    // Checkbox inputs only use SPACE to change their state. Using ENTER will
+	    // update the ui but not the input.
+
+
+	    /**
+	     * Because both the ripples and the checkbox input cannot share pointer
+	     * events, the checkbox input takes control of pointer events and calls
+	     * ripple animations manually.
+	     */
+
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props = this.props,
+	          name = _props.name,
+	          value = _props.value,
+	          iconStyle = _props.iconStyle,
+	          inputStyle = _props.inputStyle,
+	          inputType = _props.inputType,
+	          label = _props.label,
+	          labelStyle = _props.labelStyle,
+	          labelPosition = _props.labelPosition,
+	          onSwitch = _props.onSwitch,
+	          onBlur = _props.onBlur,
+	          onFocus = _props.onFocus,
+	          onMouseUp = _props.onMouseUp,
+	          onMouseDown = _props.onMouseDown,
+	          onMouseLeave = _props.onMouseLeave,
+	          onTouchStart = _props.onTouchStart,
+	          onTouchEnd = _props.onTouchEnd,
+	          onParentShouldUpdate = _props.onParentShouldUpdate,
+	          disabled = _props.disabled,
+	          disableTouchRipple = _props.disableTouchRipple,
+	          disableFocusRipple = _props.disableFocusRipple,
+	          className = _props.className,
+	          rippleColor = _props.rippleColor,
+	          rippleStyle = _props.rippleStyle,
+	          style = _props.style,
+	          switched = _props.switched,
+	          switchElement = _props.switchElement,
+	          thumbStyle = _props.thumbStyle,
+	          trackStyle = _props.trackStyle,
+	          other = (0, _objectWithoutProperties3.default)(_props, ['name', 'value', 'iconStyle', 'inputStyle', 'inputType', 'label', 'labelStyle', 'labelPosition', 'onSwitch', 'onBlur', 'onFocus', 'onMouseUp', 'onMouseDown', 'onMouseLeave', 'onTouchStart', 'onTouchEnd', 'onParentShouldUpdate', 'disabled', 'disableTouchRipple', 'disableFocusRipple', 'className', 'rippleColor', 'rippleStyle', 'style', 'switched', 'switchElement', 'thumbStyle', 'trackStyle']);
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+	      var styles = getStyles(this.props, this.context);
+	      var wrapStyles = (0, _simpleAssign2.default)(styles.wrap, iconStyle);
+	      var mergedRippleStyle = (0, _simpleAssign2.default)(styles.ripple, rippleStyle);
+
+	      if (thumbStyle) {
+	        wrapStyles.marginLeft /= 2;
+	        wrapStyles.marginRight /= 2;
+	      }
+
+	      var labelElement = label && _react2.default.createElement(
+	        'label',
+	        { style: prepareStyles((0, _simpleAssign2.default)(styles.label, labelStyle)) },
+	        label
+	      );
+
+	      var showTouchRipple = !disabled && !disableTouchRipple;
+	      var showFocusRipple = !disabled && !disableFocusRipple;
+
+	      var touchRipple = _react2.default.createElement(_TouchRipple2.default, {
+	        ref: 'touchRipple',
+	        key: 'touchRipple',
+	        style: mergedRippleStyle,
+	        color: mergedRippleStyle.color,
+	        muiTheme: this.context.muiTheme,
+	        centerRipple: true
+	      });
+
+	      var focusRipple = _react2.default.createElement(_FocusRipple2.default, {
+	        key: 'focusRipple',
+	        innerStyle: mergedRippleStyle,
+	        color: mergedRippleStyle.color,
+	        muiTheme: this.context.muiTheme,
+	        show: this.state.isKeyboardFocused
+	      });
+
+	      var ripples = [showTouchRipple ? touchRipple : null, showFocusRipple ? focusRipple : null];
+
+	      var inputElement = _react2.default.createElement('input', (0, _extends3.default)({}, other, {
+	        ref: 'checkbox',
+	        type: inputType,
+	        style: prepareStyles((0, _simpleAssign2.default)(styles.input, inputStyle)),
+	        name: name,
+	        value: value,
+	        disabled: disabled,
+	        onBlur: this.handleBlur,
+	        onFocus: this.handleFocus,
+	        onChange: this.handleChange,
+	        onMouseUp: showTouchRipple && this.handleMouseUp,
+	        onMouseDown: showTouchRipple && this.handleMouseDown,
+	        onMouseLeave: showTouchRipple && this.handleMouseLeave,
+	        onTouchStart: showTouchRipple && this.handleTouchStart,
+	        onTouchEnd: showTouchRipple && this.handleTouchEnd
+	      }));
+
+	      // If toggle component (indicated by whether the style includes thumb) manually lay out
+	      // elements in order to nest ripple elements
+	      var switchOrThumbElement = !thumbStyle ? _react2.default.createElement(
+	        'div',
+	        { style: prepareStyles(wrapStyles) },
+	        switchElement,
+	        ripples
+	      ) : _react2.default.createElement(
+	        'div',
+	        { style: prepareStyles(wrapStyles) },
+	        _react2.default.createElement('div', { style: prepareStyles((0, _simpleAssign2.default)({}, trackStyle)) }),
+	        _react2.default.createElement(
+	          _Paper2.default,
+	          { style: thumbStyle, zDepth: 1, circle: true },
+	          ' ',
+	          ripples,
+	          ' '
+	        )
+	      );
+
+	      var elementsInOrder = labelPosition === 'right' ? _react2.default.createElement(
+	        'div',
+	        { style: styles.controls },
+	        switchOrThumbElement,
+	        labelElement
+	      ) : _react2.default.createElement(
+	        'div',
+	        { style: styles.controls },
+	        labelElement,
+	        switchOrThumbElement
+	      );
+
+	      return _react2.default.createElement(
+	        'div',
+	        { ref: 'root', className: className, style: prepareStyles((0, _simpleAssign2.default)(styles.root, style)) },
+	        _react2.default.createElement(_reactEventListener2.default, {
+	          target: 'window',
+	          onKeyDown: this.handleKeyDown,
+	          onKeyUp: this.handleKeyUp
+	        }),
+	        inputElement,
+	        elementsInOrder
+	      );
+	    }
+	  }]);
+	  return EnhancedSwitch;
+	}(_react.Component);
+
+	EnhancedSwitch.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? EnhancedSwitch.propTypes = {
+	  checked: _react.PropTypes.bool,
+	  className: _react.PropTypes.string,
+	  defaultChecked: _react.PropTypes.bool,
+	  disableFocusRipple: _react.PropTypes.bool,
+	  disableTouchRipple: _react.PropTypes.bool,
+	  disabled: _react.PropTypes.bool,
+	  iconStyle: _react.PropTypes.object,
+	  inputStyle: _react.PropTypes.object,
+	  inputType: _react.PropTypes.string.isRequired,
+	  label: _react.PropTypes.node,
+	  labelPosition: _react.PropTypes.oneOf(['left', 'right']),
+	  labelStyle: _react.PropTypes.object,
+	  name: _react.PropTypes.string,
+	  onBlur: _react.PropTypes.func,
+	  onFocus: _react.PropTypes.func,
+	  onMouseDown: _react.PropTypes.func,
+	  onMouseLeave: _react.PropTypes.func,
+	  onMouseUp: _react.PropTypes.func,
+	  onParentShouldUpdate: _react.PropTypes.func,
+	  onSwitch: _react.PropTypes.func,
+	  onTouchEnd: _react.PropTypes.func,
+	  onTouchStart: _react.PropTypes.func,
+	  rippleColor: _react.PropTypes.string,
+	  rippleStyle: _react.PropTypes.object,
+	  style: _react.PropTypes.object,
+	  switchElement: _react.PropTypes.element.isRequired,
+	  switched: _react.PropTypes.bool.isRequired,
+	  thumbStyle: _react.PropTypes.object,
+	  trackStyle: _react.PropTypes.object,
+	  value: _react.PropTypes.any
+	} : void 0;
+	exports.default = EnhancedSwitch;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 664 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _typeof2 = __webpack_require__(509);
+
+	var _typeof3 = _interopRequireDefault(_typeof2);
+
+	var _assign = __webpack_require__(635);
+
+	var _assign2 = _interopRequireDefault(_assign);
+
+	exports.withOptions = withOptions;
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactAddonsShallowCompare = __webpack_require__(665);
+
+	var _reactAddonsShallowCompare2 = _interopRequireDefault(_reactAddonsShallowCompare);
+
+	var _warning = __webpack_require__(617);
+
+	var _warning2 = _interopRequireDefault(_warning);
+
+	var _supports = __webpack_require__(667);
+
+	var supports = _interopRequireWildcard(_supports);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var defaultEventOptions = {
+	  capture: false,
+	  passive: false
+	};
+
+	function mergeDefaultEventOptions(options) {
+	  return (0, _assign2.default)({}, defaultEventOptions, options);
+	}
+
+	function getEventListenerArgs(eventName, callback, options) {
+	  var args = [eventName, callback];
+	  args.push(supports.passiveOption ? options : options.capture);
+	  return args;
+	}
+
+	function on(target, eventName, callback, options) {
+	  if (supports.addEventListener) {
+	    target.addEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+	  } else if (supports.attachEvent) {
+	    // IE8+ Support
+	    target.attachEvent('on' + eventName, function () {
+	      callback.call(target);
+	    });
+	  }
+	}
+
+	function off(target, eventName, callback, options) {
+	  if (supports.removeEventListener) {
+	    target.removeEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+	  } else if (supports.detachEvent) {
+	    // IE8+ Support
+	    target.detachEvent('on' + eventName, callback);
+	  }
+	}
+
+	var state = {};
+
+	function forEachListener(props, iteratee) {
+	  for (var name in props) {
+	    if (name.substring(0, 2) !== 'on') continue;
+
+	    var prop = props[name];
+	    var type = typeof prop === 'undefined' ? 'undefined' : (0, _typeof3.default)(prop);
+	    var isObject = type === 'object';
+	    var isFunction = type === 'function';
+
+	    if (!isObject && !isFunction) continue;
+
+	    var _capture = name.substr(-7).toLowerCase() === 'capture';
+	    var _eventName = name.substring(2).toLowerCase();
+	    _eventName = _capture ? _eventName.substring(0, _eventName.length - 7) : _eventName;
+
+	    if (isObject) {
+	      iteratee(_eventName, prop.handler, prop.options);
+	    } else {
+	      iteratee(_eventName, prop, mergeDefaultEventOptions({ capture: _capture }));
+	    }
+	  }
+	}
+
+	function withOptions(handler, options) {
+	  process.env.NODE_ENV !== "production" ? (0, _warning2.default)(options, '[react-event-listener] Should be specified options in withOptions.') : void 0;
+
+	  return {
+	    handler: handler,
+	    options: mergeDefaultEventOptions(options)
+	  };
+	}
+
+	var EventListener = function (_Component) {
+	  (0, _inherits3.default)(EventListener, _Component);
+
+	  function EventListener() {
+	    (0, _classCallCheck3.default)(this, EventListener);
+	    return (0, _possibleConstructorReturn3.default)(this, (EventListener.__proto__ || (0, _getPrototypeOf2.default)(EventListener)).apply(this, arguments));
+	  }
+
+	  (0, _createClass3.default)(EventListener, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.addListeners();
+	    }
+	  }, {
+	    key: 'shouldComponentUpdate',
+	    value: function shouldComponentUpdate(nextProps) {
+	      return (0, _reactAddonsShallowCompare2.default)({
+	        props: this.props,
+	        state: state
+	      }, nextProps, state);
+	    }
+	  }, {
+	    key: 'componentWillUpdate',
+	    value: function componentWillUpdate() {
+	      this.removeListeners();
+	    }
+	  }, {
+	    key: 'componentDidUpdate',
+	    value: function componentDidUpdate() {
+	      this.addListeners();
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      this.removeListeners();
+	    }
+	  }, {
+	    key: 'addListeners',
+	    value: function addListeners() {
+	      this.applyListeners(on);
+	    }
+	  }, {
+	    key: 'removeListeners',
+	    value: function removeListeners() {
+	      this.applyListeners(off);
+	    }
+	  }, {
+	    key: 'applyListeners',
+	    value: function applyListeners(onOrOff) {
+	      var target = this.props.target;
+
+
+	      if (target) {
+	        var element = target;
+
+	        if (typeof target === 'string') {
+	          element = window[target];
+	        }
+
+	        forEachListener(this.props, onOrOff.bind(null, element));
+	      }
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return this.props.children || null;
+	    }
+	  }]);
+	  return EventListener;
+	}(_react.Component);
+
+	process.env.NODE_ENV !== "production" ? EventListener.propTypes = {
+	  /**
+	   * You can provide a children too.
+	   */
+	  children: _react.PropTypes.node,
+	  /**
+	   * The DOM target to listen to.
+	   */
+	  target: _react.PropTypes.oneOfType([_react.PropTypes.object, _react.PropTypes.string])
+	} : void 0;
+	exports.default = EventListener;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 665 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(666);
+
+/***/ },
+/* 666 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-present, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 */
+
+	'use strict';
+
+	var shallowEqual = __webpack_require__(420);
+
+	/**
+	 * Does a shallow comparison for props and state.
+	 * See ReactComponentWithPureRenderMixin
+	 * See also https://facebook.github.io/react/docs/shallow-compare.html
+	 */
+	function shallowCompare(instance, nextProps, nextState) {
+	  return !shallowEqual(instance.props, nextProps) || !shallowEqual(instance.state, nextState);
+	}
+
+	module.exports = shallowCompare;
+
+/***/ },
+/* 667 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.passiveOption = exports.detachEvent = exports.attachEvent = exports.removeEventListener = exports.addEventListener = exports.canUseDOM = undefined;
+
+	var _defineProperty = __webpack_require__(668);
+
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Inspired by https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/core/ExecutionEnvironment.js
+	var canUseDOM = exports.canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+
+	var addEventListener = exports.addEventListener = canUseDOM && 'addEventListener' in window;
+	var removeEventListener = exports.removeEventListener = canUseDOM && 'removeEventListener' in window;
+
+	// IE8+ Support
+	var attachEvent = exports.attachEvent = canUseDOM && 'attachEvent' in window;
+	var detachEvent = exports.detachEvent = canUseDOM && 'detachEvent' in window;
+
+	// Passive options
+	// Inspired by https://github.com/Modernizr/Modernizr/blob/master/feature-detects/dom/passiveeventlisteners.js
+	var passiveOption = exports.passiveOption = function () {
+	  var cache = null;
+
+	  return function () {
+	    if (cache !== null) {
+	      return cache;
+	    }
+
+	    var supportsPassiveOption = false;
+
+	    try {
+	      window.addEventListener('test', null, (0, _defineProperty2.default)({}, 'passive', {
+	        get: function get() {
+	          supportsPassiveOption = true;
+	        }
+	      }));
+	    } catch (e) {} // eslint-disable-line no-empty
+
+	    cache = supportsPassiveOption;
+
+	    return supportsPassiveOption;
+	  }();
+	}();
+
+/***/ },
+/* 668 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _defineProperty = __webpack_require__(505);
+
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+	exports.default = defineProperty;
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	//  weak
+
+	function defineProperty(o, p, attr) {
+	  return (0, _defineProperty2.default)(o, p, attr);
+	}
+
+/***/ },
+/* 669 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _toConsumableArray2 = __webpack_require__(564);
+
+	var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _toArray2 = __webpack_require__(670);
+
+	var _toArray3 = _interopRequireDefault(_toArray2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(329);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _reactAddonsTransitionGroup = __webpack_require__(648);
+
+	var _reactAddonsTransitionGroup2 = _interopRequireDefault(_reactAddonsTransitionGroup);
+
+	var _dom = __webpack_require__(671);
+
+	var _dom2 = _interopRequireDefault(_dom);
+
+	var _CircleRipple = __webpack_require__(672);
+
+	var _CircleRipple2 = _interopRequireDefault(_CircleRipple);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Remove the first element of the array
+	var shift = function shift(_ref) {
+	  var _ref2 = (0, _toArray3.default)(_ref),
+	      newArray = _ref2.slice(1);
+
+	  return newArray;
+	};
+
+	var TouchRipple = function (_Component) {
+	  (0, _inherits3.default)(TouchRipple, _Component);
+
+	  function TouchRipple(props, context) {
+	    (0, _classCallCheck3.default)(this, TouchRipple);
+
+	    // Touch start produces a mouse down event for compat reasons. To avoid
+	    // showing ripples twice we skip showing a ripple for the first mouse down
+	    // after a touch start. Note we don't store ignoreNextMouseDown in this.state
+	    // to avoid re-rendering when we change it.
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (TouchRipple.__proto__ || (0, _getPrototypeOf2.default)(TouchRipple)).call(this, props, context));
+
+	    _this.handleMouseDown = function (event) {
+	      // only listen to left clicks
+	      if (event.button === 0) {
+	        _this.start(event, false);
+	      }
+	    };
+
+	    _this.handleMouseUp = function () {
+	      _this.end();
+	    };
+
+	    _this.handleMouseLeave = function () {
+	      _this.end();
+	    };
+
+	    _this.handleTouchStart = function (event) {
+	      event.stopPropagation();
+	      // If the user is swiping (not just tapping), save the position so we can
+	      // abort ripples if the user appears to be scrolling.
+	      if (_this.props.abortOnScroll && event.touches) {
+	        _this.startListeningForScrollAbort(event);
+	        _this.startTime = Date.now();
+	      }
+	      _this.start(event, true);
+	    };
+
+	    _this.handleTouchEnd = function () {
+	      _this.end();
+	    };
+
+	    _this.handleTouchMove = function (event) {
+	      // Stop trying to abort if we're already 300ms into the animation
+	      var timeSinceStart = Math.abs(Date.now() - _this.startTime);
+	      if (timeSinceStart > 300) {
+	        _this.stopListeningForScrollAbort();
+	        return;
+	      }
+
+	      // If the user is scrolling...
+	      var deltaY = Math.abs(event.touches[0].clientY - _this.firstTouchY);
+	      var deltaX = Math.abs(event.touches[0].clientX - _this.firstTouchX);
+	      // Call it a scroll after an arbitrary 6px (feels reasonable in testing)
+	      if (deltaY > 6 || deltaX > 6) {
+	        var currentRipples = _this.state.ripples;
+	        var ripple = currentRipples[0];
+	        // This clone will replace the ripple in ReactTransitionGroup with a
+	        // version that will disappear immediately when removed from the DOM
+	        var abortedRipple = _react2.default.cloneElement(ripple, { aborted: true });
+	        // Remove the old ripple and replace it with the new updated one
+	        currentRipples = shift(currentRipples);
+	        currentRipples = [].concat((0, _toConsumableArray3.default)(currentRipples), [abortedRipple]);
+	        _this.setState({ ripples: currentRipples }, function () {
+	          // Call end after we've set the ripple to abort otherwise the setState
+	          // in end() merges with this and the ripple abort fails
+	          _this.end();
+	        });
+	      }
+	    };
+
+	    _this.ignoreNextMouseDown = false;
+
+	    _this.state = {
+	      // This prop allows us to only render the ReactTransitionGroup
+	      // on the first click of the component, making the inital render faster.
+	      hasRipples: false,
+	      nextKey: 0,
+	      ripples: []
+	    };
+	    return _this;
+	  }
+
+	  (0, _createClass3.default)(TouchRipple, [{
+	    key: 'start',
+	    value: function start(event, isRippleTouchGenerated) {
+	      var theme = this.context.muiTheme.ripple;
+
+	      if (this.ignoreNextMouseDown && !isRippleTouchGenerated) {
+	        this.ignoreNextMouseDown = false;
+	        return;
+	      }
+
+	      var ripples = this.state.ripples;
+
+	      // Add a ripple to the ripples array
+	      ripples = [].concat((0, _toConsumableArray3.default)(ripples), [_react2.default.createElement(_CircleRipple2.default, {
+	        key: this.state.nextKey,
+	        style: !this.props.centerRipple ? this.getRippleStyle(event) : {},
+	        color: this.props.color || theme.color,
+	        opacity: this.props.opacity,
+	        touchGenerated: isRippleTouchGenerated
+	      })]);
+
+	      this.ignoreNextMouseDown = isRippleTouchGenerated;
+	      this.setState({
+	        hasRipples: true,
+	        nextKey: this.state.nextKey + 1,
+	        ripples: ripples
+	      });
+	    }
+	  }, {
+	    key: 'end',
+	    value: function end() {
+	      var currentRipples = this.state.ripples;
+	      this.setState({
+	        ripples: shift(currentRipples)
+	      });
+	      if (this.props.abortOnScroll) {
+	        this.stopListeningForScrollAbort();
+	      }
+	    }
+
+	    // Check if the user seems to be scrolling and abort the animation if so
+
+	  }, {
+	    key: 'startListeningForScrollAbort',
+	    value: function startListeningForScrollAbort(event) {
+	      this.firstTouchY = event.touches[0].clientY;
+	      this.firstTouchX = event.touches[0].clientX;
+	      // Note that when scolling Chrome throttles this event to every 200ms
+	      // Also note we don't listen for scroll events directly as there's no general
+	      // way to cover cases like scrolling within containers on the page
+	      document.body.addEventListener('touchmove', this.handleTouchMove);
+	    }
+	  }, {
+	    key: 'stopListeningForScrollAbort',
+	    value: function stopListeningForScrollAbort() {
+	      document.body.removeEventListener('touchmove', this.handleTouchMove);
+	    }
+	  }, {
+	    key: 'getRippleStyle',
+	    value: function getRippleStyle(event) {
+	      var el = _reactDom2.default.findDOMNode(this);
+	      var elHeight = el.offsetHeight;
+	      var elWidth = el.offsetWidth;
+	      var offset = _dom2.default.offset(el);
+	      var isTouchEvent = event.touches && event.touches.length;
+	      var pageX = isTouchEvent ? event.touches[0].pageX : event.pageX;
+	      var pageY = isTouchEvent ? event.touches[0].pageY : event.pageY;
+	      var pointerX = pageX - offset.left;
+	      var pointerY = pageY - offset.top;
+	      var topLeftDiag = this.calcDiag(pointerX, pointerY);
+	      var topRightDiag = this.calcDiag(elWidth - pointerX, pointerY);
+	      var botRightDiag = this.calcDiag(elWidth - pointerX, elHeight - pointerY);
+	      var botLeftDiag = this.calcDiag(pointerX, elHeight - pointerY);
+	      var rippleRadius = Math.max(topLeftDiag, topRightDiag, botRightDiag, botLeftDiag);
+	      var rippleSize = rippleRadius * 2;
+	      var left = pointerX - rippleRadius;
+	      var top = pointerY - rippleRadius;
+
+	      return {
+	        directionInvariant: true,
+	        height: rippleSize,
+	        width: rippleSize,
+	        top: top,
+	        left: left
+	      };
+	    }
+	  }, {
+	    key: 'calcDiag',
+	    value: function calcDiag(a, b) {
+	      return Math.sqrt(a * a + b * b);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props = this.props,
+	          children = _props.children,
+	          style = _props.style;
+	      var _state = this.state,
+	          hasRipples = _state.hasRipples,
+	          ripples = _state.ripples;
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+
+	      var rippleGroup = void 0;
+
+	      if (hasRipples) {
+	        var mergedStyles = (0, _simpleAssign2.default)({
+	          height: '100%',
+	          width: '100%',
+	          position: 'absolute',
+	          top: 0,
+	          left: 0,
+	          overflow: 'hidden'
+	        }, style);
+
+	        rippleGroup = _react2.default.createElement(
+	          _reactAddonsTransitionGroup2.default,
+	          { style: prepareStyles(mergedStyles) },
+	          ripples
+	        );
+	      }
+
+	      return _react2.default.createElement(
+	        'div',
+	        {
+	          onMouseUp: this.handleMouseUp,
+	          onMouseDown: this.handleMouseDown,
+	          onMouseLeave: this.handleMouseLeave,
+	          onTouchStart: this.handleTouchStart,
+	          onTouchEnd: this.handleTouchEnd
+	        },
+	        rippleGroup,
+	        children
+	      );
+	    }
+	  }]);
+	  return TouchRipple;
+	}(_react.Component);
+
+	TouchRipple.defaultProps = {
+	  abortOnScroll: true
+	};
+	TouchRipple.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? TouchRipple.propTypes = {
+	  abortOnScroll: _react.PropTypes.bool,
+	  centerRipple: _react.PropTypes.bool,
+	  children: _react.PropTypes.node,
+	  color: _react.PropTypes.string,
+	  opacity: _react.PropTypes.number,
+	  style: _react.PropTypes.object
+	} : void 0;
+	exports.default = TouchRipple;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 670 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	var _from = __webpack_require__(565);
+
+	var _from2 = _interopRequireDefault(_from);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = function (arr) {
+	  return Array.isArray(arr) ? arr : (0, _from2.default)(arr);
+	};
+
+/***/ },
+/* 671 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  isDescendant: function isDescendant(parent, child) {
+	    var node = child.parentNode;
+
+	    while (node !== null) {
+	      if (node === parent) return true;
+	      node = node.parentNode;
+	    }
+
+	    return false;
+	  },
+	  offset: function offset(el) {
+	    var rect = el.getBoundingClientRect();
+	    return {
+	      top: rect.top + document.body.scrollTop,
+	      left: rect.left + document.body.scrollLeft
+	    };
+	  }
+	};
+
+/***/ },
+/* 672 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(329);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _shallowEqual = __webpack_require__(645);
+
+	var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
+
+	var _autoPrefix = __webpack_require__(646);
+
+	var _autoPrefix2 = _interopRequireDefault(_autoPrefix);
+
+	var _transitions = __webpack_require__(643);
+
+	var _transitions2 = _interopRequireDefault(_transitions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var CircleRipple = function (_Component) {
+	  (0, _inherits3.default)(CircleRipple, _Component);
+
+	  function CircleRipple() {
+	    (0, _classCallCheck3.default)(this, CircleRipple);
+	    return (0, _possibleConstructorReturn3.default)(this, (CircleRipple.__proto__ || (0, _getPrototypeOf2.default)(CircleRipple)).apply(this, arguments));
+	  }
+
+	  (0, _createClass3.default)(CircleRipple, [{
+	    key: 'shouldComponentUpdate',
+	    value: function shouldComponentUpdate(nextProps) {
+	      return !(0, _shallowEqual2.default)(this.props, nextProps);
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      clearTimeout(this.enterTimer);
+	      clearTimeout(this.leaveTimer);
+	    }
+	  }, {
+	    key: 'componentWillAppear',
+	    value: function componentWillAppear(callback) {
+	      this.initializeAnimation(callback);
+	    }
+	  }, {
+	    key: 'componentWillEnter',
+	    value: function componentWillEnter(callback) {
+	      this.initializeAnimation(callback);
+	    }
+	  }, {
+	    key: 'componentDidAppear',
+	    value: function componentDidAppear() {
+	      this.animate();
+	    }
+	  }, {
+	    key: 'componentDidEnter',
+	    value: function componentDidEnter() {
+	      this.animate();
+	    }
+	  }, {
+	    key: 'componentWillLeave',
+	    value: function componentWillLeave(callback) {
+	      var style = _reactDom2.default.findDOMNode(this).style;
+	      style.opacity = 0;
+	      // If the animation is aborted, remove from the DOM immediately
+	      var removeAfter = this.props.aborted ? 0 : 2000;
+	      this.enterTimer = setTimeout(callback, removeAfter);
+	    }
+	  }, {
+	    key: 'animate',
+	    value: function animate() {
+	      var style = _reactDom2.default.findDOMNode(this).style;
+	      var transitionValue = _transitions2.default.easeOut('2s', 'opacity') + ', ' + _transitions2.default.easeOut('1s', 'transform');
+	      _autoPrefix2.default.set(style, 'transition', transitionValue);
+	      _autoPrefix2.default.set(style, 'transform', 'scale(1)');
+	    }
+	  }, {
+	    key: 'initializeAnimation',
+	    value: function initializeAnimation(callback) {
+	      var style = _reactDom2.default.findDOMNode(this).style;
+	      style.opacity = this.props.opacity;
+	      _autoPrefix2.default.set(style, 'transform', 'scale(0)');
+	      this.leaveTimer = setTimeout(callback, 0);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props = this.props,
+	          aborted = _props.aborted,
+	          color = _props.color,
+	          opacity = _props.opacity,
+	          style = _props.style,
+	          touchGenerated = _props.touchGenerated,
+	          other = (0, _objectWithoutProperties3.default)(_props, ['aborted', 'color', 'opacity', 'style', 'touchGenerated']);
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+
+	      var mergedStyles = (0, _simpleAssign2.default)({
+	        position: 'absolute',
+	        top: 0,
+	        left: 0,
+	        height: '100%',
+	        width: '100%',
+	        borderRadius: '50%',
+	        backgroundColor: color
+	      }, style);
+
+	      return _react2.default.createElement('div', (0, _extends3.default)({}, other, { style: prepareStyles(mergedStyles) }));
+	    }
+	  }]);
+	  return CircleRipple;
+	}(_react.Component);
+
+	CircleRipple.defaultProps = {
+	  opacity: 0.1,
+	  aborted: false
+	};
+	CircleRipple.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? CircleRipple.propTypes = {
+	  aborted: _react.PropTypes.bool,
+	  color: _react.PropTypes.string,
+	  opacity: _react.PropTypes.number,
+	  style: _react.PropTypes.object,
+	  touchGenerated: _react.PropTypes.bool
+	} : void 0;
+	exports.default = CircleRipple;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 673 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _surface = __webpack_require__(659);
+	var _surface = __webpack_require__(674);
 
 	var _surface2 = _interopRequireDefault(_surface);
 
-	var _point = __webpack_require__(661);
+	var _config = __webpack_require__(676);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _point = __webpack_require__(677);
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _plate = __webpack_require__(662);
+	var _plate = __webpack_require__(678);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
-	var _hotSpot = __webpack_require__(663);
+	var _hotSpot = __webpack_require__(679);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
@@ -40892,16 +42792,10 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var MIN_HEIGHT = exports.MIN_HEIGHT = -1;
-	var MAX_HEIGHT = exports.MAX_HEIGHT = 1;
-	var BASIC_OCEAN_HEIGHT = -0.5;
-	var BASIC_CONTINENT_HEIGHT = 0.01;
-
 	function generatePlate(_ref) {
 	  var width = _ref.width,
 	      height = _ref.height,
 	      type = _ref.type,
-	      pointsHeight = _ref.pointsHeight,
 	      _ref$x = _ref.x,
 	      x = _ref$x === undefined ? 0 : _ref$x,
 	      _ref$y = _ref.y,
@@ -40913,10 +42807,16 @@
 	      maxX = _ref.maxX,
 	      maxY = _ref.maxY;
 
+	  var pointHeight = void 0;
 	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
 	  for (var px = x; px < x + width; px += 1) {
 	    for (var py = y; py < y + height; py += 1) {
-	      var point = new _point2.default({ x: px, y: py, height: pointsHeight, type: type, plate: plate, maxX: maxX, maxY: maxY });
+	      if (type === _point.OCEAN) {
+	        pointHeight = _config2.default.newOceanHeight;
+	      } else {
+	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
+	      }
+	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: type, plate: plate });
 	      plate.points.push(point);
 	    }
 	  }
@@ -40937,8 +42837,9 @@
 	    this.width = width;
 	    this.height = height;
 	    this.timeStep = timeStep;
-	    this.surface = new _surface2.default({ width: width, height: height });
 	    this.plates = [];
+	    this.prevSurface = null;
+	    this.surface = new _surface2.default({ width: width, height: height, plates: this.plates });
 	    this.testInit();
 	  }
 
@@ -40954,6 +42855,7 @@
 	      this.removePointsBelowMinHeight();
 	      this.removeDeadHotSpots();
 	      this.removeEmptyPlates();
+	      this.addNewPoints();
 	    }
 	  }, {
 	    key: 'movePlates',
@@ -40967,21 +42869,12 @@
 	  }, {
 	    key: 'updateSurface',
 	    value: function updateSurface() {
-	      var _this2 = this;
-
-	      this.surface.reset();
-	      this.plates.forEach(function (plate) {
-	        var points = plate.points;
-	        for (var i = 0, len = points.length; i < len; i += 1) {
-	          _this2.surface.setPoint(points[i]);
-	        }
-	      });
+	      this.prevSurface = this.surface;
+	      this.surface = new _surface2.default({ width: this.width, height: this.height, plates: this.plates });
 	    }
 	  }, {
 	    key: 'handleCollisions',
 	    value: function handleCollisions() {
-	      var _this3 = this;
-
 	      this.surface.forEachCollision(function (points) {
 	        if (points.length === 2) {
 	          var p1 = points[0];
@@ -40990,14 +42883,15 @@
 	            // Ocean - continent collision.
 	            var oceanPoint = p1.type === _point.OCEAN ? p1 : p2;
 	            var continentPoint = p1.type === _point.CONTINENT ? p1 : p2;
-	            oceanPoint.collideWithContinent(continentPoint, _this3.timeStep);
+	            oceanPoint.collideWithContinent(continentPoint);
 
-	            if (Math.random() < oceanPoint.volcanicActProbability) {
+	            if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
 	              var continentPlate = continentPoint.plate;
 	              var newHotSpot = new _hotSpot2.default({
 	                x: continentPoint.x,
 	                y: continentPoint.y,
-	                radius: oceanPoint.volcanicActProbability * Math.random() * 500 + 5,
+	                radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+	                strength: oceanPoint.getRelativeVelocity(continentPoint),
 	                plate: continentPlate
 	              });
 	              continentPlate.addHotSpot(newHotSpot);
@@ -41009,36 +42903,48 @@
 	  }, {
 	    key: 'activateHotSpots',
 	    value: function activateHotSpots() {
-	      var _this4 = this;
+	      var _this2 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.inactiveHotSpots.forEach(function (hotSpot) {
-	          var points = _this4.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
+	          var points = _this2.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
+	          var volcanicActAllowed = true;
 	          points.forEach(function (point) {
-	            return point.applyVolcanicActivity(hotSpot);
+	            if (!point.volcanicActAllowed) {
+	              volcanicActAllowed = false;
+	            }
+	            point.applyVolcanicActivity(hotSpot);
 	          });
 	          hotSpot.active = true;
+	          // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.
+	          // Don't remove hot spot immediately, so we don't try to create new hot spots immediately in the next step.
+	          // We could control that point by point, but it would cause more noisy look of the volcanoes / mountains.
+	          if (!volcanicActAllowed) {
+	            hotSpot.strength = 0;
+	          }
 	        });
 	      });
 	    }
 	  }, {
 	    key: 'updatePoints',
 	    value: function updatePoints() {
+	      var _this3 = this;
+
 	      this.plates.forEach(function (plate) {
 	        plate.points.forEach(function (point) {
 	          // E.g. handle ongoing collisions, subduction and so on.
-	          point.update();
+	          point.update(_this3.timeStep);
 	        });
 	      });
 	    }
 	  }, {
 	    key: 'updateHotSpots',
 	    value: function updateHotSpots() {
-	      var _this5 = this;
+	      var _this4 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.hotSpots.forEach(function (hotSpot) {
-	          hotSpot.update(_this5.timeStep);
+	          hotSpot.update(_this4.timeStep);
 	        });
 	      });
 	    }
@@ -41046,7 +42952,7 @@
 	    key: 'removePointsBelowMinHeight',
 	    value: function removePointsBelowMinHeight() {
 	      this.plates.forEach(function (plate) {
-	        plate.removePointsBelow(MIN_HEIGHT);
+	        plate.removePointsBelow(_config2.default.minHeight);
 	      });
 	    }
 	  }, {
@@ -41063,6 +42969,33 @@
 	        return p.notEmpty();
 	      });
 	    }
+
+	    // This handles divergent boundaries.
+
+	  }, {
+	    key: 'addNewPoints',
+	    value: function addNewPoints() {
+	      var width = this.width,
+	          height = this.height,
+	          surface = this.surface,
+	          prevSurface = this.prevSurface;
+
+	      for (var x = 0; x < width; x += 1) {
+	        for (var y = 0; y < height; y += 1) {
+	          // If there's some point missing, create a new ocean crust and add it to the plate that
+	          // was in the same location before.
+	          if (!surface.points[x][y]) {
+	            var plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
+	            if (plate) {
+	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate });
+	              plate.points.push(newPoint);
+	              // Update surface object too, so prevSurface in the next step is valid!
+	              surface.points[x][y] = [newPoint];
+	            }
+	          }
+	        }
+	      }
+	    }
 	  }, {
 	    key: 'testInit',
 	    value: function testInit() {
@@ -41075,8 +43008,7 @@
 	        width: width * 0.5,
 	        height: height,
 	        type: _point.OCEAN,
-	        pointsHeight: BASIC_OCEAN_HEIGHT,
-	        vx: 2.5,
+	        vx: 2,
 	        vy: 0,
 	        maxX: width,
 	        maxY: height
@@ -41087,7 +43019,6 @@
 	        width: width * 0.5,
 	        height: height,
 	        type: _point.CONTINENT,
-	        pointsHeight: BASIC_CONTINENT_HEIGHT,
 	        vx: 0,
 	        vy: 0,
 	        maxX: width,
@@ -41123,7 +43054,7 @@
 	exports.default = Model;
 
 /***/ },
-/* 659 */
+/* 674 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -41134,25 +43065,13 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _binarysearch = __webpack_require__(660);
+	var _binarysearch = __webpack_require__(675);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function getTestData(width, height) {
-	  var data = [];
-	  for (var i = 0; i < width; i += 1) {
-	    var row = [];
-	    data.push(row);
-	    for (var j = 0; j < height; j += 1) {
-	      row.push(j / height * 2 - 1); // [-1, 1] range
-	    }
-	  }
-	  return data;
-	}
 
 	function getGrid(width, height) {
 	  var data = [];
@@ -41173,23 +43092,29 @@
 
 	var Surface = function () {
 	  function Surface(_ref) {
+	    var _this = this;
+
 	    var width = _ref.width,
-	        height = _ref.height;
+	        height = _ref.height,
+	        _ref$plates = _ref.plates,
+	        plates = _ref$plates === undefined ? [] : _ref$plates;
 
 	    _classCallCheck(this, Surface);
 
 	    this.width = width;
 	    this.height = height;
-	    this.reset();
+	    this.maxHeight = getGrid(width, height);
+	    this.points = getGrid(width, height);
+
+	    plates.forEach(function (plate) {
+	      var points = plate.points;
+	      for (var i = 0, len = points.length; i < len; i += 1) {
+	        _this.setPoint(points[i]);
+	      }
+	    });
 	  }
 
 	  _createClass(Surface, [{
-	    key: 'reset',
-	    value: function reset() {
-	      this.maxHeight = getGrid(this.width, this.height);
-	      this.points = getGrid(this.width, this.height);
-	    }
-	  }, {
 	    key: 'setPoint',
 	    value: function setPoint(point) {
 	      if (!this.maxHeight[point.x][point.y] || this.maxHeight[point.x][point.y] < point.height) {
@@ -41244,7 +43169,7 @@
 	exports.default = Surface;
 
 /***/ },
-/* 660 */
+/* 675 */
 /***/ function(module, exports) {
 
 	
@@ -41467,28 +43392,94 @@
 
 
 /***/ },
-/* 661 */
+/* 676 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	function getURLParam(name) {
+	  var url = window.location.href;
+	  name = name.replace(/[[]]/g, '\\$&');
+	  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+	  var results = regex.exec(url);
+	  if (!results) return null;
+	  if (!results[2]) return true;
+	  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+	}
+
+	var DEFAULT_CONFIG = {
+	  minHeight: -1,
+	  maxHeight: 1,
+	  waterLevel: 0,
+	  // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
+	  newOceanHeight: -0.5,
+	  // When oceanic crust cools down, it sinks a bit.
+	  oceanicCrustCoolingRatio: 0.025,
+	  oceanicCrustCoolingTime: 3,
+	  // Speed of subduction.
+	  subductionRatio: 0.00015,
+	  // Volcanoes are created between min and max distance from convergent boundary.
+	  volcanicActMinDist: 20,
+	  volcanicActMaxDist: 70,
+	  // Limit amount of time that given point can undergo volcanic activity.
+	  volcanicActMaxTime: 100,
+	  // Strength of volcanic activity.
+	  volcanoHeightChangeRatio: 0.0008,
+	  // Volcano lifespan is proportional to this value and its diameter.
+	  volcanoLifeLengthRatio: 0.5
+	};
+
+	var urlConfig = {};
+
+	Object.keys(DEFAULT_CONFIG).forEach(function (key) {
+	  var urlValue = getURLParam(key);
+	  if (urlValue === 'true') {
+	    urlConfig[key] = true;
+	  } else if (urlValue === 'false') {
+	    urlConfig[key] = false;
+	  } else if (urlValue !== null && !isNaN(urlValue)) {
+	    // !isNaN(string) means isNumber(string).
+	    urlConfig[key] = parseFloat(urlValue);
+	  } else if (urlValue !== null) {
+	    urlConfig[key] = urlValue;
+	  }
+	});
+
+	var finalConfig = Object.assign({}, DEFAULT_CONFIG, urlConfig);
+	exports.default = finalConfig;
+
+/***/ },
+/* 677 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.CONTINENT = exports.OCEAN = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(676);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var OCEAN = exports.OCEAN = 0;
 	var CONTINENT = exports.CONTINENT = 1;
 
-	var SUBDUCTION_RATIO = -0.00015;
-	var VOLCANIC_ACT_MIN_DIST = 0;
-	var VOLCANIC_ACT_MAX_DIST = 60;
-
-	function subductionHeightChange(subductionDist) {
-	  return SUBDUCTION_RATIO * subductionDist * subductionDist;
+	// Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
+	// pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
+	// function rather than linear.
+	function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
+	  return _config2.default.subductionRatio * subductionVelocity * timeStep * subductionDist;
 	}
 
 	var Point = function () {
@@ -41501,54 +43492,60 @@
 
 	    _classCallCheck(this, Point);
 
-	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = x > plate.x ? x - plate.x : x - plate.x + plate.maxX;
-	    this.relY = y > plate.y ? y - plate.y : y - plate.y + plate.maxY;
+	    // Make sure that relative coords are always positive and rounded to make other calculations easier.
+	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
 	    this.type = type;
 	    this.height = height;
 	    this.plate = plate;
+	    this.age = 0;
 	    // Subduction properties:
 	    this.subductionDist = null;
-	    this.subductionDisplacement = null;
-	    this.preSubductionHeight = null;
+	    this.subductionVelocity = null;
 	    // Volcanic activity properties:
 	    this.volcanicHotSpot = false;
 	    this.distFromVolcanoCenter = null;
+	    this.volcanicActTime = 0;
 	  }
 
 	  _createClass(Point, [{
-	    key: "getRelativeVelocity",
+	    key: 'getRelativeVelocity',
 	    value: function getRelativeVelocity(otherPoint) {
 	      var vxDiff = this.vx - otherPoint.vx;
 	      var vyDiff = this.vy - otherPoint.vy;
 	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
 	    }
 	  }, {
-	    key: "collideWithContinent",
-	    value: function collideWithContinent(otherPoint, timeStep) {
+	    key: 'collideWithContinent',
+	    value: function collideWithContinent(otherPoint) {
 	      if (!this.subduction) {
 	        this.subductionDist = 0;
-	        this.preSubductionHeight = this.height;
 	      }
-	      this.subductionDisplacement = this.getRelativeVelocity(otherPoint) * timeStep;
+	      this.subductionVelocity = this.getRelativeVelocity(otherPoint);
 	    }
 	  }, {
-	    key: "applyVolcanicActivity",
+	    key: 'applyVolcanicActivity',
 	    value: function applyVolcanicActivity(hotSpot) {
 	      this.volcanicHotSpot = hotSpot;
 	      // Cache distance so we don't need to recalculate it in each simulation step.
 	      this.distFromVolcanoCenter = hotSpot.dist(this);
 	    }
 	  }, {
-	    key: "update",
-	    value: function update() {
+	    key: 'update',
+	    value: function update(timeStep) {
+	      if (this.type === OCEAN && this.age < _config2.default.oceanicCrustCoolingTime) {
+	        // Oceanic crust cools down and becomes denser.
+	        this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep;
+	      }
+
 	      if (this.subduction) {
-	        this.subductionDist += this.subductionDisplacement;
-	        this.height = this.preSubductionHeight + subductionHeightChange(this.subductionDist);
+	        this.subductionDist += this.subductionVelocity * timeStep;
+	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
 	      }
 
 	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
-	        this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter);
+	        this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
+	        this.volcanicActTime += timeStep;
 	      } else {
 	        this.volcanicHotSpot = null;
 	        this.distFromVolcanoCenter = null;
@@ -41557,37 +43554,49 @@
 	      if (this.height > 1) {
 	        this.height = 1;
 	      }
+
+	      this.age += timeStep;
 	    }
 	  }, {
-	    key: "x",
+	    key: 'x',
 	    get: function get() {
 	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
 	    }
 	  }, {
-	    key: "y",
+	    key: 'y',
 	    get: function get() {
 	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
 	    }
 	  }, {
-	    key: "vx",
+	    key: 'vx',
 	    get: function get() {
 	      return this.plate.vx;
 	    }
 	  }, {
-	    key: "vy",
+	    key: 'vy',
 	    get: function get() {
 	      return this.plate.vy;
 	    }
 	  }, {
-	    key: "subduction",
+	    key: 'subduction',
 	    get: function get() {
 	      return this.subductionDist !== null;
 	    }
 	  }, {
-	    key: "volcanicActProbability",
+	    key: 'volcanicAct',
+	    get: function get() {
+	      return this.volcanicHotSpot !== null;
+	    }
+	  }, {
+	    key: 'volcanicActAllowed',
+	    get: function get() {
+	      return this.volcanicActTime < _config2.default.volcanicActMaxTime;
+	    }
+	  }, {
+	    key: 'volcanicActProbability',
 	    get: function get() {
 	      if (!this.subduction) return 0;
-	      var normalizedDist = (this.subductionDist - VOLCANIC_ACT_MIN_DIST) / (VOLCANIC_ACT_MAX_DIST - VOLCANIC_ACT_MIN_DIST);
+	      var normalizedDist = (this.subductionDist - _config2.default.volcanicActMinDist) / (_config2.default.volcanicActMaxDist - _config2.default.volcanicActMinDist);
 	      return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
 	    }
 	  }]);
@@ -41598,7 +43607,7 @@
 	exports.default = Point;
 
 /***/ },
-/* 662 */
+/* 678 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -41708,10 +43717,10 @@
 	exports.default = Plate;
 
 /***/ },
-/* 663 */
-/***/ function(module, exports) {
+/* 679 */
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -41719,34 +43728,38 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	var _config = __webpack_require__(676);
 
-	var HEIGHT_CHANGE_RATIO = 0.0016;
-	var LIFE_LENGTH_RATIO = 0.5;
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
 	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
-
 	var HotSpot = function () {
 	  function HotSpot(_ref) {
 	    var x = _ref.x,
 	        y = _ref.y,
 	        radius = _ref.radius,
+	        strength = _ref.strength,
 	        plate = _ref.plate;
 
 	    _classCallCheck(this, HotSpot);
 
 	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = x > plate.x ? x - plate.x : x - plate.x + plate.maxX;
-	    this.relY = y > plate.y ? y - plate.y : y - plate.y + plate.maxY;
+	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
 	    this.radius = radius;
+	    this.strength = strength;
 	    this.plate = plate;
 	    this.active = false;
-	    this.lifeLeft = LIFE_LENGTH_RATIO * radius;
+	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
 	  }
 
 	  _createClass(HotSpot, [{
-	    key: "dist",
+	    key: 'dist',
 	    value: function dist(_ref2) {
 	      var x = _ref2.x,
 	          y = _ref2.y;
@@ -41754,38 +43767,38 @@
 	      return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
 	    }
 	  }, {
-	    key: "pointInside",
+	    key: 'pointInside',
 	    value: function pointInside(point) {
 	      return this.dist(point) < this.radius;
 	    }
 	  }, {
-	    key: "collides",
+	    key: 'collides',
 	    value: function collides(hotSpot) {
 	      return this.dist(hotSpot) < this.radius + hotSpot.radius;
 	    }
 	  }, {
-	    key: "heightChange",
+	    key: 'heightChange',
 	    value: function heightChange(dist) {
 	      var normDist = dist / this.radius;
-	      return HEIGHT_CHANGE_RATIO * (1 - normDist) * this.radius;
+	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
 	    }
 	  }, {
-	    key: "update",
+	    key: 'update',
 	    value: function update(timeStep) {
 	      this.lifeLeft -= timeStep;
 	    }
 	  }, {
-	    key: "x",
+	    key: 'x',
 	    get: function get() {
 	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
 	    }
 	  }, {
-	    key: "y",
+	    key: 'y',
 	    get: function get() {
 	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
 	    }
 	  }, {
-	    key: "alive",
+	    key: 'alive',
 	    get: function get() {
 	      return this.lifeLeft > 0;
 	    }
@@ -41797,7 +43810,7 @@
 	exports.default = HotSpot;
 
 /***/ },
-/* 664 */
+/* 680 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -41807,11 +43820,13 @@
 	});
 	exports.default = renderTopView;
 
-	var _colormap = __webpack_require__(665);
+	var _colormap = __webpack_require__(681);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
-	var _model = __webpack_require__(658);
+	var _config = __webpack_require__(676);
+
+	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -41827,7 +43842,7 @@
 
 	function heightToShade(val) {
 	  if (val == null) return -1;
-	  return Math.floor((val - _model.MIN_HEIGHT) / (_model.MAX_HEIGHT - _model.MIN_HEIGHT) * (N_SHADES - 1));
+	  return Math.floor((val - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight) * (N_SHADES - 1));
 	}
 
 	function renderTopView(canvas, data) {
@@ -41856,7 +43871,7 @@
 	}
 
 /***/ },
-/* 665 */
+/* 681 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -41866,9 +43881,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(666);
-	var clone = __webpack_require__(667);
-	var colorScale = __webpack_require__(672);
+	var at = __webpack_require__(682);
+	var clone = __webpack_require__(683);
+	var colorScale = __webpack_require__(688);
 
 	module.exports = createColormap;
 
@@ -41997,7 +44012,7 @@
 
 
 /***/ },
-/* 666 */
+/* 682 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -42190,7 +44205,7 @@
 
 
 /***/ },
-/* 667 */
+/* 683 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -42354,10 +44369,10 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(668).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(684).Buffer))
 
 /***/ },
-/* 668 */
+/* 684 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -42370,9 +44385,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(669)
-	var ieee754 = __webpack_require__(670)
-	var isArray = __webpack_require__(671)
+	var base64 = __webpack_require__(685)
+	var ieee754 = __webpack_require__(686)
+	var isArray = __webpack_require__(687)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -44153,7 +46168,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 669 */
+/* 685 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -44273,7 +46288,7 @@
 
 
 /***/ },
-/* 670 */
+/* 686 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -44363,7 +46378,7 @@
 
 
 /***/ },
-/* 671 */
+/* 687 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -44374,7 +46389,7 @@
 
 
 /***/ },
-/* 672 */
+/* 688 */
 /***/ function(module, exports) {
 
 	module.exports={
@@ -44471,7 +46486,7 @@
 
 
 /***/ },
-/* 673 */
+/* 689 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -44481,7 +46496,6 @@
 	});
 	exports.default = renderHotSpots;
 	function renderHotSpots(canvas, hotSpots) {
-	  var canvHeight = canvas.height;
 	  var ctx = canvas.getContext('2d');
 	  ctx.strokeStyle = '#ff0000';
 	  hotSpots.forEach(function (hotSpot) {
@@ -44492,7 +46506,7 @@
 	}
 
 /***/ },
-/* 674 */
+/* 690 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -44505,21 +46519,24 @@
 
 	exports.default = renderCrossSection;
 
-	var _binarysearch = __webpack_require__(660);
+	var _binarysearch = __webpack_require__(675);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _model = __webpack_require__(658);
+	var _config = __webpack_require__(676);
 
-	var _point = __webpack_require__(661);
+	var _config2 = _interopRequireDefault(_config);
+
+	var _point = __webpack_require__(677);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	var COLORS = (_COLORS = {
-	  nothing: 220
-	}, _defineProperty(_COLORS, _point.OCEAN, 128), _defineProperty(_COLORS, _point.CONTINENT, 64), _COLORS);
+	  nothing: [220, 220, 220],
+	  water: [2, 156, 212]
+	}, _defineProperty(_COLORS, _point.CONTINENT, [128, 128, 128]), _defineProperty(_COLORS, _point.OCEAN, [64, 64, 64]), _COLORS);
 
 	function renderCrossSection(canvas, points, crossSectionY) {
 	  var maxX = points.length;
@@ -44533,22 +46550,23 @@
 	  var heightData = [];
 	  for (var x = 0; x < maxX; x += 1) {
 	    var h = (points[x][crossSectionY] || []).map(function (point) {
-	      return canvasHeight - canvasHeight * (point.height - _model.MIN_HEIGHT) / (_model.MAX_HEIGHT - _model.MIN_HEIGHT);
+	      return canvasHeight - canvasHeight * (point.height - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight);
 	    });
 	    heightData.push(h);
 	  }
+	  var waterLevel = canvasHeight - canvasHeight * (_config2.default.waterLevel - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight);
 
 	  for (var _x = 0; _x < maxX; _x += 1) {
 	    for (var y = 0; y < canvasHeight; y += 1) {
 	      var idx = (y * maxX + _x) * 4;
-	      var color = COLORS.nothing;
+	      var color = y < waterLevel ? COLORS.nothing : COLORS.water;
 	      if (y >= heightData[_x][0]) {
 	        var pointIdx = _binarysearch2.default.closest(heightData[_x], y);
 	        color = COLORS[points[_x][y][pointIdx].type];
 	      }
-	      imageData.data[idx] = color;
-	      imageData.data[idx + 1] = color;
-	      imageData.data[idx + 2] = color;
+	      imageData.data[idx] = color[0];
+	      imageData.data[idx + 1] = color[1];
+	      imageData.data[idx + 2] = color[2];
 	      imageData.data[idx + 3] = 255;
 	    }
 	  }
@@ -44556,16 +46574,16 @@
 	}
 
 /***/ },
-/* 675 */
+/* 691 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(676);
+	var content = __webpack_require__(692);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(678)(content, {});
+	var update = __webpack_require__(694)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -44582,10 +46600,10 @@
 	}
 
 /***/ },
-/* 676 */
+/* 692 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(677)();
+	exports = module.exports = __webpack_require__(693)();
 	// imports
 
 
@@ -44596,7 +46614,7 @@
 
 
 /***/ },
-/* 677 */
+/* 693 */
 /***/ function(module, exports) {
 
 	/*
@@ -44652,7 +46670,7 @@
 
 
 /***/ },
-/* 678 */
+/* 694 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -44904,16 +46922,16 @@
 
 
 /***/ },
-/* 679 */
+/* 695 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(680);
+	var content = __webpack_require__(696);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(678)(content, {});
+	var update = __webpack_require__(694)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -44930,10 +46948,10 @@
 	}
 
 /***/ },
-/* 680 */
+/* 696 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(677)();
+	exports = module.exports = __webpack_require__(693)();
 	// imports
 
 
