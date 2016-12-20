@@ -29456,7 +29456,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(695);
+	__webpack_require__(697);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37395,19 +37395,19 @@
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _renderTopView = __webpack_require__(680);
+	var _renderTopView = __webpack_require__(682);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(689);
+	var _renderHotSpots = __webpack_require__(691);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(690);
+	var _renderCrossSection = __webpack_require__(692);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
-	__webpack_require__(691);
+	__webpack_require__(693);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42778,13 +42778,17 @@
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _plate = __webpack_require__(678);
-
-	var _plate2 = _interopRequireDefault(_plate);
-
-	var _hotSpot = __webpack_require__(679);
+	var _hotSpot = __webpack_require__(678);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
+
+	var _continent = __webpack_require__(679);
+
+	var _initializers = __webpack_require__(680);
+
+	var initializers = _interopRequireWildcard(_initializers);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42792,55 +42796,25 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function generatePlate(_ref) {
-	  var width = _ref.width,
-	      height = _ref.height,
-	      type = _ref.type,
-	      _ref$x = _ref.x,
-	      x = _ref$x === undefined ? 0 : _ref$x,
-	      _ref$y = _ref.y,
-	      y = _ref$y === undefined ? 0 : _ref$y,
-	      _ref$vx = _ref.vx,
-	      vx = _ref$vx === undefined ? 0 : _ref$vx,
-	      _ref$vy = _ref.vy,
-	      vy = _ref$vy === undefined ? 0 : _ref$vy,
-	      maxX = _ref.maxX,
-	      maxY = _ref.maxY;
-
-	  var pointHeight = void 0;
-	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
-	  for (var px = x; px < x + width; px += 1) {
-	    for (var py = y; py < y + height; py += 1) {
-	      if (type === _point.OCEAN) {
-	        pointHeight = _config2.default.newOceanHeight;
-	      } else {
-	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
-	      }
-	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: type, plate: plate });
-	      plate.points.push(point);
-	    }
-	  }
-	  return plate;
-	}
-
 	var Model = function () {
-	  function Model(_ref2) {
-	    var _ref2$width = _ref2.width,
-	        width = _ref2$width === undefined ? 512 : _ref2$width,
-	        _ref2$height = _ref2.height,
-	        height = _ref2$height === undefined ? 512 : _ref2$height,
-	        _ref2$timeStep = _ref2.timeStep,
-	        timeStep = _ref2$timeStep === undefined ? 1 : _ref2$timeStep;
+	  function Model(_ref) {
+	    var _ref$width = _ref.width,
+	        width = _ref$width === undefined ? 512 : _ref$width,
+	        _ref$height = _ref.height,
+	        height = _ref$height === undefined ? 512 : _ref$height,
+	        _ref$timeStep = _ref.timeStep,
+	        timeStep = _ref$timeStep === undefined ? 1 : _ref$timeStep,
+	        _ref$preset = _ref.preset,
+	        preset = _ref$preset === undefined ? 'continentalCollision' : _ref$preset;
 
 	    _classCallCheck(this, Model);
 
 	    this.width = width;
 	    this.height = height;
 	    this.timeStep = timeStep;
-	    this.plates = [];
+	    this.plates = initializers[preset](width, height);
 	    this.prevSurface = null;
 	    this.surface = new _surface2.default({ width: width, height: height, plates: this.plates });
-	    this.testInit();
 	  }
 
 	  _createClass(Model, [{
@@ -42848,6 +42822,7 @@
 	    value: function step() {
 	      this.movePlates();
 	      this.updateSurface();
+	      this.updateContinents();
 	      this.handleCollisions();
 	      this.activateHotSpots();
 	      this.updatePoints();
@@ -42873,41 +42848,92 @@
 	      this.surface = new _surface2.default({ width: this.width, height: this.height, plates: this.plates });
 	    }
 	  }, {
+	    key: 'updateContinents',
+	    value: function updateContinents() {
+	      (0, _continent.calcContinents)(this.surface);
+	    }
+	  }, {
 	    key: 'handleCollisions',
 	    value: function handleCollisions() {
+	      var _this2 = this;
+
 	      this.surface.forEachCollision(function (points) {
 	        if (points.length === 2) {
 	          var p1 = points[0];
 	          var p2 = points[1];
-	          if (p1.type !== p2.type) {
-	            // Ocean - continent collision.
-	            var oceanPoint = p1.type === _point.OCEAN ? p1 : p2;
-	            var continentPoint = p1.type === _point.CONTINENT ? p1 : p2;
-	            oceanPoint.collideWithContinent(continentPoint);
-
-	            if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
-	              var continentPlate = continentPoint.plate;
-	              var newHotSpot = new _hotSpot2.default({
-	                x: continentPoint.x,
-	                y: continentPoint.y,
-	                radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
-	                strength: oceanPoint.getRelativeVelocity(continentPoint),
-	                plate: continentPlate
-	              });
-	              continentPlate.addHotSpot(newHotSpot);
-	            }
+	          if (p1.plate === p2.plate) {
+	            // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
+	            p2.alive = false;
+	          } else if (p1.type !== p2.type) {
+	            _this2.oceanContinentCollision(p1, p2);
+	          } else if (p1.type === _point.CONTINENT && p2.type === _point.CONTINENT) {
+	            _this2.continentContinentCollision(p1, p2);
 	          }
 	        }
 	      });
 	    }
 	  }, {
+	    key: 'oceanContinentCollision',
+	    value: function oceanContinentCollision(p1, p2) {
+	      // Ocean - continent collision.
+	      var oceanPoint = p1.type === _point.OCEAN ? p1 : p2;
+	      var continentPoint = p1.type === _point.CONTINENT ? p1 : p2;
+	      oceanPoint.setupSubduction(continentPoint);
+	      if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
+	        var continentPlate = continentPoint.plate;
+	        var newHotSpot = new _hotSpot2.default({
+	          x: continentPoint.x,
+	          y: continentPoint.y,
+	          radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+	          strength: oceanPoint.getRelativeVelocity(continentPoint),
+	          plate: continentPlate
+	        });
+	        continentPlate.addHotSpot(newHotSpot);
+	      }
+	    }
+	  }, {
+	    key: 'continentContinentCollision',
+	    value: function continentContinentCollision(p1, p2) {
+	      // Make sure that colliding continents have their own plates. We don't want to modify speed of the ocean
+	      // only because continents are colliding.
+	      if (!p1.plate.continentOnly) {
+	        var newPlate = p1.plate.extractContinent(p1.continent.points);
+	        this.plates.push(newPlate);
+	      }
+	      if (!p2.plate.continentOnly) {
+	        var _newPlate = p2.plate.extractContinent(p2.continent.points);
+	        this.plates.push(_newPlate);
+	      }
+	      var p1p2Vx = p1.plate.vx - p2.plate.vx;
+	      var p1p2Vy = p1.plate.vy - p2.plate.vy;
+	      if (Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy) > 0.2) {
+	        var c1c2SizeRatio = p1.continent.size / p2.continent.size;
+
+	        p1.plate.vx -= _config2.default.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
+	        p1.plate.vy -= _config2.default.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
+	        p2.plate.vx += _config2.default.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
+	        p2.plate.vy += _config2.default.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+	      } else if (p1.plate !== p2.plate) {
+	        // Merge plates.
+	        var vx = 0.5 * (p1.plate.vx + p2.plate.vx);
+	        var vy = 0.5 * (p1.plate.vy + p2.plate.vy);
+	        p1.plate.merge(p2.plate);
+	        p1.plate.vx = vx;
+	        p1.plate.vy = vy;
+	        // Merge continents.
+	        p1.plate.points.forEach(function (p) {
+	          p.continent = p1.continent;
+	        });
+	      }
+	    }
+	  }, {
 	    key: 'activateHotSpots',
 	    value: function activateHotSpots() {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.inactiveHotSpots.forEach(function (hotSpot) {
-	          var points = _this2.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
+	          var points = _this3.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
 	          var volcanicActAllowed = true;
 	          points.forEach(function (point) {
 	            if (!point.volcanicActAllowed) {
@@ -42928,23 +42954,23 @@
 	  }, {
 	    key: 'updatePoints',
 	    value: function updatePoints() {
-	      var _this3 = this;
+	      var _this4 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.points.forEach(function (point) {
 	          // E.g. handle ongoing collisions, subduction and so on.
-	          point.update(_this3.timeStep);
+	          point.update(_this4.timeStep);
 	        });
 	      });
 	    }
 	  }, {
 	    key: 'updateHotSpots',
 	    value: function updateHotSpots() {
-	      var _this4 = this;
+	      var _this5 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.hotSpots.forEach(function (hotSpot) {
-	          hotSpot.update(_this4.timeStep);
+	          hotSpot.update(_this5.timeStep);
 	        });
 	      });
 	    }
@@ -42952,7 +42978,7 @@
 	    key: 'removePointsBelowMinHeight',
 	    value: function removePointsBelowMinHeight() {
 	      this.plates.forEach(function (plate) {
-	        plate.removePointsBelow(_config2.default.minHeight);
+	        plate.removeDeadPoints();
 	      });
 	    }
 	  }, {
@@ -42988,44 +43014,13 @@
 	            var plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
 	            if (plate) {
 	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate });
-	              plate.points.push(newPoint);
+	              plate.addPoint(newPoint);
 	              // Update surface object too, so prevSurface in the next step is valid!
 	              surface.points[x][y] = [newPoint];
 	            }
 	          }
 	        }
 	      }
-	    }
-	  }, {
-	    key: 'testInit',
-	    value: function testInit() {
-	      var width = this.width,
-	          height = this.height;
-
-	      var ocean = generatePlate({
-	        x: 0,
-	        y: 0,
-	        width: width * 0.5,
-	        height: height,
-	        type: _point.OCEAN,
-	        vx: 2,
-	        vy: 0,
-	        maxX: width,
-	        maxY: height
-	      });
-	      var continent = generatePlate({
-	        x: width * 0.5,
-	        y: 0,
-	        width: width * 0.5,
-	        height: height,
-	        type: _point.CONTINENT,
-	        vx: 0,
-	        vy: 0,
-	        maxX: width,
-	        maxY: height
-	      });
-	      this.plates.push(ocean);
-	      this.plates.push(continent);
 	    }
 	  }, {
 	    key: 'maxHeight',
@@ -43040,9 +43035,9 @@
 	  }, {
 	    key: 'hotSpots',
 	    get: function get() {
-	      var _ref3;
+	      var _ref2;
 
-	      return (_ref3 = []).concat.apply(_ref3, [[]].concat(_toConsumableArray(this.plates.map(function (p) {
+	      return (_ref2 = []).concat.apply(_ref2, [[]].concat(_toConsumableArray(this.plates.map(function (p) {
 	        return p.hotSpots;
 	      }))));
 	    }
@@ -43149,6 +43144,20 @@
 	        }
 	      }
 	      return result;
+	    }
+	  }, {
+	    key: 'forEachPoint',
+	    value: function forEachPoint(callback) {
+	      for (var x = 0; x < this.width; x += 1) {
+	        for (var y = 0; y < this.height; y += 1) {
+	          var points = this.points[x][y];
+	          if (points) {
+	            for (var i = 0; i < points.length; i += 1) {
+	              callback(points[i]);
+	            }
+	          }
+	        }
+	      }
 	    }
 	  }, {
 	    key: 'forEachCollision',
@@ -43429,7 +43438,9 @@
 	  // Strength of volcanic activity.
 	  volcanoHeightChangeRatio: 0.0008,
 	  // Volcano lifespan is proportional to this value and its diameter.
-	  volcanoLifeLengthRatio: 0.5
+	  volcanoLifeLengthRatio: 0.5,
+	  // Controls how fast continents would slow down when they are colliding.
+	  continentCollisionFriction: 0.00001
 	};
 
 	var urlConfig = {};
@@ -43498,7 +43509,10 @@
 	    this.type = type;
 	    this.height = height;
 	    this.plate = plate;
+	    // Needs to be calculated later.
+	    this.continent = null;
 	    this.age = 0;
+	    this.alive = true;
 	    // Subduction properties:
 	    this.subductionDist = null;
 	    this.subductionVelocity = null;
@@ -43509,6 +43523,17 @@
 	  }
 
 	  _createClass(Point, [{
+	    key: 'setPlate',
+	    value: function setPlate(plate) {
+	      // Update relative coords!
+	      var x = this.x;
+	      var y = this.y;
+	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      // Finally, update plate.
+	      this.plate = plate;
+	    }
+	  }, {
 	    key: 'getRelativeVelocity',
 	    value: function getRelativeVelocity(otherPoint) {
 	      var vxDiff = this.vx - otherPoint.vx;
@@ -43516,8 +43541,8 @@
 	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
 	    }
 	  }, {
-	    key: 'collideWithContinent',
-	    value: function collideWithContinent(otherPoint) {
+	    key: 'setupSubduction',
+	    value: function setupSubduction(otherPoint) {
 	      if (!this.subduction) {
 	        this.subductionDist = 0;
 	      }
@@ -43551,11 +43576,26 @@
 	        this.distFromVolcanoCenter = null;
 	      }
 
+	      if (this.height < _config2.default.minHeight) {
+	        // Point subducted and will be removed.
+	        this.alive = false;
+	      }
+
 	      if (this.height > 1) {
 	        this.height = 1;
 	      }
 
 	      this.age += timeStep;
+	    }
+	  }, {
+	    key: 'isOcean',
+	    get: function get() {
+	      return this.type === OCEAN;
+	    }
+	  }, {
+	    key: 'isContinent',
+	    get: function get() {
+	      return this.type === CONTINENT;
 	    }
 	  }, {
 	    key: 'x',
@@ -43608,6 +43648,306 @@
 
 /***/ },
 /* 678 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(676);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
+	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
+	var HotSpot = function () {
+	  function HotSpot(_ref) {
+	    var x = _ref.x,
+	        y = _ref.y,
+	        radius = _ref.radius,
+	        strength = _ref.strength,
+	        plate = _ref.plate;
+
+	    _classCallCheck(this, HotSpot);
+
+	    // Make sure that relative coords are always positive to make other calculations easier.
+	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	    this.radius = radius;
+	    this.strength = strength;
+	    this.plate = plate;
+	    this.active = false;
+	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
+	  }
+
+	  _createClass(HotSpot, [{
+	    key: 'setPlate',
+	    value: function setPlate(plate) {
+	      // Update relative coords!
+	      var x = this.x;
+	      var y = this.y;
+	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      // Finally, update plate.
+	      this.plate = plate;
+	    }
+	  }, {
+	    key: 'dist',
+	    value: function dist(_ref2) {
+	      var x = _ref2.x,
+	          y = _ref2.y;
+
+	      return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
+	    }
+	  }, {
+	    key: 'pointInside',
+	    value: function pointInside(point) {
+	      return this.dist(point) < this.radius;
+	    }
+	  }, {
+	    key: 'collides',
+	    value: function collides(hotSpot) {
+	      return this.dist(hotSpot) < this.radius + hotSpot.radius;
+	    }
+	  }, {
+	    key: 'heightChange',
+	    value: function heightChange(dist) {
+	      var normDist = dist / this.radius;
+	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update(timeStep) {
+	      this.lifeLeft -= timeStep;
+	    }
+	  }, {
+	    key: 'x',
+	    get: function get() {
+	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
+	    }
+	  }, {
+	    key: 'y',
+	    get: function get() {
+	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
+	    }
+	  }, {
+	    key: 'alive',
+	    get: function get() {
+	      return this.lifeLeft > 0;
+	    }
+	  }]);
+
+	  return HotSpot;
+	}();
+
+	exports.default = HotSpot;
+
+/***/ },
+/* 679 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	exports.calcContinents = calcContinents;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var id = -1;
+	function getContinentID() {
+	  id += 1;
+	  return id;
+	}
+
+	var Continent = function () {
+	  function Continent() {
+	    _classCallCheck(this, Continent);
+
+	    this.points = [];
+	    this.id = getContinentID();
+	  }
+
+	  _createClass(Continent, [{
+	    key: "addPoint",
+	    value: function addPoint(p) {
+	      this.points.push(p);
+	    }
+	  }, {
+	    key: "size",
+	    get: function get() {
+	      return this.points.length;
+	    }
+	  }]);
+
+	  return Continent;
+	}();
+
+	exports.default = Continent;
+	function calcContinents(surface) {
+	  var queue = [];
+	  var continents = [];
+	  // DFS-like algorithm calculating continents.
+	  surface.forEachPoint(function (p) {
+	    if (p.isContinent && p.continent === null) {
+	      var cont = new Continent();
+	      continents.push(cont);
+	      p.continent = cont;
+	      cont.addPoint(p);
+	      queue.push(p);
+	      // Add neighbouring points to queue and to the same continent.
+	      while (queue.length > 0) {
+	        var point = queue.pop();
+	        var x0 = point.x;
+	        var y0 = point.y;
+	        for (var x = x0 - 1; x <= x0 + 1; x += 1) {
+	          for (var y = y0 - 1; y <= y0 + 1; y += 1) {
+	            var points = surface.points[x] && surface.points[x][y];
+	            if (points) {
+	              for (var i = 0; i < points.length; i += 1) {
+	                var neighbour = points[i];
+	                // Neighbouring points are only part of the same continent if they belong to the same plate.
+	                if (neighbour.isContinent && neighbour.continent === null && neighbour.plate === point.plate) {
+	                  neighbour.continent = cont;
+	                  cont.addPoint(neighbour);
+	                  queue.push(neighbour);
+	                }
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+	  });
+	  return continents;
+	}
+
+/***/ },
+/* 680 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.subduction = subduction;
+	exports.continentalCollision = continentalCollision;
+
+	var _config = __webpack_require__(676);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _plate = __webpack_require__(681);
+
+	var _plate2 = _interopRequireDefault(_plate);
+
+	var _point = __webpack_require__(677);
+
+	var _point2 = _interopRequireDefault(_point);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function generatePlate(_ref) {
+	  var width = _ref.width,
+	      height = _ref.height,
+	      type = _ref.type,
+	      _ref$x = _ref.x,
+	      x = _ref$x === undefined ? 0 : _ref$x,
+	      _ref$y = _ref.y,
+	      y = _ref$y === undefined ? 0 : _ref$y,
+	      _ref$vx = _ref.vx,
+	      vx = _ref$vx === undefined ? 0 : _ref$vx,
+	      _ref$vy = _ref.vy,
+	      vy = _ref$vy === undefined ? 0 : _ref$vy,
+	      maxX = _ref.maxX,
+	      maxY = _ref.maxY;
+
+	  var pointHeight = void 0;
+	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
+	  for (var px = x; px < x + width; px += 1) {
+	    for (var py = y; py < y + height; py += 1) {
+	      var pointType = typeof type === 'function' ? type(px, py) : type;
+	      if (pointType === _point.OCEAN) {
+	        pointHeight = _config2.default.newOceanHeight;
+	      } else {
+	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
+	      }
+	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: pointType, plate: plate });
+	      plate.addPoint(point);
+	    }
+	  }
+	  return plate;
+	}
+
+	function subduction(width, height) {
+	  var ocean = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [ocean, continent];
+	}
+
+	function continentalCollision(width, height) {
+	  var oceanAndCont = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: function type(x, y) {
+	      return x > width * 0.1 && x < width * 0.3 && y > height * 0.3 && y < height * 0.7 ? _point.CONTINENT : _point.OCEAN;
+	    },
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [oceanAndCont, continent];
+	}
+
+/***/ },
+/* 681 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -43619,6 +43959,12 @@
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var id = -1;
+	function getPlateID() {
+	  id += 1;
+	  return id;
+	}
 
 	var Plate = function () {
 	  function Plate(_ref) {
@@ -43639,12 +43985,63 @@
 	    this.maxY = maxY;
 	    this.points = [];
 	    this.hotSpots = [];
+	    // It means that plate consist of a single continent. It's necessary when continents are colliding.
+	    this.continentOnly = true;
+	    this.id = getPlateID();
 	  }
 
 	  _createClass(Plate, [{
+	    key: "extractContinent",
+	    value: function extractContinent(continentPoints) {
+	      var _this = this;
+
+	      var x = this.x,
+	          y = this.y,
+	          vx = this.vx,
+	          vy = this.vy,
+	          maxX = this.maxX,
+	          maxY = this.maxY;
+	      // Create a new plate.
+
+	      var newPlate = new Plate({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
+	      newPlate.points = continentPoints;
+	      newPlate.continentOnly = true;
+	      continentPoints.forEach(function (p) {
+	        p.plate = newPlate;
+	      });
+	      // Update our own point list.
+	      this.points = this.points.filter(function (p) {
+	        return p.plate === _this;
+	      });
+	      return newPlate;
+	    }
+	  }, {
+	    key: "merge",
+	    value: function merge(plate) {
+	      var _this2 = this;
+
+	      plate.points.forEach(function (p) {
+	        p.setPlate(_this2);
+	        _this2.addPoint(p);
+	      });
+	      plate.hotSpots.forEach(function (hs) {
+	        hs.setPlate(_this2);
+	        _this2.hotSpots.push(hs);
+	      });
+	      plate.points = [];
+	    }
+	  }, {
 	    key: "notEmpty",
 	    value: function notEmpty() {
 	      return this.points.length > 0;
+	    }
+	  }, {
+	    key: "addPoint",
+	    value: function addPoint(p) {
+	      this.points.push(p);
+	      if (this.continentOnly && p.isOcean) {
+	        this.continentOnly = false;
+	      }
 	    }
 	  }, {
 	    key: "move",
@@ -43657,10 +44054,10 @@
 	      if (this.y < 0) this.y += this.maxY;
 	    }
 	  }, {
-	    key: "removePointsBelow",
-	    value: function removePointsBelow(minHeight) {
+	    key: "removeDeadPoints",
+	    value: function removeDeadPoints() {
 	      this.points = this.points.filter(function (p) {
-	        return p.height >= minHeight;
+	        return p.alive;
 	      });
 	    }
 	  }, {
@@ -43717,100 +44114,7 @@
 	exports.default = Plate;
 
 /***/ },
-/* 679 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _config = __webpack_require__(676);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
-	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
-	var HotSpot = function () {
-	  function HotSpot(_ref) {
-	    var x = _ref.x,
-	        y = _ref.y,
-	        radius = _ref.radius,
-	        strength = _ref.strength,
-	        plate = _ref.plate;
-
-	    _classCallCheck(this, HotSpot);
-
-	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	    this.radius = radius;
-	    this.strength = strength;
-	    this.plate = plate;
-	    this.active = false;
-	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
-	  }
-
-	  _createClass(HotSpot, [{
-	    key: 'dist',
-	    value: function dist(_ref2) {
-	      var x = _ref2.x,
-	          y = _ref2.y;
-
-	      return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
-	    }
-	  }, {
-	    key: 'pointInside',
-	    value: function pointInside(point) {
-	      return this.dist(point) < this.radius;
-	    }
-	  }, {
-	    key: 'collides',
-	    value: function collides(hotSpot) {
-	      return this.dist(hotSpot) < this.radius + hotSpot.radius;
-	    }
-	  }, {
-	    key: 'heightChange',
-	    value: function heightChange(dist) {
-	      var normDist = dist / this.radius;
-	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update(timeStep) {
-	      this.lifeLeft -= timeStep;
-	    }
-	  }, {
-	    key: 'x',
-	    get: function get() {
-	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-	    }
-	  }, {
-	    key: 'y',
-	    get: function get() {
-	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-	    }
-	  }, {
-	    key: 'alive',
-	    get: function get() {
-	      return this.lifeLeft > 0;
-	    }
-	  }]);
-
-	  return HotSpot;
-	}();
-
-	exports.default = HotSpot;
-
-/***/ },
-/* 680 */
+/* 682 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43820,7 +44124,7 @@
 	});
 	exports.default = renderTopView;
 
-	var _colormap = __webpack_require__(681);
+	var _colormap = __webpack_require__(683);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
@@ -43871,7 +44175,7 @@
 	}
 
 /***/ },
-/* 681 */
+/* 683 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -43881,9 +44185,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(682);
-	var clone = __webpack_require__(683);
-	var colorScale = __webpack_require__(688);
+	var at = __webpack_require__(684);
+	var clone = __webpack_require__(685);
+	var colorScale = __webpack_require__(690);
 
 	module.exports = createColormap;
 
@@ -44012,7 +44316,7 @@
 
 
 /***/ },
-/* 682 */
+/* 684 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -44205,7 +44509,7 @@
 
 
 /***/ },
-/* 683 */
+/* 685 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -44369,10 +44673,10 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(684).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(686).Buffer))
 
 /***/ },
-/* 684 */
+/* 686 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -44385,9 +44689,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(685)
-	var ieee754 = __webpack_require__(686)
-	var isArray = __webpack_require__(687)
+	var base64 = __webpack_require__(687)
+	var ieee754 = __webpack_require__(688)
+	var isArray = __webpack_require__(689)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -46168,7 +46472,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 685 */
+/* 687 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -46288,7 +46592,7 @@
 
 
 /***/ },
-/* 686 */
+/* 688 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -46378,7 +46682,7 @@
 
 
 /***/ },
-/* 687 */
+/* 689 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -46389,7 +46693,7 @@
 
 
 /***/ },
-/* 688 */
+/* 690 */
 /***/ function(module, exports) {
 
 	module.exports={
@@ -46486,7 +46790,7 @@
 
 
 /***/ },
-/* 689 */
+/* 691 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -46506,7 +46810,7 @@
 	}
 
 /***/ },
-/* 690 */
+/* 692 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -46523,6 +46827,10 @@
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
+	var _colormap = __webpack_require__(683);
+
+	var _colormap2 = _interopRequireDefault(_colormap);
+
 	var _config = __webpack_require__(676);
 
 	var _config2 = _interopRequireDefault(_config);
@@ -46533,10 +46841,33 @@
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+	var PLATES_COLOR_MAP = function genPlateColors() {
+	  function shuffle(a) {
+	    for (var i = a.length; i; i -= 1) {
+	      var j = Math.floor(Math.random() * i);
+	      var _ref = [a[j], a[i - 1]];
+	      a[i - 1] = _ref[0];
+	      a[j] = _ref[1];
+	    }
+	    return a;
+	  }
+	  var colors = (0, _colormap2.default)({
+	    colormap: 'cubehelix', // pick a builtin colormap or add your own
+	    nshades: 100, // how many divisions
+	    format: 'rgb', // "hex" or "rgb" or "rgbaString"
+	    alpha: 1
+	  });
+	  return shuffle(colors);
+	}();
+
 	var COLORS = (_COLORS = {
 	  nothing: [220, 220, 220],
 	  water: [2, 156, 212]
 	}, _defineProperty(_COLORS, _point.CONTINENT, [128, 128, 128]), _defineProperty(_COLORS, _point.OCEAN, [64, 64, 64]), _COLORS);
+
+	function normalizedHeight(val) {
+	  return (val - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight);
+	}
 
 	function renderCrossSection(canvas, points, crossSectionY) {
 	  var maxX = points.length;
@@ -46544,25 +46875,36 @@
 	    throw new Error('Data has to have the same width as canvas');
 	  }
 	  var ctx = canvas.getContext('2d');
-	  var canvasHeight = canvas.height;
+	  var canvHeight = canvas.height;
 	  var imageData = ctx.createImageData(canvas.width, canvas.height);
 
 	  var heightData = [];
+	  var plate = [];
+	  var type = [];
 	  for (var x = 0; x < maxX; x += 1) {
 	    var h = (points[x][crossSectionY] || []).map(function (point) {
-	      return canvasHeight - canvasHeight * (point.height - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight);
+	      return canvHeight - canvHeight * normalizedHeight(point.height);
 	    });
 	    heightData.push(h);
+	    var p = (points[x][crossSectionY] || []).map(function (point) {
+	      return point.plate.id;
+	    });
+	    plate.push(p);
+	    var t = (points[x][crossSectionY] || []).map(function (point) {
+	      return point.type;
+	    });
+	    type.push(t);
 	  }
-	  var waterLevel = canvasHeight - canvasHeight * (_config2.default.waterLevel - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight);
+	  var waterLevel = canvHeight - canvHeight * normalizedHeight(_config2.default.waterLevel);
 
 	  for (var _x = 0; _x < maxX; _x += 1) {
-	    for (var y = 0; y < canvasHeight; y += 1) {
+	    for (var y = 0; y < canvHeight; y += 1) {
 	      var idx = (y * maxX + _x) * 4;
 	      var color = y < waterLevel ? COLORS.nothing : COLORS.water;
 	      if (y >= heightData[_x][0]) {
 	        var pointIdx = _binarysearch2.default.closest(heightData[_x], y);
-	        color = COLORS[points[_x][y][pointIdx].type];
+	        // color = COLORS[type[x][pointIdx]];
+	        color = PLATES_COLOR_MAP[plate[_x][pointIdx]];
 	      }
 	      imageData.data[idx] = color[0];
 	      imageData.data[idx + 1] = color[1];
@@ -46574,16 +46916,16 @@
 	}
 
 /***/ },
-/* 691 */
+/* 693 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(692);
+	var content = __webpack_require__(694);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(694)(content, {});
+	var update = __webpack_require__(696)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -46600,10 +46942,10 @@
 	}
 
 /***/ },
-/* 692 */
+/* 694 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(693)();
+	exports = module.exports = __webpack_require__(695)();
 	// imports
 
 
@@ -46614,7 +46956,7 @@
 
 
 /***/ },
-/* 693 */
+/* 695 */
 /***/ function(module, exports) {
 
 	/*
@@ -46670,7 +47012,7 @@
 
 
 /***/ },
-/* 694 */
+/* 696 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -46922,16 +47264,16 @@
 
 
 /***/ },
-/* 695 */
+/* 697 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(696);
+	var content = __webpack_require__(698);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(694)(content, {});
+	var update = __webpack_require__(696)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -46948,10 +47290,10 @@
 	}
 
 /***/ },
-/* 696 */
+/* 698 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(693)();
+	exports = module.exports = __webpack_require__(695)();
 	// imports
 
 
