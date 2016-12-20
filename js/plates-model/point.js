@@ -18,7 +18,10 @@ export default class Point {
     this.type = type;
     this.height = height;
     this.plate = plate;
+    // Needs to be calculated later.
+    this.continent = null;
     this.age = 0;
+    this.alive = true;
     // Subduction properties:
     this.subductionDist = null;
     this.subductionVelocity = null;
@@ -26,6 +29,24 @@ export default class Point {
     this.volcanicHotSpot = false;
     this.distFromVolcanoCenter = null;
     this.volcanicActTime = 0;
+  }
+
+  setPlate(plate) {
+    // Update relative coords!
+    const x = this.x;
+    const y = this.y;
+    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    // Finally, update plate.
+    this.plate = plate;
+  }
+
+  get isOcean() {
+    return this.type === OCEAN;
+  }
+
+  get isContinent() {
+    return this.type === CONTINENT;
   }
 
   get x() {
@@ -69,7 +90,7 @@ export default class Point {
     return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
   }
 
-  collideWithContinent(otherPoint) {
+  setupSubduction(otherPoint) {
     if (!this.subduction) {
       this.subductionDist = 0;
     }
@@ -99,6 +120,11 @@ export default class Point {
     } else {
       this.volcanicHotSpot = null;
       this.distFromVolcanoCenter = null;
+    }
+
+    if (this.height < config.minHeight) {
+      // Point subducted and will be removed.
+      this.alive = false;
     }
 
     if (this.height > 1) {

@@ -28,6 +28,8 @@ const DEFAULT_CONFIG = {
   volcanoHeightChangeRatio: 0.0008,
   // Volcano lifespan is proportional to this value and its diameter.
   volcanoLifeLengthRatio: 0.5,
+  // Controls how fast continents would slow down when they are colliding.
+  continentCollisionFriction: 0.00001,
 };
 
 const urlConfig = {};

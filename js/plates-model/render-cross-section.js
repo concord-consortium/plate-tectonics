@@ -1,6 +1,24 @@
 import bs from 'binarysearch';
+import colormap from 'colormap';
 import config from './config';
 import { OCEAN, CONTINENT } from './point';
+
+const PLATES_COLOR_MAP = (function genPlateColors() {
+  function shuffle(a) {
+    for (let i = a.length; i; i -= 1) {
+      const j = Math.floor(Math.random() * i);
+      [a[i - 1], a[j]] = [a[j], a[i - 1]];
+    }
+    return a;
+  }
+  const colors = colormap({
+    colormap: 'cubehelix', // pick a builtin colormap or add your own
+    nshades: 100,          // how many divisions
+    format: 'rgb',         // "hex" or "rgb" or "rgbaString"
+    alpha: 1,
+  });
+  return shuffle(colors);
+}());
 
 const COLORS = {
   nothing: [220, 220, 220],
@@ -23,9 +41,15 @@ export default function renderCrossSection(canvas, points, crossSectionY) {
   const imageData = ctx.createImageData(canvas.width, canvas.height);
 
   const heightData = [];
+  const plate = [];
+  const type = [];
   for (let x = 0; x < maxX; x += 1) {
     const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
     heightData.push(h);
+    const p = (points[x][crossSectionY] || []).map(point => point.plate.id);
+    plate.push(p);
+    const t = (points[x][crossSectionY] || []).map(point => point.type);
+    type.push(t);
   }
   const waterLevel = canvHeight - canvHeight * normalizedHeight(config.waterLevel);
 
@@ -35,7 +59,8 @@ export default function renderCrossSection(canvas, points, crossSectionY) {
       let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
         const pointIdx = bs.closest(heightData[x], y);
-        color = COLORS[points[x][y][pointIdx].type];
+        // color = COLORS[type[x][pointIdx]];
+        color = PLATES_COLOR_MAP[plate[x][pointIdx]];
       }
       imageData.data[idx] = color[0];
       imageData.data[idx + 1] = color[1];

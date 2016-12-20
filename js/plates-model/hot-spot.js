@@ -14,6 +14,16 @@ export default class HotSpot {
     this.lifeLeft = config.volcanoLifeLengthRatio * radius;
   }
 
+  setPlate(plate) {
+    // Update relative coords!
+    const x = this.x;
+    const y = this.y;
+    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    // Finally, update plate.
+    this.plate = plate;
+  }
+
   get x() {
     return Math.round(this.relX + this.plate.x) % this.plate.maxX;
   }

@@ -1,3 +1,9 @@
+let id = -1;
+function getPlateID() {
+  id += 1;
+  return id;
+}
+
 export default class Plate {
   constructor({ x, y, vx, vy, maxX, maxY }) {
     this.x = x;
@@ -8,6 +14,33 @@ export default class Plate {
     this.maxY = maxY;
     this.points = [];
     this.hotSpots = [];
+    // It means that plate consist of a single continent. It's necessary when continents are colliding.
+    this.continentOnly = true;
+    this.id = getPlateID();
+  }
+
+  extractContinent(continentPoints) {
+    const { x, y, vx, vy, maxX, maxY } = this;
+    // Create a new plate.
+    const newPlate = new Plate({ x, y, vx, vy, maxX, maxY });
+    newPlate.points = continentPoints;
+    newPlate.continentOnly = true;
+    continentPoints.forEach((p) => { p.plate = newPlate; });
+    // Update our own point list.
+    this.points = this.points.filter(p => p.plate === this);
+    return newPlate;
+  }
+
+  merge(plate) {
+    plate.points.forEach((p) => {
+      p.setPlate(this);
+      this.addPoint(p);
+    });
+    plate.hotSpots.forEach((hs) => {
+      hs.setPlate(this);
+      this.hotSpots.push(hs);
+    });
+    plate.points = [];
   }
 
   get inactiveHotSpots() {
@@ -16,6 +49,13 @@ export default class Plate {
 
   notEmpty() {
     return this.points.length > 0;
+  }
+
+  addPoint(p) {
+    this.points.push(p);
+    if (this.continentOnly && p.isOcean) {
+      this.continentOnly = false;
+    }
   }
 
   move(timeStep) {
@@ -27,8 +67,8 @@ export default class Plate {
     if (this.y < 0) this.y += this.maxY;
   }
 
-  removePointsBelow(minHeight) {
-    this.points = this.points.filter(p => p.height >= minHeight);
+  removeDeadPoints() {
+    this.points = this.points.filter(p => p.alive);
   }
 
   removeDeadHotSpots() {

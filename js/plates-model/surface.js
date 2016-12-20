@@ -65,6 +65,19 @@ export default class Surface {
     return result;
   }
 
+  forEachPoint(callback) {
+    for (let x = 0; x < this.width; x += 1) {
+      for (let y = 0; y < this.height; y += 1) {
+        const points = this.points[x][y];
+        if (points) {
+          for (let i = 0; i < points.length; i += 1) {
+            callback(points[i]);
+          }
+        }
+      }
+    }
+  }
+
   forEachCollision(callback) {
     for (let x = 0; x < this.width; x += 1) {
       for (let y = 0; y < this.height; y += 1) {

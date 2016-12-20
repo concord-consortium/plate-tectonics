@@ -1,40 +1,24 @@
 import Surface from './surface';
 import config from './config';
 import Point, { OCEAN, CONTINENT } from './point';
-import Plate from './plate';
 import HotSpot from './hot-spot';
-
-function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
-  let pointHeight;
-  const plate = new Plate({ x, y, vx, vy, maxX, maxY });
-  for (let px = x; px < x + width; px += 1) {
-    for (let py = y; py < y + height; py += 1) {
-      if (type === OCEAN) {
-        pointHeight = config.newOceanHeight;
-      } else {
-        pointHeight = Math.min(0.1, config.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
-      }
-      const point = new Point({ x: px, y: py, height: pointHeight, type, plate });
-      plate.points.push(point);
-    }
-  }
-  return plate;
-}
+import { calcContinents } from './continent';
+import * as initializers from './initializers';
 
 export default class Model {
-  constructor({ width = 512, height = 512, timeStep = 1 }) {
+  constructor({ width = 512, height = 512, timeStep = 1, preset = 'continentalCollision' }) {
     this.width = width;
     this.height = height;
     this.timeStep = timeStep;
-    this.plates = [];
+    this.plates = initializers[preset](width, height);
     this.prevSurface = null;
     this.surface = new Surface({ width, height, plates: this.plates });
-    this.testInit();
   }
 
   step() {
     this.movePlates();
     this.updateSurface();
+    this.updateContinents();
     this.handleCollisions();
     this.activateHotSpots();
     this.updatePoints();
@@ -68,31 +52,77 @@ export default class Model {
     this.surface = new Surface({ width: this.width, height: this.height, plates: this.plates });
   }
 
+  updateContinents() {
+    calcContinents(this.surface);
+  }
+
   handleCollisions() {
     this.surface.forEachCollision((points) => {
       if (points.length === 2) {
         const p1 = points[0];
         const p2 = points[1];
-        if (p1.type !== p2.type) {
-          // Ocean - continent collision.
-          const oceanPoint = p1.type === OCEAN ? p1 : p2;
-          const continentPoint = p1.type === CONTINENT ? p1 : p2;
-          oceanPoint.collideWithContinent(continentPoint);
-
-          if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
-            const continentPlate = continentPoint.plate;
-            const newHotSpot = new HotSpot({
-              x: continentPoint.x,
-              y: continentPoint.y,
-              radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
-              strength: oceanPoint.getRelativeVelocity(continentPoint),
-              plate: continentPlate,
-            });
-            continentPlate.addHotSpot(newHotSpot);
-          }
+        if (p1.plate === p2.plate) {
+          // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
+          p2.alive = false;
+        } else if (p1.type !== p2.type) {
+          this.oceanContinentCollision(p1, p2);
+        } else if (p1.type === CONTINENT && p2.type === CONTINENT) {
+          this.continentContinentCollision(p1, p2);
         }
       }
     });
+  }
+
+  oceanContinentCollision(p1, p2) {
+    // Ocean - continent collision.
+    const oceanPoint = p1.type === OCEAN ? p1 : p2;
+    const continentPoint = p1.type === CONTINENT ? p1 : p2;
+    oceanPoint.setupSubduction(continentPoint);
+    if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
+      const continentPlate = continentPoint.plate;
+      const newHotSpot = new HotSpot({
+        x: continentPoint.x,
+        y: continentPoint.y,
+        radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+        strength: oceanPoint.getRelativeVelocity(continentPoint),
+        plate: continentPlate,
+      });
+      continentPlate.addHotSpot(newHotSpot);
+    }
+  }
+
+  continentContinentCollision(p1, p2) {
+    // Make sure that colliding continents have their own plates. We don't want to modify speed of the ocean
+    // only because continents are colliding.
+    if (!p1.plate.continentOnly) {
+      const newPlate = p1.plate.extractContinent(p1.continent.points);
+      this.plates.push(newPlate);
+    }
+    if (!p2.plate.continentOnly) {
+      const newPlate = p2.plate.extractContinent(p2.continent.points);
+      this.plates.push(newPlate);
+    }
+    const p1p2Vx = p1.plate.vx - p2.plate.vx;
+    const p1p2Vy = p1.plate.vy - p2.plate.vy;
+    if (Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy) > 0.2) {
+      const c1c2SizeRatio = p1.continent.size / p2.continent.size;
+
+      p1.plate.vx -= config.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
+      p1.plate.vy -= config.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
+      p2.plate.vx += config.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
+      p2.plate.vy += config.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+    } else if (p1.plate !== p2.plate) {
+      // Merge plates.
+      const vx = 0.5 * (p1.plate.vx + p2.plate.vx);
+      const vy = 0.5 * (p1.plate.vy + p2.plate.vy);
+      p1.plate.merge(p2.plate);
+      p1.plate.vx = vx;
+      p1.plate.vy = vy;
+      // Merge continents.
+      p1.plate.points.forEach((p) => {
+        p.continent = p1.continent;
+      });
+    }
   }
 
   activateHotSpots() {
@@ -136,7 +166,7 @@ export default class Model {
 
   removePointsBelowMinHeight() {
     this.plates.forEach((plate) => {
-      plate.removePointsBelow(config.minHeight);
+      plate.removeDeadPoints();
     });
   }
 
@@ -161,40 +191,12 @@ export default class Model {
           const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
           if (plate) {
             const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate });
-            plate.points.push(newPoint);
+            plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.points[x][y] = [newPoint];
           }
         }
       }
     }
-  }
-
-  testInit() {
-    const { width, height } = this;
-    const ocean = generatePlate({
-      x: 0,
-      y: 0,
-      width: width * 0.5,
-      height,
-      type: OCEAN,
-      vx: 2,
-      vy: 0,
-      maxX: width,
-      maxY: height,
-    });
-    const continent = generatePlate({
-      x: width * 0.5,
-      y: 0,
-      width: width * 0.5,
-      height,
-      type: CONTINENT,
-      vx: 0,
-      vy: 0,
-      maxX: width,
-      maxY: height,
-    });
-    this.plates.push(ocean);
-    this.plates.push(continent);
   }
 }
