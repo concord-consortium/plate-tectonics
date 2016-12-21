@@ -29,7 +29,7 @@ const DEFAULT_CONFIG = {
   // Volcano lifespan is proportional to this value and its diameter.
   volcanoLifeLengthRatio: 0.5,
   // Controls how fast continents would slow down when they are colliding.
-  continentCollisionFriction: 0.00001,
+  continentCollisionFriction: 0.000001,
   // Visual settings.
   plateColor: PLATE_COLOR,
 };

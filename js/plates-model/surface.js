@@ -73,10 +73,6 @@ export default class Surface {
     const minY = Math.floor(cy - radius);
     const maxX = Math.floor(cx + radius);
     const maxY = Math.floor(cy + radius);
-    // const minX = Math.max(0, Math.floor(cx - radius));
-    // const minY = Math.max(0, Math.floor(cy - radius));
-    // const maxX = Math.min(this.width, Math.ceil(cx + radius));
-    // const maxY = Math.min(this.height, Math.ceil(cy + radius));
     for (let x = minX; x < maxX; x += 1) {
       for (let y = minY; y < maxY; y += 1) {
         const xr = (x + this.width) % this.width;

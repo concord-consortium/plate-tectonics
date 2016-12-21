@@ -107,13 +107,23 @@ export default class Model {
     }
     const p1p2Vx = p1.plate.vx - p2.plate.vx;
     const p1p2Vy = p1.plate.vy - p2.plate.vy;
-    if (Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy) > 0.2) {
+    const relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
+    if (relVelocity > 0.1) {
       const c1c2SizeRatio = p1.continent.size / p2.continent.size;
 
       p1.plate.vx -= config.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
       p1.plate.vy -= config.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
       p2.plate.vx += config.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
       p2.plate.vy += config.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+      const hotSpotConfig = {
+        x: p1.x,
+        y: p1.y,
+        radius: Math.random() * 12 + 4,
+        strength: relVelocity * 7,
+      };
+      const newHotSpot1 = new HotSpot(Object.assign({}, hotSpotConfig, { plate: p1.plate }));
+      p1.plate.addHotSpot(newHotSpot1);
+      // Should we add hot spot to the other plate too?
     } else if (p1.plate !== p2.plate) {
       // Merge plates.
       const vx = 0.5 * (p1.plate.vx + p2.plate.vx);
