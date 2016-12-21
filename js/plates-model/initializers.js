@@ -2,7 +2,7 @@ import config from './config';
 import Plate from './plate';
 import Point, { OCEAN, CONTINENT } from './point';
 
-function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY }) {
+function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY, smoothCont = true }) {
   let pointHeight;
   const plate = new Plate({ x, y, vx, vy, maxX, maxY });
   for (let px = x; px < x + width; px += 1) {
@@ -10,8 +10,10 @@ function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX
       const pointType = typeof type === 'function' ? type(px, py) : type;
       if (pointType === OCEAN) {
         pointHeight = config.newOceanHeight;
-      } else {
+      } else if (smoothCont) {
         pointHeight = Math.min(0.1, config.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
+      } else {
+        pointHeight = 0.1;
       }
       const point = new Point({ x: px, y: py, height: pointHeight, type: pointType, plate });
       plate.addPoint(point);
@@ -73,3 +75,54 @@ export function continentalCollision(width, height) {
   });
   return [oceanAndCont, continent];
 }
+
+export function midOceanRidge(width, height) {
+  const cont1 = generatePlate({
+    x: 0,
+    y: 0,
+    width: width * 0.2,
+    height,
+    type: CONTINENT,
+    vx: 0,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+    smoothCont: false,
+  });
+  const ocean1 = generatePlate({
+    x: width * 0.2,
+    y: 0,
+    width: width * 0.3,
+    height,
+    type: OCEAN,
+    vx: -2,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const ocean2 = generatePlate({
+    x: width * 0.5,
+    y: 0,
+    width: width * 0.3,
+    height,
+    type: OCEAN,
+    vx: 2,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const cont2 = generatePlate({
+    x: width * 0.8,
+    y: 0,
+    width: width * 0.2,
+    height,
+    type: CONTINENT,
+    vx: 0,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+    smoothCont: false,
+  });
+  return [cont1, ocean1, ocean2, cont2];
+}
+

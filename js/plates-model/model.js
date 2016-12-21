@@ -69,6 +69,8 @@ export default class Model {
           this.oceanContinentCollision(p1, p2);
         } else if (p1.type === CONTINENT && p2.type === CONTINENT) {
           this.continentContinentCollision(p1, p2);
+        } else if (p1.type === OCEAN && p2.type === OCEAN) {
+          this.oceanOceanCollision(p1, p2);
         }
       }
     });
@@ -123,6 +125,21 @@ export default class Model {
       p1.plate.points.forEach((p) => {
         p.continent = p1.continent;
       });
+    }
+  }
+
+  oceanOceanCollision(p1, p2) {
+    p2.setupSubduction(p1);
+    if (Math.random() < p2.volcanicActProbability && !p1.volcanicAct) {
+      const plate = p1.plate;
+      const newHotSpot = new HotSpot({
+        x: p1.x,
+        y: p1.y,
+        radius: p2.volcanicActProbability * Math.random() * 100 + 5,
+        strength: p2.getRelativeVelocity(p1),
+        plate,
+      });
+      plate.addHotSpot(newHotSpot);
     }
   }
 
