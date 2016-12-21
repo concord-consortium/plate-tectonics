@@ -29456,7 +29456,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(697);
+	__webpack_require__(705);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37391,23 +37391,29 @@
 
 	var _Toggle2 = _interopRequireDefault(_Toggle);
 
-	var _model = __webpack_require__(673);
+	var _RaisedButton = __webpack_require__(673);
+
+	var _RaisedButton2 = _interopRequireDefault(_RaisedButton);
+
+	var _model = __webpack_require__(680);
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _renderTopView = __webpack_require__(682);
+	var _renderTopView = __webpack_require__(698);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(691);
+	var _renderHotSpots = __webpack_require__(699);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(692);
+	var _renderCrossSection = __webpack_require__(700);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
-	__webpack_require__(693);
+	var _utils = __webpack_require__(692);
+
+	__webpack_require__(701);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37430,54 +37436,118 @@
 
 	    _this.state = {
 	      crossSectionY: HEIGHT * 0.5,
-	      hotSpotsRendering: false
+	      hotSpotsRendering: false,
+	      platesRendering: false,
+	      plateBoundariesRendering: false,
+	      simEnabled: true
 	    };
 	    _this.rafCallback = _this.rafCallback.bind(_this);
+	    _this.step = _this.step.bind(_this);
+	    _this.renderModel = _this.renderModel.bind(_this);
 	    _this.handleCrossSectionYChange = _this.handleCrossSectionYChange.bind(_this);
-	    _this.handleRenderHotSpotsChange = _this.handleRenderHotSpotsChange.bind(_this);
+	    _this.handleHotSpotsRenderingChange = _this.handleHotSpotsRenderingChange.bind(_this);
+	    _this.handlePlatesRenderingChange = _this.handlePlatesRenderingChange.bind(_this);
+	    _this.handlePlateBoundariesRenderingChange = _this.handlePlateBoundariesRenderingChange.bind(_this);
+	    _this.handleSimEnabledChange = _this.handleSimEnabledChange.bind(_this);
 	    return _this;
 	  }
 
 	  _createClass(PlatesModel, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
+	      var simEnabled = this.state.simEnabled;
+
 	      this.model = new _model2.default({
 	        width: WIDTH,
-	        height: HEIGHT
+	        height: HEIGHT,
+	        preset: (0, _utils.getURLParam)('preset') || 'continentalCollision'
 	      });
 	      window.model = this.model;
 	      window.mComp = this;
-	      this.rafCallback();
+	      if (simEnabled) {
+	        this.startSimulation();
+	      }
+	    }
+	  }, {
+	    key: 'componentDidUpdate',
+	    value: function componentDidUpdate(prevProps, prevState) {
+	      var simEnabled = this.state.simEnabled;
+
+	      if (simEnabled && !prevState.simEnabled) {
+	        this.startSimulation();
+	      }
 	    }
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
+	      this.stopSimulation();
+	    }
+	  }, {
+	    key: 'startSimulation',
+	    value: function startSimulation() {
+	      this.rafCallback();
+	    }
+	  }, {
+	    key: 'stopSimulation',
+	    value: function stopSimulation() {
 	      cancelAnimationFrame(this.rafId);
 	    }
 	  }, {
 	    key: 'rafCallback',
 	    value: function rafCallback() {
-	      var _state = this.state,
-	          crossSectionY = _state.crossSectionY,
-	          hotSpotsRendering = _state.hotSpotsRendering;
+	      var simEnabled = this.state.simEnabled;
 
-	      this.rafId = requestAnimationFrame(this.rafCallback);
-	      this.model.step();
-	      (0, _renderTopView2.default)(this.topView, this.model.maxHeight);
-	      if (hotSpotsRendering) {
-	        (0, _renderHotSpots2.default)(this.topView, this.model.hotSpots);
+	      if (simEnabled) {
+	        this.rafId = requestAnimationFrame(this.rafCallback);
+	        this.step();
 	      }
-	      (0, _renderCrossSection2.default)(this.crossSectionView, this.model.points, HEIGHT - Math.round(crossSectionY));
+	    }
+	  }, {
+	    key: 'step',
+	    value: function step() {
+	      this.model.step();
+	      this.renderModel();
+	    }
+	  }, {
+	    key: 'handleSimEnabledChange',
+	    value: function handleSimEnabledChange(event, value) {
+	      this.setState({ simEnabled: value });
 	    }
 	  }, {
 	    key: 'handleCrossSectionYChange',
 	    value: function handleCrossSectionYChange(event, value) {
-	      this.setState({ crossSectionY: Math.round(value) });
+	      this.setState({ crossSectionY: Math.round(value) }, this.renderModel);
 	    }
 	  }, {
-	    key: 'handleRenderHotSpotsChange',
-	    value: function handleRenderHotSpotsChange(event, value) {
-	      this.setState({ hotSpotsRendering: value });
+	    key: 'handleHotSpotsRenderingChange',
+	    value: function handleHotSpotsRenderingChange(event, value) {
+	      this.setState({ hotSpotsRendering: value }, this.renderModel);
+	    }
+	  }, {
+	    key: 'handlePlatesRenderingChange',
+	    value: function handlePlatesRenderingChange(event, value) {
+	      this.setState({ platesRendering: value }, this.renderModel);
+	    }
+	  }, {
+	    key: 'handlePlateBoundariesRenderingChange',
+	    value: function handlePlateBoundariesRenderingChange(event, value) {
+	      this.setState({ plateBoundariesRendering: value }, this.renderModel);
+	    }
+	  }, {
+	    key: 'renderModel',
+	    value: function renderModel() {
+	      var _state = this.state,
+	          crossSectionY = _state.crossSectionY,
+	          hotSpotsRendering = _state.hotSpotsRendering,
+	          platesRendering = _state.platesRendering,
+	          plateBoundariesRendering = _state.plateBoundariesRendering;
+
+	      (0, _renderTopView2.default)(this.topView, this.model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
+	      if (hotSpotsRendering) {
+	        (0, _renderHotSpots2.default)(this.topView, this.model.hotSpots);
+	      }
+	      var crossY = HEIGHT - Math.round(crossSectionY);
+	      (0, _renderCrossSection2.default)(this.crossSectionView, this.model.points, crossY, platesRendering ? 'plates' : 'type');
 	    }
 	  }, {
 	    key: 'render',
@@ -37486,7 +37556,10 @@
 
 	      var _state2 = this.state,
 	          crossSectionY = _state2.crossSectionY,
-	          hotSpotsRendering = _state2.hotSpotsRendering;
+	          simEnabled = _state2.simEnabled,
+	          hotSpotsRendering = _state2.hotSpotsRendering,
+	          platesRendering = _state2.platesRendering,
+	          plateBoundariesRendering = _state2.plateBoundariesRendering;
 
 	      return _react2.default.createElement(
 	        'div',
@@ -37525,8 +37598,21 @@
 	          'div',
 	          null,
 	          _react2.default.createElement(_Toggle2.default, {
+	            label: 'Simulation', labelPosition: 'right',
+	            toggled: simEnabled, onToggle: this.handleSimEnabledChange
+	          }),
+	          _react2.default.createElement(_RaisedButton2.default, { label: 'Simulation step', disabled: simEnabled, onClick: this.step, style: { margin: '5px 0' } }),
+	          _react2.default.createElement(_Toggle2.default, {
 	            label: '"Hot spots" rendering', labelPosition: 'right',
-	            toggled: hotSpotsRendering, onToggle: this.handleRenderHotSpotsChange
+	            toggled: hotSpotsRendering, onToggle: this.handleHotSpotsRenderingChange
+	          }),
+	          _react2.default.createElement(_Toggle2.default, {
+	            label: 'Plates rendering', labelPosition: 'right',
+	            toggled: platesRendering, onToggle: this.handlePlatesRenderingChange
+	          }),
+	          _react2.default.createElement(_Toggle2.default, {
+	            label: 'Plate boundaries rendering', labelPosition: 'right',
+	            toggled: plateBoundariesRendering, onToggle: this.handlePlateBoundariesRenderingChange
 	          })
 	        )
 	      );
@@ -42763,28 +42849,1127 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.default = undefined;
+
+	var _RaisedButton = __webpack_require__(674);
+
+	var _RaisedButton2 = _interopRequireDefault(_RaisedButton);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _RaisedButton2.default;
+
+/***/ },
+/* 674 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _transitions = __webpack_require__(643);
+
+	var _transitions2 = _interopRequireDefault(_transitions);
+
+	var _colorManipulator = __webpack_require__(576);
+
+	var _childUtils = __webpack_require__(675);
+
+	var _EnhancedButton = __webpack_require__(678);
+
+	var _EnhancedButton2 = _interopRequireDefault(_EnhancedButton);
+
+	var _Paper = __webpack_require__(660);
+
+	var _Paper2 = _interopRequireDefault(_Paper);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function validateLabel(props, propName, componentName) {
+	  if (process.env.NODE_ENV !== 'production') {
+	    if (!props.children && props.label !== 0 && !props.label && !props.icon) {
+	      return new Error('Required prop label or children or icon was not specified in ' + componentName + '.');
+	    }
+	  }
+	}
+
+	function getStyles(props, context, state) {
+	  var _context$muiTheme = context.muiTheme,
+	      baseTheme = _context$muiTheme.baseTheme,
+	      button = _context$muiTheme.button,
+	      raisedButton = _context$muiTheme.raisedButton;
+	  var disabled = props.disabled,
+	      disabledBackgroundColor = props.disabledBackgroundColor,
+	      disabledLabelColor = props.disabledLabelColor,
+	      fullWidth = props.fullWidth,
+	      icon = props.icon,
+	      label = props.label,
+	      labelPosition = props.labelPosition,
+	      primary = props.primary,
+	      secondary = props.secondary,
+	      style = props.style;
+
+
+	  var amount = primary || secondary ? 0.4 : 0.08;
+
+	  var backgroundColor = raisedButton.color;
+	  var labelColor = raisedButton.textColor;
+
+	  if (disabled) {
+	    backgroundColor = disabledBackgroundColor || raisedButton.disabledColor;
+	    labelColor = disabledLabelColor || raisedButton.disabledTextColor;
+	  } else if (primary) {
+	    backgroundColor = raisedButton.primaryColor;
+	    labelColor = raisedButton.primaryTextColor;
+	  } else if (secondary) {
+	    backgroundColor = raisedButton.secondaryColor;
+	    labelColor = raisedButton.secondaryTextColor;
+	  } else {
+	    if (props.backgroundColor) {
+	      backgroundColor = props.backgroundColor;
+	    }
+	    if (props.labelColor) {
+	      labelColor = props.labelColor;
+	    }
+	  }
+
+	  var buttonHeight = style && style.height || button.height;
+	  var borderRadius = 2;
+
+	  return {
+	    root: {
+	      display: 'inline-block',
+	      transition: _transitions2.default.easeOut(),
+	      minWidth: fullWidth ? '100%' : button.minWidth
+	    },
+	    button: {
+	      position: 'relative',
+	      height: buttonHeight,
+	      lineHeight: buttonHeight + 'px',
+	      width: '100%',
+	      padding: 0,
+	      borderRadius: borderRadius,
+	      transition: _transitions2.default.easeOut(),
+	      backgroundColor: backgroundColor,
+	      // That's the default value for a button but not a link
+	      textAlign: 'center'
+	    },
+	    label: {
+	      position: 'relative',
+	      opacity: 1,
+	      fontSize: raisedButton.fontSize,
+	      letterSpacing: 0,
+	      textTransform: raisedButton.textTransform || button.textTransform || 'uppercase',
+	      fontWeight: raisedButton.fontWeight,
+	      margin: 0,
+	      userSelect: 'none',
+	      paddingLeft: icon && labelPosition !== 'before' ? 8 : baseTheme.spacing.desktopGutterLess,
+	      paddingRight: icon && labelPosition === 'before' ? 8 : baseTheme.spacing.desktopGutterLess,
+	      color: labelColor
+	    },
+	    icon: {
+	      verticalAlign: 'middle',
+	      marginLeft: label && labelPosition !== 'before' ? 12 : 0,
+	      marginRight: label && labelPosition === 'before' ? 12 : 0
+	    },
+	    overlay: {
+	      height: buttonHeight,
+	      borderRadius: borderRadius,
+	      backgroundColor: (state.keyboardFocused || state.hovered) && !disabled && (0, _colorManipulator.fade)(labelColor, amount),
+	      transition: _transitions2.default.easeOut(),
+	      top: 0
+	    },
+	    ripple: {
+	      color: labelColor,
+	      opacity: !(primary || secondary) ? 0.1 : 0.16
+	    }
+	  };
+	}
+
+	var RaisedButton = function (_Component) {
+	  (0, _inherits3.default)(RaisedButton, _Component);
+
+	  function RaisedButton() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
+	    (0, _classCallCheck3.default)(this, RaisedButton);
+
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = RaisedButton.__proto__ || (0, _getPrototypeOf2.default)(RaisedButton)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+	      hovered: false,
+	      keyboardFocused: false,
+	      touched: false,
+	      initialZDepth: 0,
+	      zDepth: 0
+	    }, _this.handleMouseDown = function (event) {
+	      // only listen to left clicks
+	      if (event.button === 0) {
+	        _this.setState({
+	          zDepth: _this.state.initialZDepth + 1
+	        });
+	      }
+	      if (_this.props.onMouseDown) {
+	        _this.props.onMouseDown(event);
+	      }
+	    }, _this.handleMouseUp = function (event) {
+	      _this.setState({
+	        zDepth: _this.state.initialZDepth
+	      });
+	      if (_this.props.onMouseUp) {
+	        _this.props.onMouseUp(event);
+	      }
+	    }, _this.handleMouseLeave = function (event) {
+	      if (!_this.state.keyboardFocused) {
+	        _this.setState({
+	          zDepth: _this.state.initialZDepth,
+	          hovered: false
+	        });
+	      }
+	      if (_this.props.onMouseLeave) {
+	        _this.props.onMouseLeave(event);
+	      }
+	    }, _this.handleMouseEnter = function (event) {
+	      if (!_this.state.keyboardFocused && !_this.state.touched) {
+	        _this.setState({
+	          hovered: true
+	        });
+	      }
+	      if (_this.props.onMouseEnter) {
+	        _this.props.onMouseEnter(event);
+	      }
+	    }, _this.handleTouchStart = function (event) {
+	      _this.setState({
+	        touched: true,
+	        zDepth: _this.state.initialZDepth + 1
+	      });
+
+	      if (_this.props.onTouchStart) {
+	        _this.props.onTouchStart(event);
+	      }
+	    }, _this.handleTouchEnd = function (event) {
+	      _this.setState({
+	        touched: true,
+	        zDepth: _this.state.initialZDepth
+	      });
+
+	      if (_this.props.onTouchEnd) {
+	        _this.props.onTouchEnd(event);
+	      }
+	    }, _this.handleKeyboardFocus = function (event, keyboardFocused) {
+	      var zDepth = keyboardFocused && !_this.props.disabled ? _this.state.initialZDepth + 1 : _this.state.initialZDepth;
+
+	      _this.setState({
+	        zDepth: zDepth,
+	        keyboardFocused: keyboardFocused
+	      });
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+	  }
+
+	  (0, _createClass3.default)(RaisedButton, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      var zDepth = this.props.disabled ? 0 : 1;
+	      this.setState({
+	        zDepth: zDepth,
+	        initialZDepth: zDepth
+	      });
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps) {
+	      var zDepth = nextProps.disabled ? 0 : 1;
+	      var nextState = {
+	        zDepth: zDepth,
+	        initialZDepth: zDepth
+	      };
+
+	      if (nextProps.disabled) {
+	        nextState.hovered = false;
+	      }
+
+	      this.setState(nextState);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props = this.props,
+	          backgroundColor = _props.backgroundColor,
+	          buttonStyle = _props.buttonStyle,
+	          children = _props.children,
+	          className = _props.className,
+	          disabled = _props.disabled,
+	          disabledBackgroundColor = _props.disabledBackgroundColor,
+	          disabledLabelColor = _props.disabledLabelColor,
+	          fullWidth = _props.fullWidth,
+	          icon = _props.icon,
+	          label = _props.label,
+	          labelColor = _props.labelColor,
+	          labelPosition = _props.labelPosition,
+	          labelStyle = _props.labelStyle,
+	          overlayStyle = _props.overlayStyle,
+	          primary = _props.primary,
+	          rippleStyle = _props.rippleStyle,
+	          secondary = _props.secondary,
+	          style = _props.style,
+	          other = (0, _objectWithoutProperties3.default)(_props, ['backgroundColor', 'buttonStyle', 'children', 'className', 'disabled', 'disabledBackgroundColor', 'disabledLabelColor', 'fullWidth', 'icon', 'label', 'labelColor', 'labelPosition', 'labelStyle', 'overlayStyle', 'primary', 'rippleStyle', 'secondary', 'style']);
+	      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+	      var styles = getStyles(this.props, this.context, this.state);
+	      var mergedRippleStyles = (0, _simpleAssign2.default)({}, styles.ripple, rippleStyle);
+
+	      var buttonEventHandlers = disabled ? {} : {
+	        onMouseDown: this.handleMouseDown,
+	        onMouseUp: this.handleMouseUp,
+	        onMouseLeave: this.handleMouseLeave,
+	        onMouseEnter: this.handleMouseEnter,
+	        onTouchStart: this.handleTouchStart,
+	        onTouchEnd: this.handleTouchEnd,
+	        onKeyboardFocus: this.handleKeyboardFocus
+	      };
+
+	      var labelElement = label && _react2.default.createElement(
+	        'span',
+	        { style: prepareStyles((0, _simpleAssign2.default)(styles.label, labelStyle)) },
+	        label
+	      );
+
+	      var iconCloned = icon && (0, _react.cloneElement)(icon, {
+	        color: icon.props.color || styles.label.color,
+	        style: (0, _simpleAssign2.default)(styles.icon, icon.props.style)
+	      });
+
+	      // Place label before or after children.
+	      var childrenFragment = labelPosition === 'before' ? {
+	        labelElement: labelElement,
+	        iconCloned: iconCloned,
+	        children: children
+	      } : {
+	        children: children,
+	        iconCloned: iconCloned,
+	        labelElement: labelElement
+	      };
+
+	      var enhancedButtonChildren = (0, _childUtils.createChildFragment)(childrenFragment);
+
+	      return _react2.default.createElement(
+	        _Paper2.default,
+	        {
+	          className: className,
+	          style: (0, _simpleAssign2.default)(styles.root, style),
+	          zDepth: this.state.zDepth
+	        },
+	        _react2.default.createElement(
+	          _EnhancedButton2.default,
+	          (0, _extends3.default)({}, other, buttonEventHandlers, {
+	            ref: 'container',
+	            disabled: disabled,
+	            style: (0, _simpleAssign2.default)(styles.button, buttonStyle),
+	            focusRippleColor: mergedRippleStyles.color,
+	            touchRippleColor: mergedRippleStyles.color,
+	            focusRippleOpacity: mergedRippleStyles.opacity,
+	            touchRippleOpacity: mergedRippleStyles.opacity
+	          }),
+	          _react2.default.createElement(
+	            'div',
+	            {
+	              ref: 'overlay',
+	              style: prepareStyles((0, _simpleAssign2.default)(styles.overlay, overlayStyle))
+	            },
+	            enhancedButtonChildren
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	  return RaisedButton;
+	}(_react.Component);
+
+	RaisedButton.muiName = 'RaisedButton';
+	RaisedButton.defaultProps = {
+	  disabled: false,
+	  labelPosition: 'after',
+	  fullWidth: false,
+	  primary: false,
+	  secondary: false
+	};
+	RaisedButton.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? RaisedButton.propTypes = {
+	  /**
+	   * Override the default background color for the button,
+	   * but not the default disabled background color
+	   * (use `disabledBackgroundColor` for this).
+	   */
+	  backgroundColor: _react.PropTypes.string,
+	  /**
+	   * Override the inline-styles of the button element.
+	   */
+	  buttonStyle: _react.PropTypes.object,
+	  /**
+	   * The content of the button.
+	   * If a label is provided via the `label` prop, the text within the label
+	   * will be displayed in addition to the content provided here.
+	   */
+	  children: _react.PropTypes.node,
+	  /**
+	   * The CSS class name of the root element.
+	   */
+	  className: _react.PropTypes.string,
+	  /**
+	   * If true, the button will be disabled.
+	   */
+	  disabled: _react.PropTypes.bool,
+	  /**
+	   * Override the default background color for the button
+	   * when it is disabled.
+	   */
+	  disabledBackgroundColor: _react.PropTypes.string,
+	  /**
+	   * The color of the button's label when the button is disabled.
+	   */
+	  disabledLabelColor: _react.PropTypes.string,
+	  /**
+	   * If true, the button will take up the full width of its container.
+	   */
+	  fullWidth: _react.PropTypes.bool,
+	  /**
+	   * The URL to link to when the button is clicked.
+	   */
+	  href: _react.PropTypes.string,
+	  /**
+	   * An icon to be displayed within the button.
+	   */
+	  icon: _react.PropTypes.node,
+	  /**
+	   * The label to be displayed within the button.
+	   * If content is provided via the `children` prop, that content will be
+	   * displayed in addition to the label provided here.
+	   */
+	  label: validateLabel,
+	  /**
+	   * The color of the button's label.
+	   */
+	  labelColor: _react.PropTypes.string,
+	  /**
+	   * The position of the button's label relative to the button's `children`.
+	   */
+	  labelPosition: _react.PropTypes.oneOf(['before', 'after']),
+	  /**
+	   * Override the inline-styles of the button's label element.
+	   */
+	  labelStyle: _react.PropTypes.object,
+	  /** @ignore */
+	  onMouseDown: _react.PropTypes.func,
+	  /** @ignore */
+	  onMouseEnter: _react.PropTypes.func,
+	  /** @ignore */
+	  onMouseLeave: _react.PropTypes.func,
+	  /** @ignore */
+	  onMouseUp: _react.PropTypes.func,
+	  /** @ignore */
+	  onTouchEnd: _react.PropTypes.func,
+	  /** @ignore */
+	  onTouchStart: _react.PropTypes.func,
+	  /**
+	   * Override the inline style of the button overlay.
+	   */
+	  overlayStyle: _react.PropTypes.object,
+	  /**
+	   * If true, the button will use the theme's primary color.
+	   */
+	  primary: _react.PropTypes.bool,
+	  /**
+	   * Override the inline style of the ripple element.
+	   */
+	  rippleStyle: _react.PropTypes.object,
+	  /**
+	   * If true, the button will use the theme's secondary color.
+	   * If both `secondary` and `primary` are true, the button will use
+	   * the theme's primary color.
+	   */
+	  secondary: _react.PropTypes.bool,
+	  /**
+	   * Override the inline-styles of the root element.
+	   */
+	  style: _react.PropTypes.object
+	} : void 0;
+	exports.default = RaisedButton;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 675 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.createChildFragment = createChildFragment;
+	exports.extendChildren = extendChildren;
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactAddonsCreateFragment = __webpack_require__(676);
+
+	var _reactAddonsCreateFragment2 = _interopRequireDefault(_reactAddonsCreateFragment);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function createChildFragment(fragments) {
+	  var newFragments = {};
+	  var validChildrenCount = 0;
+	  var firstKey = void 0;
+
+	  // Only create non-empty key fragments
+	  for (var key in fragments) {
+	    var currentChild = fragments[key];
+
+	    if (currentChild) {
+	      if (validChildrenCount === 0) firstKey = key;
+	      newFragments[key] = currentChild;
+	      validChildrenCount++;
+	    }
+	  }
+
+	  if (validChildrenCount === 0) return undefined;
+	  if (validChildrenCount === 1) return newFragments[firstKey];
+	  return (0, _reactAddonsCreateFragment2.default)(newFragments);
+	}
+
+	function extendChildren(children, extendedProps, extendedChildren) {
+	  return _react2.default.Children.map(children, function (child) {
+	    if (!_react2.default.isValidElement(child)) {
+	      return child;
+	    }
+
+	    var newProps = typeof extendedProps === 'function' ? extendedProps(child) : extendedProps;
+
+	    var newChildren = typeof extendedChildren === 'function' ? extendedChildren(child) : extendedChildren ? extendedChildren : child.props.children;
+
+	    return _react2.default.cloneElement(child, newProps, newChildren);
+	  });
+	}
+
+/***/ },
+/* 676 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(677).create;
+
+/***/ },
+/* 677 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2015-present, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 */
+
+	'use strict';
+
+	var _prodInvariant = __webpack_require__(304);
+
+	var ReactChildren = __webpack_require__(302);
+	var ReactElement = __webpack_require__(306);
+
+	var emptyFunction = __webpack_require__(309);
+	var invariant = __webpack_require__(305);
+	var warning = __webpack_require__(308);
+
+	/**
+	 * We used to allow keyed objects to serve as a collection of ReactElements,
+	 * or nested sets. This allowed us a way to explicitly key a set or fragment of
+	 * components. This is now being replaced with an opaque data structure.
+	 * The upgrade path is to call React.addons.createFragment({ key: value }) to
+	 * create a keyed fragment. The resulting data structure is an array.
+	 */
+
+	var numericPropertyRegex = /^\d+$/;
+
+	var warnedAboutNumeric = false;
+
+	var ReactFragment = {
+	  /**
+	   * Wrap a keyed object in an opaque proxy that warns you if you access any
+	   * of its properties.
+	   * See https://facebook.github.io/react/docs/create-fragment.html
+	   */
+	  create: function (object) {
+	    if (typeof object !== 'object' || !object || Array.isArray(object)) {
+	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment only accepts a single object. Got: %s', object) : void 0;
+	      return object;
+	    }
+	    if (ReactElement.isValidElement(object)) {
+	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment does not accept a ReactElement ' + 'without a wrapper object.') : void 0;
+	      return object;
+	    }
+
+	    !(object.nodeType !== 1) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'React.addons.createFragment(...): Encountered an invalid child; DOM elements are not valid children of React components.') : _prodInvariant('0') : void 0;
+
+	    var result = [];
+
+	    for (var key in object) {
+	      if (process.env.NODE_ENV !== 'production') {
+	        if (!warnedAboutNumeric && numericPropertyRegex.test(key)) {
+	          process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment(...): Child objects should have ' + 'non-numeric keys so ordering is preserved.') : void 0;
+	          warnedAboutNumeric = true;
+	        }
+	      }
+	      ReactChildren.mapIntoWithKeyPrefixInternal(object[key], result, key, emptyFunction.thatReturnsArgument);
+	    }
+
+	    return result;
+	  }
+	};
+
+	module.exports = ReactFragment;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 678 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _extends2 = __webpack_require__(634);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
+	var _objectWithoutProperties2 = __webpack_require__(639);
+
+	var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+	var _getPrototypeOf = __webpack_require__(477);
+
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+	var _classCallCheck2 = __webpack_require__(503);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(504);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _possibleConstructorReturn2 = __webpack_require__(508);
+
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+	var _inherits2 = __webpack_require__(555);
+
+	var _inherits3 = _interopRequireDefault(_inherits2);
+
+	var _simpleAssign = __webpack_require__(641);
+
+	var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+	var _react = __webpack_require__(299);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _childUtils = __webpack_require__(675);
+
+	var _events = __webpack_require__(679);
+
+	var _events2 = _interopRequireDefault(_events);
+
+	var _keycode = __webpack_require__(642);
+
+	var _keycode2 = _interopRequireDefault(_keycode);
+
+	var _FocusRipple = __webpack_require__(644);
+
+	var _FocusRipple2 = _interopRequireDefault(_FocusRipple);
+
+	var _TouchRipple = __webpack_require__(669);
+
+	var _TouchRipple2 = _interopRequireDefault(_TouchRipple);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var styleInjected = false;
+	var listening = false;
+	var tabPressed = false;
+
+	function injectStyle() {
+	  if (!styleInjected) {
+	    // Remove inner padding and border in Firefox 4+.
+	    var style = document.createElement('style');
+	    style.innerHTML = '\n      button::-moz-focus-inner,\n      input::-moz-focus-inner {\n        border: 0;\n        padding: 0;\n      }\n    ';
+
+	    document.body.appendChild(style);
+	    styleInjected = true;
+	  }
+	}
+
+	function listenForTabPresses() {
+	  if (!listening) {
+	    _events2.default.on(window, 'keydown', function (event) {
+	      tabPressed = (0, _keycode2.default)(event) === 'tab';
+	    });
+	    listening = true;
+	  }
+	}
+
+	var EnhancedButton = function (_Component) {
+	  (0, _inherits3.default)(EnhancedButton, _Component);
+
+	  function EnhancedButton() {
+	    var _ref;
+
+	    var _temp, _this, _ret;
+
+	    (0, _classCallCheck3.default)(this, EnhancedButton);
+
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = EnhancedButton.__proto__ || (0, _getPrototypeOf2.default)(EnhancedButton)).call.apply(_ref, [this].concat(args))), _this), _this.state = { isKeyboardFocused: false }, _this.handleKeyDown = function (event) {
+	      if (!_this.props.disabled && !_this.props.disableKeyboardFocus) {
+	        if ((0, _keycode2.default)(event) === 'enter' && _this.state.isKeyboardFocused) {
+	          _this.handleTouchTap(event);
+	        }
+	        if ((0, _keycode2.default)(event) === 'esc' && _this.state.isKeyboardFocused) {
+	          _this.removeKeyboardFocus(event);
+	        }
+	      }
+	      _this.props.onKeyDown(event);
+	    }, _this.handleKeyUp = function (event) {
+	      if (!_this.props.disabled && !_this.props.disableKeyboardFocus) {
+	        if ((0, _keycode2.default)(event) === 'space' && _this.state.isKeyboardFocused) {
+	          _this.handleTouchTap(event);
+	        }
+	      }
+	      _this.props.onKeyUp(event);
+	    }, _this.handleBlur = function (event) {
+	      _this.cancelFocusTimeout();
+	      _this.removeKeyboardFocus(event);
+	      _this.props.onBlur(event);
+	    }, _this.handleFocus = function (event) {
+	      if (event) event.persist();
+	      if (!_this.props.disabled && !_this.props.disableKeyboardFocus) {
+	        // setTimeout is needed because the focus event fires first
+	        // Wait so that we can capture if this was a keyboard focus
+	        // or touch focus
+	        _this.focusTimeout = setTimeout(function () {
+	          if (tabPressed) {
+	            _this.setKeyboardFocus(event);
+	            tabPressed = false;
+	          }
+	        }, 150);
+
+	        _this.props.onFocus(event);
+	      }
+	    }, _this.handleClick = function (event) {
+	      if (!_this.props.disabled) {
+	        tabPressed = false;
+	        _this.props.onClick(event);
+	      }
+	    }, _this.handleTouchTap = function (event) {
+	      _this.cancelFocusTimeout();
+	      if (!_this.props.disabled) {
+	        tabPressed = false;
+	        _this.removeKeyboardFocus(event);
+	        _this.props.onTouchTap(event);
+	      }
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+	  }
+
+	  (0, _createClass3.default)(EnhancedButton, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      var _props = this.props,
+	          disabled = _props.disabled,
+	          disableKeyboardFocus = _props.disableKeyboardFocus,
+	          keyboardFocused = _props.keyboardFocused;
+
+	      if (!disabled && keyboardFocused && !disableKeyboardFocus) {
+	        this.setState({ isKeyboardFocused: true });
+	      }
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      injectStyle();
+	      listenForTabPresses();
+	      if (this.state.isKeyboardFocused) {
+	        this.refs.enhancedButton.focus();
+	        this.props.onKeyboardFocus(null, true);
+	      }
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps) {
+	      if ((nextProps.disabled || nextProps.disableKeyboardFocus) && this.state.isKeyboardFocused) {
+	        this.setState({ isKeyboardFocused: false });
+	        if (nextProps.onKeyboardFocus) {
+	          nextProps.onKeyboardFocus(null, false);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      clearTimeout(this.focusTimeout);
+	    }
+	  }, {
+	    key: 'isKeyboardFocused',
+	    value: function isKeyboardFocused() {
+	      return this.state.isKeyboardFocused;
+	    }
+	  }, {
+	    key: 'removeKeyboardFocus',
+	    value: function removeKeyboardFocus(event) {
+	      if (this.state.isKeyboardFocused) {
+	        this.setState({ isKeyboardFocused: false });
+	        this.props.onKeyboardFocus(event, false);
+	      }
+	    }
+	  }, {
+	    key: 'setKeyboardFocus',
+	    value: function setKeyboardFocus(event) {
+	      if (!this.state.isKeyboardFocused) {
+	        this.setState({ isKeyboardFocused: true });
+	        this.props.onKeyboardFocus(event, true);
+	      }
+	    }
+	  }, {
+	    key: 'cancelFocusTimeout',
+	    value: function cancelFocusTimeout() {
+	      if (this.focusTimeout) {
+	        clearTimeout(this.focusTimeout);
+	        this.focusTimeout = null;
+	      }
+	    }
+	  }, {
+	    key: 'createButtonChildren',
+	    value: function createButtonChildren() {
+	      var _props2 = this.props,
+	          centerRipple = _props2.centerRipple,
+	          children = _props2.children,
+	          disabled = _props2.disabled,
+	          disableFocusRipple = _props2.disableFocusRipple,
+	          disableKeyboardFocus = _props2.disableKeyboardFocus,
+	          disableTouchRipple = _props2.disableTouchRipple,
+	          focusRippleColor = _props2.focusRippleColor,
+	          focusRippleOpacity = _props2.focusRippleOpacity,
+	          touchRippleColor = _props2.touchRippleColor,
+	          touchRippleOpacity = _props2.touchRippleOpacity;
+	      var isKeyboardFocused = this.state.isKeyboardFocused;
+
+	      // Focus Ripple
+
+	      var focusRipple = isKeyboardFocused && !disabled && !disableFocusRipple && !disableKeyboardFocus ? _react2.default.createElement(_FocusRipple2.default, {
+	        color: focusRippleColor,
+	        opacity: focusRippleOpacity,
+	        show: isKeyboardFocused
+	      }) : undefined;
+
+	      // Touch Ripple
+	      var touchRipple = !disabled && !disableTouchRipple ? _react2.default.createElement(
+	        _TouchRipple2.default,
+	        {
+	          centerRipple: centerRipple,
+	          color: touchRippleColor,
+	          opacity: touchRippleOpacity
+	        },
+	        children
+	      ) : undefined;
+
+	      return (0, _childUtils.createChildFragment)({
+	        focusRipple: focusRipple,
+	        touchRipple: touchRipple,
+	        children: touchRipple ? undefined : children
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _props3 = this.props,
+	          centerRipple = _props3.centerRipple,
+	          children = _props3.children,
+	          containerElement = _props3.containerElement,
+	          disabled = _props3.disabled,
+	          disableFocusRipple = _props3.disableFocusRipple,
+	          disableKeyboardFocus = _props3.disableKeyboardFocus,
+	          disableTouchRipple = _props3.disableTouchRipple,
+	          focusRippleColor = _props3.focusRippleColor,
+	          focusRippleOpacity = _props3.focusRippleOpacity,
+	          href = _props3.href,
+	          keyboardFocused = _props3.keyboardFocused,
+	          touchRippleColor = _props3.touchRippleColor,
+	          touchRippleOpacity = _props3.touchRippleOpacity,
+	          onBlur = _props3.onBlur,
+	          onClick = _props3.onClick,
+	          onFocus = _props3.onFocus,
+	          onKeyUp = _props3.onKeyUp,
+	          onKeyDown = _props3.onKeyDown,
+	          onKeyboardFocus = _props3.onKeyboardFocus,
+	          onTouchTap = _props3.onTouchTap,
+	          style = _props3.style,
+	          tabIndex = _props3.tabIndex,
+	          type = _props3.type,
+	          other = (0, _objectWithoutProperties3.default)(_props3, ['centerRipple', 'children', 'containerElement', 'disabled', 'disableFocusRipple', 'disableKeyboardFocus', 'disableTouchRipple', 'focusRippleColor', 'focusRippleOpacity', 'href', 'keyboardFocused', 'touchRippleColor', 'touchRippleOpacity', 'onBlur', 'onClick', 'onFocus', 'onKeyUp', 'onKeyDown', 'onKeyboardFocus', 'onTouchTap', 'style', 'tabIndex', 'type']);
+	      var _context$muiTheme = this.context.muiTheme,
+	          prepareStyles = _context$muiTheme.prepareStyles,
+	          enhancedButton = _context$muiTheme.enhancedButton;
+
+
+	      var mergedStyles = (0, _simpleAssign2.default)({
+	        border: 10,
+	        boxSizing: 'border-box',
+	        display: 'inline-block',
+	        fontFamily: this.context.muiTheme.baseTheme.fontFamily,
+	        WebkitTapHighlightColor: enhancedButton.tapHighlightColor, // Remove mobile color flashing (deprecated)
+	        cursor: disabled ? 'default' : 'pointer',
+	        textDecoration: 'none',
+	        margin: 0,
+	        padding: 0,
+	        outline: 'none',
+	        fontSize: 'inherit',
+	        fontWeight: 'inherit',
+	        /**
+	         * This is needed so that ripples do not bleed
+	         * past border radius.
+	         * See: http://stackoverflow.com/questions/17298739/
+	         * css-overflow-hidden-not-working-in-chrome-when-parent-has-border-radius-and-chil
+	         */
+	        transform: disableTouchRipple && disableFocusRipple ? null : 'translate(0, 0)',
+	        verticalAlign: href ? 'middle' : null
+	      }, style);
+
+	      // Passing both background:none & backgroundColor can break due to object iteration order
+	      if (!mergedStyles.backgroundColor && !mergedStyles.background) {
+	        mergedStyles.background = 'none';
+	      }
+
+	      if (disabled && href) {
+	        return _react2.default.createElement(
+	          'span',
+	          (0, _extends3.default)({}, other, {
+	            style: mergedStyles
+	          }),
+	          children
+	        );
+	      }
+
+	      var buttonProps = (0, _extends3.default)({}, other, {
+	        style: prepareStyles(mergedStyles),
+	        ref: 'enhancedButton',
+	        disabled: disabled,
+	        href: href,
+	        onBlur: this.handleBlur,
+	        onClick: this.handleClick,
+	        onFocus: this.handleFocus,
+	        onKeyUp: this.handleKeyUp,
+	        onKeyDown: this.handleKeyDown,
+	        onTouchTap: this.handleTouchTap,
+	        tabIndex: disabled || disableKeyboardFocus ? -1 : tabIndex
+	      });
+
+	      var buttonChildren = this.createButtonChildren();
+
+	      if (_react2.default.isValidElement(containerElement)) {
+	        return _react2.default.cloneElement(containerElement, buttonProps, buttonChildren);
+	      }
+
+	      if (!href && containerElement === 'button') {
+	        buttonProps.type = type;
+	      }
+
+	      return _react2.default.createElement(href ? 'a' : containerElement, buttonProps, buttonChildren);
+	    }
+	  }]);
+	  return EnhancedButton;
+	}(_react.Component);
+
+	EnhancedButton.defaultProps = {
+	  containerElement: 'button',
+	  onBlur: function onBlur() {},
+	  onClick: function onClick() {},
+	  onFocus: function onFocus() {},
+	  onKeyDown: function onKeyDown() {},
+	  onKeyUp: function onKeyUp() {},
+	  onKeyboardFocus: function onKeyboardFocus() {},
+	  onMouseDown: function onMouseDown() {},
+	  onMouseEnter: function onMouseEnter() {},
+	  onMouseLeave: function onMouseLeave() {},
+	  onMouseUp: function onMouseUp() {},
+	  onTouchEnd: function onTouchEnd() {},
+	  onTouchStart: function onTouchStart() {},
+	  onTouchTap: function onTouchTap() {},
+	  tabIndex: 0,
+	  type: 'button'
+	};
+	EnhancedButton.contextTypes = {
+	  muiTheme: _react.PropTypes.object.isRequired
+	};
+	process.env.NODE_ENV !== "production" ? EnhancedButton.propTypes = {
+	  centerRipple: _react.PropTypes.bool,
+	  children: _react.PropTypes.node,
+	  containerElement: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.element]),
+	  disableFocusRipple: _react.PropTypes.bool,
+	  disableKeyboardFocus: _react.PropTypes.bool,
+	  disableTouchRipple: _react.PropTypes.bool,
+	  disabled: _react.PropTypes.bool,
+	  focusRippleColor: _react.PropTypes.string,
+	  focusRippleOpacity: _react.PropTypes.number,
+	  href: _react.PropTypes.string,
+	  keyboardFocused: _react.PropTypes.bool,
+	  onBlur: _react.PropTypes.func,
+	  onClick: _react.PropTypes.func,
+	  onFocus: _react.PropTypes.func,
+	  onKeyDown: _react.PropTypes.func,
+	  onKeyUp: _react.PropTypes.func,
+	  onKeyboardFocus: _react.PropTypes.func,
+	  onMouseDown: _react.PropTypes.func,
+	  onMouseEnter: _react.PropTypes.func,
+	  onMouseLeave: _react.PropTypes.func,
+	  onMouseUp: _react.PropTypes.func,
+	  onTouchEnd: _react.PropTypes.func,
+	  onTouchStart: _react.PropTypes.func,
+	  onTouchTap: _react.PropTypes.func,
+	  style: _react.PropTypes.object,
+	  tabIndex: _react.PropTypes.number,
+	  touchRippleColor: _react.PropTypes.string,
+	  touchRippleOpacity: _react.PropTypes.number,
+	  type: _react.PropTypes.string
+	} : void 0;
+	exports.default = EnhancedButton;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(295)))
+
+/***/ },
+/* 679 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  once: function once(el, type, callback) {
+	    var typeArray = type ? type.split(' ') : [];
+	    var recursiveFunction = function recursiveFunction(event) {
+	      event.target.removeEventListener(event.type, recursiveFunction);
+	      return callback(event);
+	    };
+
+	    for (var i = typeArray.length - 1; i >= 0; i--) {
+	      this.on(el, typeArray[i], recursiveFunction);
+	    }
+	  },
+	  on: function on(el, type, callback) {
+	    if (el.addEventListener) {
+	      el.addEventListener(type, callback);
+	    } else {
+	      // IE8+ Support
+	      el.attachEvent('on' + type, function () {
+	        callback.call(el);
+	      });
+	    }
+	  },
+	  off: function off(el, type, callback) {
+	    if (el.removeEventListener) {
+	      el.removeEventListener(type, callback);
+	    } else {
+	      // IE8+ Support
+	      el.detachEvent('on' + type, callback);
+	    }
+	  },
+	  isKeyboard: function isKeyboard(event) {
+	    return ['keydown', 'keypress', 'keyup'].indexOf(event.type) !== -1;
+	  }
+	};
+
+/***/ },
+/* 680 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _surface = __webpack_require__(674);
+	var _surface = __webpack_require__(681);
 
 	var _surface2 = _interopRequireDefault(_surface);
 
-	var _config = __webpack_require__(676);
+	var _config = __webpack_require__(683);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(677);
+	var _point = __webpack_require__(693);
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _hotSpot = __webpack_require__(678);
+	var _hotSpot = __webpack_require__(694);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
-	var _continent = __webpack_require__(679);
+	var _continent = __webpack_require__(695);
 
-	var _initializers = __webpack_require__(680);
+	var _initializers = __webpack_require__(696);
 
 	var initializers = _interopRequireWildcard(_initializers);
 
@@ -42850,6 +44035,7 @@
 	  }, {
 	    key: 'updateContinents',
 	    value: function updateContinents() {
+	      // this.surface.forEachPoint((p) => { p.continent = null; });
 	      (0, _continent.calcContinents)(this.surface);
 	    }
 	  }, {
@@ -42868,6 +44054,8 @@
 	            _this2.oceanContinentCollision(p1, p2);
 	          } else if (p1.type === _point.CONTINENT && p2.type === _point.CONTINENT) {
 	            _this2.continentContinentCollision(p1, p2);
+	          } else if (p1.type === _point.OCEAN && p2.type === _point.OCEAN) {
+	            _this2.oceanOceanCollision(p1, p2);
 	          }
 	        }
 	      });
@@ -42884,7 +44072,7 @@
 	        var newHotSpot = new _hotSpot2.default({
 	          x: continentPoint.x,
 	          y: continentPoint.y,
-	          radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+	          radius: oceanPoint.volcanicActProbability * Math.random() * 100 + 5,
 	          strength: oceanPoint.getRelativeVelocity(continentPoint),
 	          plate: continentPlate
 	        });
@@ -42906,13 +44094,23 @@
 	      }
 	      var p1p2Vx = p1.plate.vx - p2.plate.vx;
 	      var p1p2Vy = p1.plate.vy - p2.plate.vy;
-	      if (Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy) > 0.2) {
+	      var relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
+	      if (relVelocity > 0.1) {
 	        var c1c2SizeRatio = p1.continent.size / p2.continent.size;
 
 	        p1.plate.vx -= _config2.default.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
 	        p1.plate.vy -= _config2.default.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
 	        p2.plate.vx += _config2.default.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
 	        p2.plate.vy += _config2.default.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+	        var hotSpotConfig = {
+	          x: p1.x,
+	          y: p1.y,
+	          radius: Math.random() * 12 + 4,
+	          strength: relVelocity * 7
+	        };
+	        var newHotSpot1 = new _hotSpot2.default(Object.assign({}, hotSpotConfig, { plate: p1.plate }));
+	        p1.plate.addHotSpot(newHotSpot1);
+	        // Should we add hot spot to the other plate too?
 	      } else if (p1.plate !== p2.plate) {
 	        // Merge plates.
 	        var vx = 0.5 * (p1.plate.vx + p2.plate.vx);
@@ -42927,15 +44125,30 @@
 	      }
 	    }
 	  }, {
+	    key: 'oceanOceanCollision',
+	    value: function oceanOceanCollision(p1, p2) {
+	      p2.setupSubduction(p1);
+	      if (Math.random() < p2.volcanicActProbability && !p1.volcanicAct) {
+	        var plate = p1.plate;
+	        var newHotSpot = new _hotSpot2.default({
+	          x: p1.x,
+	          y: p1.y,
+	          radius: p2.volcanicActProbability * Math.random() * 100 + 5,
+	          strength: p2.getRelativeVelocity(p1),
+	          plate: plate
+	        });
+	        plate.addHotSpot(newHotSpot);
+	      }
+	    }
+	  }, {
 	    key: 'activateHotSpots',
 	    value: function activateHotSpots() {
 	      var _this3 = this;
 
 	      this.plates.forEach(function (plate) {
 	        plate.inactiveHotSpots.forEach(function (hotSpot) {
-	          var points = _this3.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
 	          var volcanicActAllowed = true;
-	          points.forEach(function (point) {
+	          _this3.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, function (point) {
 	            if (!point.volcanicActAllowed) {
 	              volcanicActAllowed = false;
 	            }
@@ -43010,13 +44223,13 @@
 	        for (var y = 0; y < height; y += 1) {
 	          // If there's some point missing, create a new ocean crust and add it to the plate that
 	          // was in the same location before.
-	          if (!surface.points[x][y]) {
+	          if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
 	            var plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
 	            if (plate) {
 	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate });
 	              plate.addPoint(newPoint);
 	              // Update surface object too, so prevSurface in the next step is valid!
-	              surface.points[x][y] = [newPoint];
+	              surface.setPoint(newPoint);
 	            }
 	          }
 	        }
@@ -43049,7 +44262,7 @@
 	exports.default = Model;
 
 /***/ },
-/* 674 */
+/* 681 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43060,7 +44273,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _binarysearch = __webpack_require__(675);
+	var _binarysearch = __webpack_require__(682);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
@@ -43098,7 +44311,6 @@
 
 	    this.width = width;
 	    this.height = height;
-	    this.maxHeight = getGrid(width, height);
 	    this.points = getGrid(width, height);
 
 	    plates.forEach(function (plate) {
@@ -43112,9 +44324,6 @@
 	  _createClass(Surface, [{
 	    key: 'setPoint',
 	    value: function setPoint(point) {
-	      if (!this.maxHeight[point.x][point.y] || this.maxHeight[point.x][point.y] < point.height) {
-	        this.maxHeight[point.x][point.y] = point.height;
-	      }
 	      if (!this.points[point.x][point.y]) {
 	        this.points[point.x][point.y] = [point];
 	      } else {
@@ -43127,23 +44336,6 @@
 	    value: function getSurfacePoint(x, y) {
 	      // Points are ordered from highest to lowest. See #setPoint.
 	      return this.points[x][y] && this.points[x][y][0];
-	    }
-	  }, {
-	    key: 'getSurfacePointsWithinRadius',
-	    value: function getSurfacePointsWithinRadius(cx, cy, radius) {
-	      var result = [];
-	      var minX = Math.max(0, Math.floor(cx - radius));
-	      var minY = Math.max(0, Math.floor(cy - radius));
-	      var maxX = Math.min(this.width, Math.ceil(cx + radius));
-	      var maxY = Math.min(this.height, Math.ceil(cy + radius));
-	      for (var x = minX; x < maxX; x += 1) {
-	        for (var y = minY; y < maxY; y += 1) {
-	          if (this.points[x][y] && dist(x, y, cx, cy) <= radius) {
-	            result.push(this.points[x][y][0]);
-	          }
-	        }
-	      }
-	      return result;
 	    }
 	  }, {
 	    key: 'forEachPoint',
@@ -43170,6 +44362,29 @@
 	        }
 	      }
 	    }
+	  }, {
+	    key: 'forEachPlatePointWithinRadius',
+	    value: function forEachPlatePointWithinRadius(plate, cx, cy, radius, callback) {
+	      var minX = Math.floor(cx - radius);
+	      var minY = Math.floor(cy - radius);
+	      var maxX = Math.floor(cx + radius);
+	      var maxY = Math.floor(cy + radius);
+	      for (var x = minX; x < maxX; x += 1) {
+	        for (var y = minY; y < maxY; y += 1) {
+	          var xr = (x + this.width) % this.width;
+	          var yr = (y + this.height) % this.height;
+	          if (this.points[xr][yr] && dist(x, y, cx, cy) <= radius) {
+	            var points = this.points[xr][yr];
+	            for (var i = 0; i < points.length; i += 1) {
+	              if (points[i].plate === plate) {
+	                callback(points[i]);
+	                break;
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
 	  }]);
 
 	  return Surface;
@@ -43178,7 +44393,7 @@
 	exports.default = Surface;
 
 /***/ },
-/* 675 */
+/* 682 */
 /***/ function(module, exports) {
 
 	
@@ -43401,23 +44616,29 @@
 
 
 /***/ },
-/* 676 */
-/***/ function(module, exports) {
+/* 683 */
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	function getURLParam(name) {
-	  var url = window.location.href;
-	  name = name.replace(/[[]]/g, '\\$&');
-	  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-	  var results = regex.exec(url);
-	  if (!results) return null;
-	  if (!results[2]) return true;
-	  return decodeURIComponent(results[2].replace(/\+/g, ' '));
-	}
+
+	var _colormap = __webpack_require__(684);
+
+	var _colormap2 = _interopRequireDefault(_colormap);
+
+	var _utils = __webpack_require__(692);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var PLATE_COLOR = (0, _utils.shuffle)((0, _colormap2.default)({
+	  colormap: 'cubehelix', // pick a builtin colormap or add your own
+	  nshades: 200, // how many divisions
+	  format: 'rgb', // "hex" or "rgb" or "rgbaString"
+	  alpha: 1
+	}));
 
 	var DEFAULT_CONFIG = {
 	  minHeight: -1,
@@ -43440,13 +44661,15 @@
 	  // Volcano lifespan is proportional to this value and its diameter.
 	  volcanoLifeLengthRatio: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
-	  continentCollisionFriction: 0.00001
+	  continentCollisionFriction: 0.000001,
+	  // Visual settings.
+	  plateColor: PLATE_COLOR
 	};
 
 	var urlConfig = {};
 
 	Object.keys(DEFAULT_CONFIG).forEach(function (key) {
-	  var urlValue = getURLParam(key);
+	  var urlValue = (0, _utils.getURLParam)(key);
 	  if (urlValue === 'true') {
 	    urlConfig[key] = true;
 	  } else if (urlValue === 'false') {
@@ -43463,719 +44686,7 @@
 	exports.default = finalConfig;
 
 /***/ },
-/* 677 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.CONTINENT = exports.OCEAN = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _config = __webpack_require__(676);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var OCEAN = exports.OCEAN = 0;
-	var CONTINENT = exports.CONTINENT = 1;
-
-	// Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
-	// pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
-	// function rather than linear.
-	function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
-	  return _config2.default.subductionRatio * subductionVelocity * timeStep * subductionDist;
-	}
-
-	var Point = function () {
-	  function Point(_ref) {
-	    var x = _ref.x,
-	        y = _ref.y,
-	        type = _ref.type,
-	        height = _ref.height,
-	        plate = _ref.plate;
-
-	    _classCallCheck(this, Point);
-
-	    // Make sure that relative coords are always positive and rounded to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	    this.type = type;
-	    this.height = height;
-	    this.plate = plate;
-	    // Needs to be calculated later.
-	    this.continent = null;
-	    this.age = 0;
-	    this.alive = true;
-	    // Subduction properties:
-	    this.subductionDist = null;
-	    this.subductionVelocity = null;
-	    // Volcanic activity properties:
-	    this.volcanicHotSpot = false;
-	    this.distFromVolcanoCenter = null;
-	    this.volcanicActTime = 0;
-	  }
-
-	  _createClass(Point, [{
-	    key: 'setPlate',
-	    value: function setPlate(plate) {
-	      // Update relative coords!
-	      var x = this.x;
-	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	      // Finally, update plate.
-	      this.plate = plate;
-	    }
-	  }, {
-	    key: 'getRelativeVelocity',
-	    value: function getRelativeVelocity(otherPoint) {
-	      var vxDiff = this.vx - otherPoint.vx;
-	      var vyDiff = this.vy - otherPoint.vy;
-	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
-	    }
-	  }, {
-	    key: 'setupSubduction',
-	    value: function setupSubduction(otherPoint) {
-	      if (!this.subduction) {
-	        this.subductionDist = 0;
-	      }
-	      this.subductionVelocity = this.getRelativeVelocity(otherPoint);
-	    }
-	  }, {
-	    key: 'applyVolcanicActivity',
-	    value: function applyVolcanicActivity(hotSpot) {
-	      this.volcanicHotSpot = hotSpot;
-	      // Cache distance so we don't need to recalculate it in each simulation step.
-	      this.distFromVolcanoCenter = hotSpot.dist(this);
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update(timeStep) {
-	      if (this.type === OCEAN && this.age < _config2.default.oceanicCrustCoolingTime) {
-	        // Oceanic crust cools down and becomes denser.
-	        this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep;
-	      }
-
-	      if (this.subduction) {
-	        this.subductionDist += this.subductionVelocity * timeStep;
-	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
-	      }
-
-	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
-	        this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
-	        this.volcanicActTime += timeStep;
-	      } else {
-	        this.volcanicHotSpot = null;
-	        this.distFromVolcanoCenter = null;
-	      }
-
-	      if (this.height < _config2.default.minHeight) {
-	        // Point subducted and will be removed.
-	        this.alive = false;
-	      }
-
-	      if (this.height > 1) {
-	        this.height = 1;
-	      }
-
-	      this.age += timeStep;
-	    }
-	  }, {
-	    key: 'isOcean',
-	    get: function get() {
-	      return this.type === OCEAN;
-	    }
-	  }, {
-	    key: 'isContinent',
-	    get: function get() {
-	      return this.type === CONTINENT;
-	    }
-	  }, {
-	    key: 'x',
-	    get: function get() {
-	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-	    }
-	  }, {
-	    key: 'y',
-	    get: function get() {
-	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-	    }
-	  }, {
-	    key: 'vx',
-	    get: function get() {
-	      return this.plate.vx;
-	    }
-	  }, {
-	    key: 'vy',
-	    get: function get() {
-	      return this.plate.vy;
-	    }
-	  }, {
-	    key: 'subduction',
-	    get: function get() {
-	      return this.subductionDist !== null;
-	    }
-	  }, {
-	    key: 'volcanicAct',
-	    get: function get() {
-	      return this.volcanicHotSpot !== null;
-	    }
-	  }, {
-	    key: 'volcanicActAllowed',
-	    get: function get() {
-	      return this.volcanicActTime < _config2.default.volcanicActMaxTime;
-	    }
-	  }, {
-	    key: 'volcanicActProbability',
-	    get: function get() {
-	      if (!this.subduction) return 0;
-	      var normalizedDist = (this.subductionDist - _config2.default.volcanicActMinDist) / (_config2.default.volcanicActMaxDist - _config2.default.volcanicActMinDist);
-	      return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
-	    }
-	  }]);
-
-	  return Point;
-	}();
-
-	exports.default = Point;
-
-/***/ },
-/* 678 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _config = __webpack_require__(676);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
-	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
-	var HotSpot = function () {
-	  function HotSpot(_ref) {
-	    var x = _ref.x,
-	        y = _ref.y,
-	        radius = _ref.radius,
-	        strength = _ref.strength,
-	        plate = _ref.plate;
-
-	    _classCallCheck(this, HotSpot);
-
-	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	    this.radius = radius;
-	    this.strength = strength;
-	    this.plate = plate;
-	    this.active = false;
-	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
-	  }
-
-	  _createClass(HotSpot, [{
-	    key: 'setPlate',
-	    value: function setPlate(plate) {
-	      // Update relative coords!
-	      var x = this.x;
-	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	      // Finally, update plate.
-	      this.plate = plate;
-	    }
-	  }, {
-	    key: 'dist',
-	    value: function dist(_ref2) {
-	      var x = _ref2.x,
-	          y = _ref2.y;
-
-	      return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
-	    }
-	  }, {
-	    key: 'pointInside',
-	    value: function pointInside(point) {
-	      return this.dist(point) < this.radius;
-	    }
-	  }, {
-	    key: 'collides',
-	    value: function collides(hotSpot) {
-	      return this.dist(hotSpot) < this.radius + hotSpot.radius;
-	    }
-	  }, {
-	    key: 'heightChange',
-	    value: function heightChange(dist) {
-	      var normDist = dist / this.radius;
-	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update(timeStep) {
-	      this.lifeLeft -= timeStep;
-	    }
-	  }, {
-	    key: 'x',
-	    get: function get() {
-	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-	    }
-	  }, {
-	    key: 'y',
-	    get: function get() {
-	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-	    }
-	  }, {
-	    key: 'alive',
-	    get: function get() {
-	      return this.lifeLeft > 0;
-	    }
-	  }]);
-
-	  return HotSpot;
-	}();
-
-	exports.default = HotSpot;
-
-/***/ },
-/* 679 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	exports.calcContinents = calcContinents;
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var id = -1;
-	function getContinentID() {
-	  id += 1;
-	  return id;
-	}
-
-	var Continent = function () {
-	  function Continent() {
-	    _classCallCheck(this, Continent);
-
-	    this.points = [];
-	    this.id = getContinentID();
-	  }
-
-	  _createClass(Continent, [{
-	    key: "addPoint",
-	    value: function addPoint(p) {
-	      this.points.push(p);
-	    }
-	  }, {
-	    key: "size",
-	    get: function get() {
-	      return this.points.length;
-	    }
-	  }]);
-
-	  return Continent;
-	}();
-
-	exports.default = Continent;
-	function calcContinents(surface) {
-	  var queue = [];
-	  var continents = [];
-	  // DFS-like algorithm calculating continents.
-	  surface.forEachPoint(function (p) {
-	    if (p.isContinent && p.continent === null) {
-	      var cont = new Continent();
-	      continents.push(cont);
-	      p.continent = cont;
-	      cont.addPoint(p);
-	      queue.push(p);
-	      // Add neighbouring points to queue and to the same continent.
-	      while (queue.length > 0) {
-	        var point = queue.pop();
-	        var x0 = point.x;
-	        var y0 = point.y;
-	        for (var x = x0 - 1; x <= x0 + 1; x += 1) {
-	          for (var y = y0 - 1; y <= y0 + 1; y += 1) {
-	            var points = surface.points[x] && surface.points[x][y];
-	            if (points) {
-	              for (var i = 0; i < points.length; i += 1) {
-	                var neighbour = points[i];
-	                // Neighbouring points are only part of the same continent if they belong to the same plate.
-	                if (neighbour.isContinent && neighbour.continent === null && neighbour.plate === point.plate) {
-	                  neighbour.continent = cont;
-	                  cont.addPoint(neighbour);
-	                  queue.push(neighbour);
-	                }
-	              }
-	            }
-	          }
-	        }
-	      }
-	    }
-	  });
-	  return continents;
-	}
-
-/***/ },
-/* 680 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.subduction = subduction;
-	exports.continentalCollision = continentalCollision;
-
-	var _config = __webpack_require__(676);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	var _plate = __webpack_require__(681);
-
-	var _plate2 = _interopRequireDefault(_plate);
-
-	var _point = __webpack_require__(677);
-
-	var _point2 = _interopRequireDefault(_point);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function generatePlate(_ref) {
-	  var width = _ref.width,
-	      height = _ref.height,
-	      type = _ref.type,
-	      _ref$x = _ref.x,
-	      x = _ref$x === undefined ? 0 : _ref$x,
-	      _ref$y = _ref.y,
-	      y = _ref$y === undefined ? 0 : _ref$y,
-	      _ref$vx = _ref.vx,
-	      vx = _ref$vx === undefined ? 0 : _ref$vx,
-	      _ref$vy = _ref.vy,
-	      vy = _ref$vy === undefined ? 0 : _ref$vy,
-	      maxX = _ref.maxX,
-	      maxY = _ref.maxY;
-
-	  var pointHeight = void 0;
-	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
-	  for (var px = x; px < x + width; px += 1) {
-	    for (var py = y; py < y + height; py += 1) {
-	      var pointType = typeof type === 'function' ? type(px, py) : type;
-	      if (pointType === _point.OCEAN) {
-	        pointHeight = _config2.default.newOceanHeight;
-	      } else {
-	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
-	      }
-	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: pointType, plate: plate });
-	      plate.addPoint(point);
-	    }
-	  }
-	  return plate;
-	}
-
-	function subduction(width, height) {
-	  var ocean = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [ocean, continent];
-	}
-
-	function continentalCollision(width, height) {
-	  var oceanAndCont = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: function type(x, y) {
-	      return x > width * 0.1 && x < width * 0.3 && y > height * 0.3 && y < height * 0.7 ? _point.CONTINENT : _point.OCEAN;
-	    },
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [oceanAndCont, continent];
-	}
-
-/***/ },
-/* 681 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var id = -1;
-	function getPlateID() {
-	  id += 1;
-	  return id;
-	}
-
-	var Plate = function () {
-	  function Plate(_ref) {
-	    var x = _ref.x,
-	        y = _ref.y,
-	        vx = _ref.vx,
-	        vy = _ref.vy,
-	        maxX = _ref.maxX,
-	        maxY = _ref.maxY;
-
-	    _classCallCheck(this, Plate);
-
-	    this.x = x;
-	    this.y = y;
-	    this.vx = vx;
-	    this.vy = vy;
-	    this.maxX = maxX;
-	    this.maxY = maxY;
-	    this.points = [];
-	    this.hotSpots = [];
-	    // It means that plate consist of a single continent. It's necessary when continents are colliding.
-	    this.continentOnly = true;
-	    this.id = getPlateID();
-	  }
-
-	  _createClass(Plate, [{
-	    key: "extractContinent",
-	    value: function extractContinent(continentPoints) {
-	      var _this = this;
-
-	      var x = this.x,
-	          y = this.y,
-	          vx = this.vx,
-	          vy = this.vy,
-	          maxX = this.maxX,
-	          maxY = this.maxY;
-	      // Create a new plate.
-
-	      var newPlate = new Plate({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
-	      newPlate.points = continentPoints;
-	      newPlate.continentOnly = true;
-	      continentPoints.forEach(function (p) {
-	        p.plate = newPlate;
-	      });
-	      // Update our own point list.
-	      this.points = this.points.filter(function (p) {
-	        return p.plate === _this;
-	      });
-	      return newPlate;
-	    }
-	  }, {
-	    key: "merge",
-	    value: function merge(plate) {
-	      var _this2 = this;
-
-	      plate.points.forEach(function (p) {
-	        p.setPlate(_this2);
-	        _this2.addPoint(p);
-	      });
-	      plate.hotSpots.forEach(function (hs) {
-	        hs.setPlate(_this2);
-	        _this2.hotSpots.push(hs);
-	      });
-	      plate.points = [];
-	    }
-	  }, {
-	    key: "notEmpty",
-	    value: function notEmpty() {
-	      return this.points.length > 0;
-	    }
-	  }, {
-	    key: "addPoint",
-	    value: function addPoint(p) {
-	      this.points.push(p);
-	      if (this.continentOnly && p.isOcean) {
-	        this.continentOnly = false;
-	      }
-	    }
-	  }, {
-	    key: "move",
-	    value: function move(timeStep) {
-	      this.x += this.vx * timeStep;
-	      this.y += this.vy * timeStep;
-	      if (this.x > this.maxX) this.x = this.x % this.maxX;
-	      if (this.x < 0) this.x += this.maxX;
-	      if (this.y > this.maxY) this.y = this.y % this.maxY;
-	      if (this.y < 0) this.y += this.maxY;
-	    }
-	  }, {
-	    key: "removeDeadPoints",
-	    value: function removeDeadPoints() {
-	      this.points = this.points.filter(function (p) {
-	        return p.alive;
-	      });
-	    }
-	  }, {
-	    key: "removeDeadHotSpots",
-	    value: function removeDeadHotSpots() {
-	      this.hotSpots = this.hotSpots.filter(function (hs) {
-	        return hs.alive;
-	      });
-	    }
-	  }, {
-	    key: "addHotSpot",
-	    value: function addHotSpot(newHotSpot) {
-	      // TODO OPTIMIZE
-	      // Brutal way, but it's initial test if hot spot idea works at all. If so, we should implement fast way to check
-	      // if hot spots are colliding and which points lie inside them (k-trees?).
-	      for (var i = 0, len = this.hotSpots.length; i < len; i += 1) {
-	        if (this.hotSpots[i].collides(newHotSpot)) return;
-	      }
-	      this.hotSpots.push(newHotSpot);
-	    }
-	  }, {
-	    key: "getDisplacement",
-	    value: function getDisplacement(timeStep) {
-	      return Math.sqrt(this.vx * this.vx + this.vy * this.vy) * timeStep;
-	    }
-	  }, {
-	    key: "getBBox",
-	    value: function getBBox() {
-	      var minX = Infinity;
-	      var maxX = -Infinity;
-	      var minY = Infinity;
-	      var maxY = -Infinity;
-	      for (var i = 0, len = this.points.length; i < len; i += 1) {
-	        var p = this.points[i];
-	        if (minX > p.x) minX = p.x;
-	        if (maxX < p.x) maxX = p.x;
-	        if (minY > p.y) minY = p.y;
-	        if (maxY < p.y) maxY = p.y;
-	      }
-	      return { minX: minX, maxX: maxX, minY: minY, maxY: maxY };
-	    }
-	  }, {
-	    key: "inactiveHotSpots",
-	    get: function get() {
-	      return this.hotSpots.filter(function (hs) {
-	        return !hs.active;
-	      });
-	    }
-	  }]);
-
-	  return Plate;
-	}();
-
-	exports.default = Plate;
-
-/***/ },
-/* 682 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = renderTopView;
-
-	var _colormap = __webpack_require__(683);
-
-	var _colormap2 = _interopRequireDefault(_colormap);
-
-	var _config = __webpack_require__(676);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var N_SHADES = 200;
-
-	var DEF_COLOR_MAP = (0, _colormap2.default)({
-	  colormap: 'jet', // pick a builtin colormap or add your own
-	  nshades: N_SHADES, // how many divisions
-	  format: 'rgb', // "hex" or "rgb" or "rgbaString"
-	  alpha: 1
-	});
-	var NO_PLATE_COLOR = [220, 220, 220];
-
-	function heightToShade(val) {
-	  if (val == null) return -1;
-	  return Math.floor((val - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight) * (N_SHADES - 1));
-	}
-
-	function renderTopView(canvas, data) {
-	  var colorMap = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEF_COLOR_MAP;
-
-	  var maxX = data.length;
-	  var maxY = data[0].length;
-	  if (maxX !== canvas.width || maxY !== canvas.height) {
-	    throw new Error('Data has to have the same dimensions as canvas');
-	  }
-	  var ctx = canvas.getContext('2d');
-	  var imageData = ctx.createImageData(canvas.width, canvas.height);
-
-	  for (var x = 0; x < maxX; x += 1) {
-	    for (var y = 0; y < maxY; y += 1) {
-	      var shade = heightToShade(data[x][y]);
-	      var color = shade > 0 ? colorMap[shade] : NO_PLATE_COLOR;
-	      var dataIdx = (y * maxX + x) * 4;
-	      imageData.data[dataIdx] = color[0];
-	      imageData.data[dataIdx + 1] = color[1];
-	      imageData.data[dataIdx + 2] = color[2];
-	      imageData.data[dataIdx + 3] = 255;
-	    }
-	  }
-	  ctx.putImageData(imageData, 0, 0);
-	}
-
-/***/ },
-/* 683 */
+/* 684 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -44185,9 +44696,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(684);
-	var clone = __webpack_require__(685);
-	var colorScale = __webpack_require__(690);
+	var at = __webpack_require__(685);
+	var clone = __webpack_require__(686);
+	var colorScale = __webpack_require__(691);
 
 	module.exports = createColormap;
 
@@ -44316,7 +44827,7 @@
 
 
 /***/ },
-/* 684 */
+/* 685 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -44509,7 +45020,7 @@
 
 
 /***/ },
-/* 685 */
+/* 686 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -44673,10 +45184,10 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(686).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(687).Buffer))
 
 /***/ },
-/* 686 */
+/* 687 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -44689,9 +45200,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(687)
-	var ieee754 = __webpack_require__(688)
-	var isArray = __webpack_require__(689)
+	var base64 = __webpack_require__(688)
+	var ieee754 = __webpack_require__(689)
+	var isArray = __webpack_require__(690)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -46472,7 +46983,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 687 */
+/* 688 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -46592,7 +47103,7 @@
 
 
 /***/ },
-/* 688 */
+/* 689 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -46682,7 +47193,7 @@
 
 
 /***/ },
-/* 689 */
+/* 690 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -46693,7 +47204,7 @@
 
 
 /***/ },
-/* 690 */
+/* 691 */
 /***/ function(module, exports) {
 
 	module.exports={
@@ -46790,7 +47301,838 @@
 
 
 /***/ },
-/* 691 */
+/* 692 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.getURLParam = getURLParam;
+	exports.shuffle = shuffle;
+	function getURLParam(name) {
+	  var url = window.location.href;
+	  name = name.replace(/[[]]/g, '\\$&');
+	  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+	  var results = regex.exec(url);
+	  if (!results) return null;
+	  if (!results[2]) return true;
+	  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+	}
+
+	function shuffle(a) {
+	  var res = a.concat();
+	  for (var i = res.length; i; i -= 1) {
+	    var j = Math.floor(Math.random() * i);
+	    var _ref = [res[j], res[i - 1]];
+	    res[i - 1] = _ref[0];
+	    res[j] = _ref[1];
+	  }
+	  return res;
+	}
+
+/***/ },
+/* 693 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.CONTINENT = exports.OCEAN = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(683);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var OCEAN = exports.OCEAN = 0;
+	var CONTINENT = exports.CONTINENT = 1;
+
+	// Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
+	// pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
+	// function rather than linear.
+	function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
+	  return _config2.default.subductionRatio * subductionVelocity * timeStep * subductionDist;
+	}
+
+	var Point = function () {
+	  function Point(_ref) {
+	    var x = _ref.x,
+	        y = _ref.y,
+	        type = _ref.type,
+	        height = _ref.height,
+	        plate = _ref.plate;
+
+	    _classCallCheck(this, Point);
+
+	    // Make sure that relative coords are always positive and rounded to make other calculations easier.
+	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	    this.type = type;
+	    this.height = height;
+	    this.plate = plate;
+	    // Needs to be calculated later.
+	    this.continent = null;
+	    this.age = 0;
+	    this.alive = true;
+	    // Subduction properties:
+	    this.subductionDist = null;
+	    this.subductionVelocity = null;
+	    // Volcanic activity properties:
+	    this.volcanicHotSpot = false;
+	    this.distFromVolcanoCenter = null;
+	    this.volcanicActTime = 0;
+	  }
+
+	  _createClass(Point, [{
+	    key: 'setPlate',
+	    value: function setPlate(plate) {
+	      // Update relative coords!
+	      var x = this.x;
+	      var y = this.y;
+	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      // Finally, update plate.
+	      this.plate = plate;
+	    }
+	  }, {
+	    key: 'getRelativeVelocity',
+	    value: function getRelativeVelocity(otherPoint) {
+	      var vxDiff = this.vx - otherPoint.vx;
+	      var vyDiff = this.vy - otherPoint.vy;
+	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
+	    }
+	  }, {
+	    key: 'setupSubduction',
+	    value: function setupSubduction(otherPoint) {
+	      if (!this.subduction) {
+	        this.subductionDist = 0;
+	      }
+	      this.subductionVelocity = this.getRelativeVelocity(otherPoint);
+	    }
+	  }, {
+	    key: 'applyVolcanicActivity',
+	    value: function applyVolcanicActivity(hotSpot) {
+	      this.volcanicHotSpot = hotSpot;
+	      // Cache distance so we don't need to recalculate it in each simulation step.
+	      this.distFromVolcanoCenter = hotSpot.dist(this);
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update(timeStep) {
+	      if (this.type === OCEAN && this.age < _config2.default.oceanicCrustCoolingTime) {
+	        // Oceanic crust cools down and becomes denser.
+	        this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep;
+	      }
+
+	      if (this.subduction) {
+	        this.subductionDist += this.subductionVelocity * timeStep;
+	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
+	      }
+
+	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
+	        this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
+	        this.volcanicActTime += timeStep;
+	      } else {
+	        this.volcanicHotSpot = null;
+	        this.distFromVolcanoCenter = null;
+	      }
+
+	      if (this.height < _config2.default.minHeight) {
+	        // Point subducted and will be removed.
+	        this.alive = false;
+	      }
+
+	      if (this.type === OCEAN && this.height > _config2.default.newOceanHeight + 0.01) {
+	        // This is going to be more complicated, we would need to recalculate continent division.
+	        //this.type = CONTINENT;
+	      }
+
+	      if (this.height > 1) {
+	        this.height = 1;
+	      }
+
+	      this.age += timeStep;
+	    }
+	  }, {
+	    key: 'isOcean',
+	    get: function get() {
+	      return this.type === OCEAN;
+	    }
+	  }, {
+	    key: 'isContinent',
+	    get: function get() {
+	      return this.type === CONTINENT;
+	    }
+	  }, {
+	    key: 'x',
+	    get: function get() {
+	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
+	    }
+	  }, {
+	    key: 'y',
+	    get: function get() {
+	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
+	    }
+	  }, {
+	    key: 'vx',
+	    get: function get() {
+	      return this.plate.vx;
+	    }
+	  }, {
+	    key: 'vy',
+	    get: function get() {
+	      return this.plate.vy;
+	    }
+	  }, {
+	    key: 'subduction',
+	    get: function get() {
+	      return this.subductionDist !== null;
+	    }
+	  }, {
+	    key: 'volcanicAct',
+	    get: function get() {
+	      return this.volcanicHotSpot !== null;
+	    }
+	  }, {
+	    key: 'volcanicActAllowed',
+	    get: function get() {
+	      return this.volcanicActTime < _config2.default.volcanicActMaxTime;
+	    }
+	  }, {
+	    key: 'volcanicActProbability',
+	    get: function get() {
+	      if (!this.subduction) return 0;
+	      var normalizedDist = (this.subductionDist - _config2.default.volcanicActMinDist) / (_config2.default.volcanicActMaxDist - _config2.default.volcanicActMinDist);
+	      return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
+	    }
+	  }]);
+
+	  return Point;
+	}();
+
+	exports.default = Point;
+
+/***/ },
+/* 694 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(683);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
+	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
+	var HotSpot = function () {
+	  function HotSpot(_ref) {
+	    var x = _ref.x,
+	        y = _ref.y,
+	        radius = _ref.radius,
+	        strength = _ref.strength,
+	        plate = _ref.plate;
+
+	    _classCallCheck(this, HotSpot);
+
+	    // Make sure that relative coords are always positive to make other calculations easier.
+	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	    this.radius = radius;
+	    this.strength = strength;
+	    this.plate = plate;
+	    this.active = false;
+	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
+	  }
+
+	  _createClass(HotSpot, [{
+	    key: 'setPlate',
+	    value: function setPlate(plate) {
+	      // Update relative coords!
+	      var x = this.x;
+	      var y = this.y;
+	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      // Finally, update plate.
+	      this.plate = plate;
+	    }
+	  }, {
+	    key: 'dist',
+	    value: function dist(_ref2) {
+	      var x = _ref2.x,
+	          y = _ref2.y;
+
+	      var xDiff = Math.abs(this.x - x);
+	      var yDiff = Math.abs(this.y - y);
+	      // Note that grid has wrapping boundaries!
+	      if (xDiff > this.plate.maxX * 0.5) xDiff = this.plate.maxX - xDiff;
+	      if (yDiff > this.plate.maxY * 0.5) yDiff = this.plate.maxY - yDiff;
+	      return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+	    }
+	  }, {
+	    key: 'pointInside',
+	    value: function pointInside(point) {
+	      return this.dist(point) < this.radius;
+	    }
+	  }, {
+	    key: 'collides',
+	    value: function collides(hotSpot) {
+	      return this.dist(hotSpot) < this.radius + hotSpot.radius;
+	    }
+	  }, {
+	    key: 'heightChange',
+	    value: function heightChange(dist) {
+	      var normDist = dist / this.radius;
+	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update(timeStep) {
+	      this.lifeLeft -= timeStep;
+	    }
+	  }, {
+	    key: 'x',
+	    get: function get() {
+	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
+	    }
+	  }, {
+	    key: 'y',
+	    get: function get() {
+	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
+	    }
+	  }, {
+	    key: 'alive',
+	    get: function get() {
+	      return this.lifeLeft > 0;
+	    }
+	  }]);
+
+	  return HotSpot;
+	}();
+
+	exports.default = HotSpot;
+
+/***/ },
+/* 695 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	exports.calcContinents = calcContinents;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var id = -1;
+	function getContinentID() {
+	  id += 1;
+	  return id;
+	}
+
+	var Continent = function () {
+	  function Continent() {
+	    _classCallCheck(this, Continent);
+
+	    this.points = [];
+	    this.id = getContinentID();
+	  }
+
+	  _createClass(Continent, [{
+	    key: "addPoint",
+	    value: function addPoint(p) {
+	      this.points.push(p);
+	    }
+	  }, {
+	    key: "size",
+	    get: function get() {
+	      return this.points.length;
+	    }
+	  }]);
+
+	  return Continent;
+	}();
+
+	exports.default = Continent;
+	function calcContinents(surface) {
+	  var queue = [];
+	  var continents = [];
+	  // DFS-like algorithm calculating continents.
+	  surface.forEachPoint(function (p) {
+	    if (p.isContinent && p.continent === null) {
+	      var cont = new Continent();
+	      continents.push(cont);
+	      p.continent = cont;
+	      cont.addPoint(p);
+	      queue.push(p);
+	      // Add neighbouring points to queue and to the same continent.
+	      while (queue.length > 0) {
+	        var point = queue.pop();
+	        var x0 = point.x;
+	        var y0 = point.y;
+	        for (var x = x0 - 1; x <= x0 + 1; x += 1) {
+	          for (var y = y0 - 1; y <= y0 + 1; y += 1) {
+	            var points = surface.points[x] && surface.points[x][y];
+	            if (points) {
+	              for (var i = 0; i < points.length; i += 1) {
+	                var neighbour = points[i];
+	                // Neighbouring points are only part of the same continent if they belong to the same plate.
+	                if (neighbour.isContinent && neighbour.continent === null && neighbour.plate === point.plate) {
+	                  neighbour.continent = cont;
+	                  cont.addPoint(neighbour);
+	                  queue.push(neighbour);
+	                }
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+	  });
+	  return continents;
+	}
+
+/***/ },
+/* 696 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.subduction = subduction;
+	exports.continentalCollision = continentalCollision;
+	exports.midOceanRidge = midOceanRidge;
+
+	var _config = __webpack_require__(683);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _plate = __webpack_require__(697);
+
+	var _plate2 = _interopRequireDefault(_plate);
+
+	var _point = __webpack_require__(693);
+
+	var _point2 = _interopRequireDefault(_point);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function generatePlate(_ref) {
+	  var width = _ref.width,
+	      height = _ref.height,
+	      type = _ref.type,
+	      _ref$x = _ref.x,
+	      x = _ref$x === undefined ? 0 : _ref$x,
+	      _ref$y = _ref.y,
+	      y = _ref$y === undefined ? 0 : _ref$y,
+	      _ref$vx = _ref.vx,
+	      vx = _ref$vx === undefined ? 0 : _ref$vx,
+	      _ref$vy = _ref.vy,
+	      vy = _ref$vy === undefined ? 0 : _ref$vy,
+	      maxX = _ref.maxX,
+	      maxY = _ref.maxY,
+	      _ref$smoothCont = _ref.smoothCont,
+	      smoothCont = _ref$smoothCont === undefined ? true : _ref$smoothCont;
+
+	  var pointHeight = void 0;
+	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
+	  for (var px = x; px < x + width; px += 1) {
+	    for (var py = y; py < y + height; py += 1) {
+	      var pointType = typeof type === 'function' ? type(px, py) : type;
+	      if (pointType === _point.OCEAN) {
+	        pointHeight = _config2.default.newOceanHeight;
+	      } else if (smoothCont) {
+	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
+	      } else {
+	        pointHeight = 0.1;
+	      }
+	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: pointType, plate: plate });
+	      plate.addPoint(point);
+	    }
+	  }
+	  return plate;
+	}
+
+	function subduction(width, height) {
+	  var ocean = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [ocean, continent];
+	}
+
+	function continentalCollision(width, height) {
+	  var oceanAndCont = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: function type(x, y) {
+	      return x > width * 0.1 && x < width * 0.4 && y > height * 0.2 && y < height * 0.8 ? _point.CONTINENT : _point.OCEAN;
+	    },
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [oceanAndCont, continent];
+	}
+
+	function midOceanRidge(width, height) {
+	  var cont1 = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.2,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height,
+	    smoothCont: false
+	  });
+	  var ocean1 = generatePlate({
+	    x: width * 0.2,
+	    y: 0,
+	    width: width * 0.3,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: -2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var ocean2 = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.3,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var cont2 = generatePlate({
+	    x: width * 0.8,
+	    y: 0,
+	    width: width * 0.2,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height,
+	    smoothCont: false
+	  });
+	  return [cont1, ocean1, ocean2, cont2];
+	}
+
+/***/ },
+/* 697 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var id = -1;
+	function getPlateID() {
+	  id += 1;
+	  return id;
+	}
+
+	var Plate = function () {
+	  function Plate(_ref) {
+	    var x = _ref.x,
+	        y = _ref.y,
+	        vx = _ref.vx,
+	        vy = _ref.vy,
+	        maxX = _ref.maxX,
+	        maxY = _ref.maxY;
+
+	    _classCallCheck(this, Plate);
+
+	    this.x = x;
+	    this.y = y;
+	    this.vx = vx;
+	    this.vy = vy;
+	    this.maxX = maxX;
+	    this.maxY = maxY;
+	    this.points = [];
+	    this.hotSpots = [];
+	    // It means that plate consist of a single continent. It's necessary when continents are colliding.
+	    this.continentOnly = true;
+	    this.id = getPlateID();
+	  }
+
+	  _createClass(Plate, [{
+	    key: "extractContinent",
+	    value: function extractContinent(continentPoints) {
+	      var _this = this;
+
+	      var x = this.x,
+	          y = this.y,
+	          vx = this.vx,
+	          vy = this.vy,
+	          maxX = this.maxX,
+	          maxY = this.maxY;
+	      // Create a new plate.
+
+	      var newPlate = new Plate({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
+	      newPlate.points = continentPoints;
+	      newPlate.continentOnly = true;
+	      continentPoints.forEach(function (p) {
+	        p.plate = newPlate;
+	      });
+	      // Update our own point list.
+	      this.points = this.points.filter(function (p) {
+	        return p.plate === _this;
+	      });
+	      return newPlate;
+	    }
+	  }, {
+	    key: "merge",
+	    value: function merge(plate) {
+	      var _this2 = this;
+
+	      plate.points.forEach(function (p) {
+	        p.setPlate(_this2);
+	        _this2.addPoint(p);
+	      });
+	      plate.hotSpots.forEach(function (hs) {
+	        hs.setPlate(_this2);
+	        _this2.hotSpots.push(hs);
+	      });
+	      plate.points = [];
+	    }
+	  }, {
+	    key: "notEmpty",
+	    value: function notEmpty() {
+	      return this.points.length > 0;
+	    }
+	  }, {
+	    key: "addPoint",
+	    value: function addPoint(p) {
+	      this.points.push(p);
+	      if (this.continentOnly && p.isOcean) {
+	        this.continentOnly = false;
+	      }
+	    }
+	  }, {
+	    key: "move",
+	    value: function move(timeStep) {
+	      this.x += this.vx * timeStep;
+	      this.y += this.vy * timeStep;
+	      if (this.x > this.maxX) this.x = this.x % this.maxX;
+	      if (this.x < 0) this.x += this.maxX;
+	      if (this.y > this.maxY) this.y = this.y % this.maxY;
+	      if (this.y < 0) this.y += this.maxY;
+	    }
+	  }, {
+	    key: "removeDeadPoints",
+	    value: function removeDeadPoints() {
+	      this.points = this.points.filter(function (p) {
+	        return p.alive;
+	      });
+	    }
+	  }, {
+	    key: "removeDeadHotSpots",
+	    value: function removeDeadHotSpots() {
+	      this.hotSpots = this.hotSpots.filter(function (hs) {
+	        return hs.alive;
+	      });
+	    }
+	  }, {
+	    key: "addHotSpot",
+	    value: function addHotSpot(newHotSpot) {
+	      // TODO OPTIMIZE
+	      // Brutal way, but it's initial test if hot spot idea works at all. If so, we should implement fast way to check
+	      // if hot spots are colliding and which points lie inside them (k-trees?).
+	      for (var i = 0, len = this.hotSpots.length; i < len; i += 1) {
+	        if (this.hotSpots[i].collides(newHotSpot)) return;
+	      }
+	      this.hotSpots.push(newHotSpot);
+	    }
+	  }, {
+	    key: "getDisplacement",
+	    value: function getDisplacement(timeStep) {
+	      return Math.sqrt(this.vx * this.vx + this.vy * this.vy) * timeStep;
+	    }
+	  }, {
+	    key: "getBBox",
+	    value: function getBBox() {
+	      var minX = Infinity;
+	      var maxX = -Infinity;
+	      var minY = Infinity;
+	      var maxY = -Infinity;
+	      for (var i = 0, len = this.points.length; i < len; i += 1) {
+	        var p = this.points[i];
+	        if (minX > p.x) minX = p.x;
+	        if (maxX < p.x) maxX = p.x;
+	        if (minY > p.y) minY = p.y;
+	        if (maxY < p.y) maxY = p.y;
+	      }
+	      return { minX: minX, maxX: maxX, minY: minY, maxY: maxY };
+	    }
+	  }, {
+	    key: "inactiveHotSpots",
+	    get: function get() {
+	      return this.hotSpots.filter(function (hs) {
+	        return !hs.active;
+	      });
+	    }
+	  }]);
+
+	  return Plate;
+	}();
+
+	exports.default = Plate;
+
+/***/ },
+/* 698 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = renderTopView;
+
+	var _colormap = __webpack_require__(684);
+
+	var _colormap2 = _interopRequireDefault(_colormap);
+
+	var _config = __webpack_require__(683);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var N_SHADES = 200;
+
+	var DEF_COLOR_MAP = (0, _colormap2.default)({
+	  colormap: 'jet', // pick a builtin colormap or add your own
+	  nshades: N_SHADES, // how many divisions
+	  format: 'rgb', // "hex" or "rgb" or "rgbaString"
+	  alpha: 1
+	});
+	var NO_PLATE_COLOR = [220, 220, 220];
+	var BOUNDARY_COLOR = [16, 16, 16];
+
+	function heightToShade(val) {
+	  if (val == null) return -1;
+	  return Math.floor((val - _config2.default.minHeight) / (_config2.default.maxHeight - _config2.default.minHeight) * (N_SHADES - 1));
+	}
+
+	function renderTopView(canvas, points) {
+	  var mode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'plates';
+	  var boundaries = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+	  var maxX = points.length;
+	  var maxY = points[0].length;
+	  var boundary = function boundary(x, y) {
+	    if (x === 0 || y === 0) return false;
+	    var plate = points[x][y][0].plate;
+	    var p1 = points[x - 1] && points[x - 1][y] && points[x - 1][y][0];
+	    var p2 = points[x] && points[x][y - 1] && points[x][y - 1][0];
+	    var p3 = points[x - 1] && points[x - 1][y - 1] && points[x - 1][y - 1][0];
+	    // We consider given point boundary if neighbouring plate is different or there's no neighbouring plate at all.
+	    return !p1 || !p2 || !p3 || p1.plate !== plate || p2.plate !== plate || p3.plate !== plate;
+	  };
+
+	  if (maxX !== canvas.width || maxY !== canvas.height) {
+	    throw new Error('Data has to have the same dimensions as canvas');
+	  }
+	  var ctx = canvas.getContext('2d');
+	  var imageData = ctx.createImageData(canvas.width, canvas.height);
+
+	  for (var x = 0; x < maxX; x += 1) {
+	    for (var y = 0; y < maxY; y += 1) {
+	      var color = NO_PLATE_COLOR;
+	      if (points[x] && points[x][y]) {
+	        if (boundaries && boundary(x, y)) {
+	          // Don't render plate boundaries in plates mode. Plate boundaries are visible anyway.
+	          color = BOUNDARY_COLOR;
+	        } else if (mode === 'height') {
+	          var shade = heightToShade(points[x][y][0].height);
+	          color = DEF_COLOR_MAP[shade];
+	        } else if (mode === 'plates') {
+	          color = _config2.default.plateColor[points[x][y][0].plate.id];
+	        }
+	      }
+	      var dataIdx = (y * maxX + x) * 4;
+	      imageData.data[dataIdx] = color[0];
+	      imageData.data[dataIdx + 1] = color[1];
+	      imageData.data[dataIdx + 2] = color[2];
+	      imageData.data[dataIdx + 3] = 255;
+	    }
+	  }
+	  ctx.putImageData(imageData, 0, 0);
+	}
+
+/***/ },
+/* 699 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -46810,7 +48152,7 @@
 	}
 
 /***/ },
-/* 692 */
+/* 700 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -46823,42 +48165,19 @@
 
 	exports.default = renderCrossSection;
 
-	var _binarysearch = __webpack_require__(675);
+	var _binarysearch = __webpack_require__(682);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _colormap = __webpack_require__(683);
-
-	var _colormap2 = _interopRequireDefault(_colormap);
-
-	var _config = __webpack_require__(676);
+	var _config = __webpack_require__(683);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(677);
+	var _point = __webpack_require__(693);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	var PLATES_COLOR_MAP = function genPlateColors() {
-	  function shuffle(a) {
-	    for (var i = a.length; i; i -= 1) {
-	      var j = Math.floor(Math.random() * i);
-	      var _ref = [a[j], a[i - 1]];
-	      a[i - 1] = _ref[0];
-	      a[j] = _ref[1];
-	    }
-	    return a;
-	  }
-	  var colors = (0, _colormap2.default)({
-	    colormap: 'cubehelix', // pick a builtin colormap or add your own
-	    nshades: 100, // how many divisions
-	    format: 'rgb', // "hex" or "rgb" or "rgbaString"
-	    alpha: 1
-	  });
-	  return shuffle(colors);
-	}();
 
 	var COLORS = (_COLORS = {
 	  nothing: [220, 220, 220],
@@ -46870,6 +48189,8 @@
 	}
 
 	function renderCrossSection(canvas, points, crossSectionY) {
+	  var mode = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'type';
+
 	  var maxX = points.length;
 	  if (maxX !== canvas.width) {
 	    throw new Error('Data has to have the same width as canvas');
@@ -46897,14 +48218,13 @@
 	  }
 	  var waterLevel = canvHeight - canvHeight * normalizedHeight(_config2.default.waterLevel);
 
-	  for (var _x = 0; _x < maxX; _x += 1) {
+	  for (var _x2 = 0; _x2 < maxX; _x2 += 1) {
 	    for (var y = 0; y < canvHeight; y += 1) {
-	      var idx = (y * maxX + _x) * 4;
+	      var idx = (y * maxX + _x2) * 4;
 	      var color = y < waterLevel ? COLORS.nothing : COLORS.water;
-	      if (y >= heightData[_x][0]) {
-	        var pointIdx = _binarysearch2.default.closest(heightData[_x], y);
-	        // color = COLORS[type[x][pointIdx]];
-	        color = PLATES_COLOR_MAP[plate[_x][pointIdx]];
+	      if (y >= heightData[_x2][0]) {
+	        var pointIdx = _binarysearch2.default.closest(heightData[_x2], y);
+	        color = mode === 'type' ? COLORS[type[_x2][pointIdx]] : _config2.default.plateColor[plate[_x2][pointIdx]];
 	      }
 	      imageData.data[idx] = color[0];
 	      imageData.data[idx + 1] = color[1];
@@ -46916,16 +48236,16 @@
 	}
 
 /***/ },
-/* 693 */
+/* 701 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(694);
+	var content = __webpack_require__(702);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(696)(content, {});
+	var update = __webpack_require__(704)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -46942,10 +48262,10 @@
 	}
 
 /***/ },
-/* 694 */
+/* 702 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(695)();
+	exports = module.exports = __webpack_require__(703)();
 	// imports
 
 
@@ -46956,7 +48276,7 @@
 
 
 /***/ },
-/* 695 */
+/* 703 */
 /***/ function(module, exports) {
 
 	/*
@@ -47012,7 +48332,7 @@
 
 
 /***/ },
-/* 696 */
+/* 704 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -47264,16 +48584,16 @@
 
 
 /***/ },
-/* 697 */
+/* 705 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(698);
+	var content = __webpack_require__(706);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(696)(content, {});
+	var update = __webpack_require__(704)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -47290,10 +48610,10 @@
 	}
 
 /***/ },
-/* 698 */
+/* 706 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(695)();
+	exports = module.exports = __webpack_require__(703)();
 	// imports
 
 
