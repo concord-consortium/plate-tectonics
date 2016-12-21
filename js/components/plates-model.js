@@ -20,6 +20,7 @@ export default class PlatesModel extends PureComponent {
       crossSectionY: HEIGHT * 0.5,
       hotSpotsRendering: false,
       platesRendering: false,
+      plateBoundariesRendering: false,
       simEnabled: true,
     };
     this.rafCallback = this.rafCallback.bind(this);
@@ -28,6 +29,7 @@ export default class PlatesModel extends PureComponent {
     this.handleCrossSectionYChange = this.handleCrossSectionYChange.bind(this);
     this.handleHotSpotsRenderingChange = this.handleHotSpotsRenderingChange.bind(this);
     this.handlePlatesRenderingChange = this.handlePlatesRenderingChange.bind(this);
+    this.handlePlateBoundariesRenderingChange = this.handlePlateBoundariesRenderingChange.bind(this);
     this.handleSimEnabledChange = this.handleSimEnabledChange.bind(this);
   }
 
@@ -93,9 +95,13 @@ export default class PlatesModel extends PureComponent {
     this.setState({ platesRendering: value }, this.renderModel);
   }
 
+  handlePlateBoundariesRenderingChange(event, value) {
+    this.setState({ plateBoundariesRendering: value }, this.renderModel);
+  }
+
   renderModel() {
-    const { crossSectionY, hotSpotsRendering, platesRendering } = this.state;
-    renderTopView(this.topView, this.model.points, platesRendering ? 'plates' : 'height');
+    const { crossSectionY, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
+    renderTopView(this.topView, this.model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
     if (hotSpotsRendering) {
       renderHotSpots(this.topView, this.model.hotSpots);
     }
@@ -104,7 +110,7 @@ export default class PlatesModel extends PureComponent {
   }
 
   render() {
-    const { crossSectionY, simEnabled, hotSpotsRendering, platesRendering } = this.state;
+    const { crossSectionY, simEnabled, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
     return (
       <div className="plates-model">
         <div>
@@ -136,6 +142,10 @@ export default class PlatesModel extends PureComponent {
           <Toggle
             label="Plates rendering" labelPosition="right"
             toggled={platesRendering} onToggle={this.handlePlatesRenderingChange}
+          />
+          <Toggle
+            label="Plate boundaries rendering" labelPosition="right"
+            toggled={plateBoundariesRendering} onToggle={this.handlePlateBoundariesRenderingChange}
           />
         </div>
       </div>

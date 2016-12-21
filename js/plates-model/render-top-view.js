@@ -17,7 +17,7 @@ function heightToShade(val) {
   return Math.floor((val - config.minHeight) / (config.maxHeight - config.minHeight) * (N_SHADES - 1));
 }
 
-export default function renderTopView(canvas, points, mode = 'plates') {
+export default function renderTopView(canvas, points, mode = 'plates', boundaries = false) {
   const maxX = points.length;
   const maxY = points[0].length;
   const boundary = function boundary(x, y) {
@@ -43,7 +43,7 @@ export default function renderTopView(canvas, points, mode = 'plates') {
     for (let y = 0; y < maxY; y += 1) {
       let color = NO_PLATE_COLOR;
       if (points[x] && points[x][y]) {
-        if (mode !== 'plates' && boundary(x, y)) {
+        if (boundaries && boundary(x, y)) {
           // Don't render plate boundaries in plates mode. Plate boundaries are visible anyway.
           color = BOUNDARY_COLOR;
         } else if (mode === 'height') {

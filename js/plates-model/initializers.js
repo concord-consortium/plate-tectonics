@@ -69,7 +69,7 @@ export function continentalCollision(width, height) {
     height,
     type: CONTINENT,
     vx: 0,
-    vy: 2,
+    vy: 0,
     maxX: width,
     maxY: height,
   });
