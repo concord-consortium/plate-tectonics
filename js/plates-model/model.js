@@ -53,6 +53,7 @@ export default class Model {
   }
 
   updateContinents() {
+    // this.surface.forEachPoint((p) => { p.continent = null; });
     calcContinents(this.surface);
   }
 
@@ -83,7 +84,7 @@ export default class Model {
       const newHotSpot = new HotSpot({
         x: continentPoint.x,
         y: continentPoint.y,
-        radius: oceanPoint.volcanicActProbability * Math.random() * 400 + 5,
+        radius: oceanPoint.volcanicActProbability * Math.random() * 100 + 5,
         strength: oceanPoint.getRelativeVelocity(continentPoint),
         plate: continentPlate,
       });
@@ -128,9 +129,8 @@ export default class Model {
   activateHotSpots() {
     this.plates.forEach((plate) => {
       plate.inactiveHotSpots.forEach((hotSpot) => {
-        const points = this.surface.getSurfacePointsWithinRadius(hotSpot.x, hotSpot.y, hotSpot.radius);
         let volcanicActAllowed = true;
-        points.forEach((point) => {
+        this.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, (point) => {
           if (!point.volcanicActAllowed) {
             volcanicActAllowed = false;
           }
@@ -187,13 +187,13 @@ export default class Model {
       for (let y = 0; y < height; y += 1) {
         // If there's some point missing, create a new ocean crust and add it to the plate that
         // was in the same location before.
-        if (!surface.points[x][y]) {
+        if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
           const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
           if (plate) {
             const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate });
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
-            surface.points[x][y] = [newPoint];
+            surface.setPoint(newPoint);
           }
         }
       }

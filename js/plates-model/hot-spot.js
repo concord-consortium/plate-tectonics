@@ -37,7 +37,12 @@ export default class HotSpot {
   }
 
   dist({ x, y }) {
-    return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
+    let xDiff = Math.abs(this.x - x);
+    let yDiff = Math.abs(this.y - y);
+    // Note that grid has wrapping boundaries!
+    if (xDiff > this.plate.maxX * 0.5) xDiff = this.plate.maxX - xDiff;
+    if (yDiff > this.plate.maxY * 0.5) yDiff = this.plate.maxY - yDiff;
+    return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
   }
 
   pointInside(point) {

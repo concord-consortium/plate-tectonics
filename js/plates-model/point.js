@@ -127,6 +127,11 @@ export default class Point {
       this.alive = false;
     }
 
+    if (this.type === OCEAN && this.height > config.newOceanHeight + 0.01) {
+      // This is going to be more complicated, we would need to recalculate continent division.
+      //this.type = CONTINENT;
+    }
+
     if (this.height > 1) {
       this.height = 1;
     }

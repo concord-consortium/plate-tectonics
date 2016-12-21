@@ -1,12 +1,12 @@
-function getURLParam(name) {
-  const url = window.location.href;
-  name = name.replace(/[[]]/g, '\\$&');
-  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
-  const results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return true;
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
-}
+import colormap from 'colormap';
+import { shuffle, getURLParam } from '../utils';
+
+const PLATE_COLOR = shuffle(colormap({
+  colormap: 'cubehelix', // pick a builtin colormap or add your own
+  nshades: 200,          // how many divisions
+  format: 'rgb',         // "hex" or "rgb" or "rgbaString"
+  alpha: 1,
+}));
 
 const DEFAULT_CONFIG = {
   minHeight: -1,
@@ -30,6 +30,8 @@ const DEFAULT_CONFIG = {
   volcanoLifeLengthRatio: 0.5,
   // Controls how fast continents would slow down when they are colliding.
   continentCollisionFriction: 0.00001,
+  // Visual settings.
+  plateColor: PLATE_COLOR,
 };
 
 const urlConfig = {};

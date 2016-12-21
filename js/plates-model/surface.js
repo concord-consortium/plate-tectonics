@@ -21,7 +21,6 @@ export default class Surface {
   constructor({ width, height, plates = [] }) {
     this.width = width;
     this.height = height;
-    this.maxHeight = getGrid(width, height);
     this.points = getGrid(width, height);
 
     plates.forEach((plate) => {
@@ -33,9 +32,6 @@ export default class Surface {
   }
 
   setPoint(point) {
-    if (!this.maxHeight[point.x][point.y] || this.maxHeight[point.x][point.y] < point.height) {
-      this.maxHeight[point.x][point.y] = point.height;
-    }
     if (!this.points[point.x][point.y]) {
       this.points[point.x][point.y] = [point];
     } else {
@@ -47,22 +43,6 @@ export default class Surface {
   getSurfacePoint(x, y) {
     // Points are ordered from highest to lowest. See #setPoint.
     return this.points[x][y] && this.points[x][y][0];
-  }
-
-  getSurfacePointsWithinRadius(cx, cy, radius) {
-    const result = [];
-    const minX = Math.max(0, Math.floor(cx - radius));
-    const minY = Math.max(0, Math.floor(cy - radius));
-    const maxX = Math.min(this.width, Math.ceil(cx + radius));
-    const maxY = Math.min(this.height, Math.ceil(cy + radius));
-    for (let x = minX; x < maxX; x += 1) {
-      for (let y = minY; y < maxY; y += 1) {
-        if (this.points[x][y] && dist(x, y, cx, cy) <= radius) {
-          result.push(this.points[x][y][0]);
-        }
-      }
-    }
-    return result;
   }
 
   forEachPoint(callback) {
@@ -83,6 +63,32 @@ export default class Surface {
       for (let y = 0; y < this.height; y += 1) {
         if (this.points[x][y] && this.points[x][y].length > 1) {
           callback(this.points[x][y]);
+        }
+      }
+    }
+  }
+
+  forEachPlatePointWithinRadius(plate, cx, cy, radius, callback) {
+    const minX = Math.floor(cx - radius);
+    const minY = Math.floor(cy - radius);
+    const maxX = Math.floor(cx + radius);
+    const maxY = Math.floor(cy + radius);
+    // const minX = Math.max(0, Math.floor(cx - radius));
+    // const minY = Math.max(0, Math.floor(cy - radius));
+    // const maxX = Math.min(this.width, Math.ceil(cx + radius));
+    // const maxY = Math.min(this.height, Math.ceil(cy + radius));
+    for (let x = minX; x < maxX; x += 1) {
+      for (let y = minY; y < maxY; y += 1) {
+        const xr = (x + this.width) % this.width;
+        const yr = (y + this.height) % this.height;
+        if (this.points[xr][yr] && dist(x, y, cx, cy) <= radius) {
+          const points = this.points[xr][yr];
+          for (let i = 0; i < points.length; i += 1) {
+            if (points[i].plate === plate) {
+              callback(points[i]);
+              break;
+            }
+          }
         }
       }
     }

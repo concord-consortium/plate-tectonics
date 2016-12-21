@@ -53,7 +53,7 @@ export function continentalCollision(width, height) {
     width: width * 0.5,
     height,
     type: function type(x, y) {
-      return x > width * 0.1 && x < width * 0.3 && y > height * 0.3 && y < height * 0.7 ? CONTINENT : OCEAN;
+      return x > width * 0.2 && x < width * 0.4 && y > height * 0.3 && y < height * 0.7 ? CONTINENT : OCEAN;
     },
     vx: 2,
     vy: 0,
@@ -67,7 +67,7 @@ export function continentalCollision(width, height) {
     height,
     type: CONTINENT,
     vx: 0,
-    vy: 0,
+    vy: 2,
     maxX: width,
     maxY: height,
   });
