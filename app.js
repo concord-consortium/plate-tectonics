@@ -43981,6 +43981,11 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	function isIsland(point) {
+	  // Assume that land is an island if its size is smaller than 50% of the whole plate area.
+	  return point.continent.size < point.plate.size * _config2.default.islandRatio;
+	}
+
 	var Model = function () {
 	  function Model(_ref) {
 	    var _ref$width = _ref.width,
@@ -44035,7 +44040,9 @@
 	  }, {
 	    key: 'updateContinents',
 	    value: function updateContinents() {
-	      // this.surface.forEachPoint((p) => { p.continent = null; });
+	      this.surface.forEachPoint(function (p) {
+	        p.continent = null;
+	      });
 	      (0, _continent.calcContinents)(this.surface);
 	    }
 	  }, {
@@ -44044,19 +44051,20 @@
 	      var _this2 = this;
 
 	      this.surface.forEachCollision(function (points) {
-	        if (points.length === 2) {
-	          var p1 = points[0];
-	          var p2 = points[1];
-	          if (p1.plate === p2.plate) {
-	            // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
-	            p2.alive = false;
-	          } else if (p1.type !== p2.type) {
-	            _this2.oceanContinentCollision(p1, p2);
-	          } else if (p1.type === _point.CONTINENT && p2.type === _point.CONTINENT) {
-	            _this2.continentContinentCollision(p1, p2);
-	          } else if (p1.type === _point.OCEAN && p2.type === _point.OCEAN) {
-	            _this2.oceanOceanCollision(p1, p2);
-	          }
+	        var p1 = points[0];
+	        var p2 = points[1];
+	        if (p1.plate === p2.plate) {
+	          // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
+	          p2.alive = false;
+	        } else if (p1.type !== p2.type) {
+	          _this2.oceanContinentCollision(p1, p2);
+	        } else if (p1.type === _point.CONTINENT && p2.type === _point.CONTINENT) {
+	          _this2.continentContinentCollision(p1, p2);
+	        } else if (p1.type === _point.OCEAN && p2.type === _point.OCEAN) {
+	          _this2.oceanOceanCollision(p1, p2);
+	        }
+	        for (var i = 2; i < points.length; i += 1) {
+	          points[i].alive = false;
 	        }
 	      });
 	    }
@@ -44072,7 +44080,7 @@
 	        var newHotSpot = new _hotSpot2.default({
 	          x: continentPoint.x,
 	          y: continentPoint.y,
-	          radius: oceanPoint.volcanicActProbability * Math.random() * 100 + 5,
+	          radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
 	          strength: oceanPoint.getRelativeVelocity(continentPoint),
 	          plate: continentPlate
 	        });
@@ -44082,26 +44090,26 @@
 	  }, {
 	    key: 'continentContinentCollision',
 	    value: function continentContinentCollision(p1, p2) {
-	      // Make sure that colliding continents have their own plates. We don't want to modify speed of the ocean
-	      // only because continents are colliding.
-	      if (!p1.plate.continentOnly) {
+	      // Make sure that colliding islands have their own plates. We don't want to modify speed of the ocean
+	      // only because small islands are colliding.
+	      if (isIsland(p1) && !p1.plate.continentOnly) {
 	        var newPlate = p1.plate.extractContinent(p1.continent.points);
 	        this.plates.push(newPlate);
 	      }
-	      if (!p2.plate.continentOnly) {
+	      if (isIsland(p2) && !p2.plate.continentOnly) {
 	        var _newPlate = p2.plate.extractContinent(p2.continent.points);
 	        this.plates.push(_newPlate);
 	      }
 	      var p1p2Vx = p1.plate.vx - p2.plate.vx;
 	      var p1p2Vy = p1.plate.vy - p2.plate.vy;
 	      var relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
-	      if (relVelocity > 0.1) {
+	      if (relVelocity > 0.2) {
 	        var c1c2SizeRatio = p1.continent.size / p2.continent.size;
 
-	        p1.plate.vx -= _config2.default.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
-	        p1.plate.vy -= _config2.default.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
-	        p2.plate.vx += _config2.default.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
-	        p2.plate.vy += _config2.default.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+	        p1.plate.vx -= _config2.default.continentCollisionFriction * p1p2Vx / c1c2SizeRatio / p1.continent.size;
+	        p1.plate.vy -= _config2.default.continentCollisionFriction * p1p2Vy / c1c2SizeRatio / p1.continent.size;
+	        p2.plate.vx += _config2.default.continentCollisionFriction * p1p2Vx * c1c2SizeRatio / p2.continent.size;
+	        p2.plate.vy += _config2.default.continentCollisionFriction * p1p2Vy * c1c2SizeRatio / p2.continent.size;
 	        var hotSpotConfig = {
 	          x: p1.x,
 	          y: p1.y,
@@ -44133,8 +44141,8 @@
 	        var newHotSpot = new _hotSpot2.default({
 	          x: p1.x,
 	          y: p1.y,
-	          radius: p2.volcanicActProbability * Math.random() * 100 + 5,
-	          strength: p2.getRelativeVelocity(p1),
+	          radius: p2.volcanicActProbability * Math.random() * 50 + 10,
+	          strength: p2.getRelativeVelocity(p1) * 3 * Math.random(),
 	          plate: plate
 	        });
 	        plate.addHotSpot(newHotSpot);
@@ -44635,7 +44643,7 @@
 
 	var PLATE_COLOR = (0, _utils.shuffle)((0, _colormap2.default)({
 	  colormap: 'cubehelix', // pick a builtin colormap or add your own
-	  nshades: 200, // how many divisions
+	  nshades: 1000, // how many divisions
 	  format: 'rgb', // "hex" or "rgb" or "rgbaString"
 	  alpha: 1
 	}));
@@ -44661,7 +44669,11 @@
 	  // Volcano lifespan is proportional to this value and its diameter.
 	  volcanoLifeLengthRatio: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
-	  continentCollisionFriction: 0.000001,
+	  continentCollisionFriction: 0.1,
+	  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
+	  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
+	  // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
+	  islandRatio: 0.5,
 	  // Visual settings.
 	  plateColor: PLATE_COLOR
 	};
@@ -47451,9 +47463,8 @@
 	        this.alive = false;
 	      }
 
-	      if (this.type === OCEAN && this.height > _config2.default.newOceanHeight + 0.01) {
-	        // This is going to be more complicated, we would need to recalculate continent division.
-	        //this.type = CONTINENT;
+	      if (this.type === OCEAN && this.height > 0) {
+	        this.type = CONTINENT;
 	      }
 
 	      if (this.height > 1) {
@@ -47725,6 +47736,7 @@
 	});
 	exports.subduction = subduction;
 	exports.continentalCollision = continentalCollision;
+	exports.oceanicCollision = oceanicCollision;
 	exports.midOceanRidge = midOceanRidge;
 
 	var _config = __webpack_require__(683);
@@ -47829,6 +47841,34 @@
 	    maxY: height
 	  });
 	  return [oceanAndCont, continent];
+	}
+
+	function oceanicCollision(width, height) {
+	  var ocean = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: function type(x, y) {
+	      return x > width * 0.3 && x < width * 0.4 && y > height * 0.2 && y < height * 0.4 ? _point.CONTINENT : _point.OCEAN;
+	    },
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [ocean, continent];
 	}
 
 	function midOceanRidge(width, height) {
@@ -48033,6 +48073,11 @@
 	        if (maxY < p.y) maxY = p.y;
 	      }
 	      return { minX: minX, maxX: maxX, minY: minY, maxY: maxY };
+	    }
+	  }, {
+	    key: "size",
+	    get: function get() {
+	      return this.points.length;
 	    }
 	  }, {
 	    key: "inactiveHotSpots",
