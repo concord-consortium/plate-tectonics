@@ -19,6 +19,10 @@ export default class Plate {
     this.id = getPlateID();
   }
 
+  get size() {
+    return this.points.length;
+  }
+
   extractContinent(continentPoints) {
     const { x, y, vx, vy, maxX, maxY } = this;
     // Create a new plate.

@@ -3,7 +3,7 @@ import { shuffle, getURLParam } from '../utils';
 
 const PLATE_COLOR = shuffle(colormap({
   colormap: 'cubehelix', // pick a builtin colormap or add your own
-  nshades: 200,          // how many divisions
+  nshades: 1000,          // how many divisions
   format: 'rgb',         // "hex" or "rgb" or "rgbaString"
   alpha: 1,
 }));
@@ -30,6 +30,10 @@ const DEFAULT_CONFIG = {
   volcanoLifeLengthRatio: 0.5,
   // Controls how fast continents would slow down when they are colliding.
   continentCollisionFriction: 0.000001,
+  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
+  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
+  // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
+  islandRatio: 0.5,
   // Visual settings.
   plateColor: PLATE_COLOR,
 };

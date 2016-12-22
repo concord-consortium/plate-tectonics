@@ -5,6 +5,11 @@ import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
 import * as initializers from './initializers';
 
+function isIsland(point) {
+  // Assume that land is an island if its size is smaller than 50% of the whole plate area.
+  return point.continent.size < point.plate.size * config.islandRatio;
+}
+
 export default class Model {
   constructor({ width = 512, height = 512, timeStep = 1, preset = 'continentalCollision' }) {
     this.width = width;
@@ -53,25 +58,26 @@ export default class Model {
   }
 
   updateContinents() {
-    // this.surface.forEachPoint((p) => { p.continent = null; });
+    this.surface.forEachPoint((p) => { p.continent = null; });
     calcContinents(this.surface);
   }
 
   handleCollisions() {
     this.surface.forEachCollision((points) => {
-      if (points.length === 2) {
-        const p1 = points[0];
-        const p2 = points[1];
-        if (p1.plate === p2.plate) {
-          // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
-          p2.alive = false;
-        } else if (p1.type !== p2.type) {
-          this.oceanContinentCollision(p1, p2);
-        } else if (p1.type === CONTINENT && p2.type === CONTINENT) {
-          this.continentContinentCollision(p1, p2);
-        } else if (p1.type === OCEAN && p2.type === OCEAN) {
-          this.oceanOceanCollision(p1, p2);
-        }
+      const p1 = points[0];
+      const p2 = points[1];
+      if (p1.plate === p2.plate) {
+        // Probably merged continents. Don't need lower point anymore (note that points are sorted by height).
+        p2.alive = false;
+      } else if (p1.type !== p2.type) {
+        this.oceanContinentCollision(p1, p2);
+      } else if (p1.type === CONTINENT && p2.type === CONTINENT) {
+        this.continentContinentCollision(p1, p2);
+      } else if (p1.type === OCEAN && p2.type === OCEAN) {
+        this.oceanOceanCollision(p1, p2);
+      }
+      for (let i = 2; i < points.length; i += 1) {
+        points[i].alive = false;
       }
     });
   }
@@ -86,7 +92,7 @@ export default class Model {
       const newHotSpot = new HotSpot({
         x: continentPoint.x,
         y: continentPoint.y,
-        radius: oceanPoint.volcanicActProbability * Math.random() * 100 + 5,
+        radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
         strength: oceanPoint.getRelativeVelocity(continentPoint),
         plate: continentPlate,
       });
@@ -95,20 +101,20 @@ export default class Model {
   }
 
   continentContinentCollision(p1, p2) {
-    // Make sure that colliding continents have their own plates. We don't want to modify speed of the ocean
-    // only because continents are colliding.
-    if (!p1.plate.continentOnly) {
+    // Make sure that colliding islands have their own plates. We don't want to modify speed of the ocean
+    // only because small islands are colliding.
+    if (isIsland(p1) && !p1.plate.continentOnly) {
       const newPlate = p1.plate.extractContinent(p1.continent.points);
       this.plates.push(newPlate);
     }
-    if (!p2.plate.continentOnly) {
+    if (isIsland(p2) && !p2.plate.continentOnly) {
       const newPlate = p2.plate.extractContinent(p2.continent.points);
       this.plates.push(newPlate);
     }
     const p1p2Vx = p1.plate.vx - p2.plate.vx;
     const p1p2Vy = p1.plate.vy - p2.plate.vy;
     const relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
-    if (relVelocity > 0.1) {
+    if (relVelocity > 0.2) {
       const c1c2SizeRatio = p1.continent.size / p2.continent.size;
 
       p1.plate.vx -= config.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
@@ -145,8 +151,8 @@ export default class Model {
       const newHotSpot = new HotSpot({
         x: p1.x,
         y: p1.y,
-        radius: p2.volcanicActProbability * Math.random() * 100 + 5,
-        strength: p2.getRelativeVelocity(p1),
+        radius: p2.volcanicActProbability * Math.random() * 50 + 10,
+        strength: p2.getRelativeVelocity(p1) * 3 * Math.random(),
         plate,
       });
       plate.addHotSpot(newHotSpot);

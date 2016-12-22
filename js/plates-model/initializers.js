@@ -76,6 +76,35 @@ export function continentalCollision(width, height) {
   return [oceanAndCont, continent];
 }
 
+export function oceanicCollision(width, height) {
+  const ocean = generatePlate({
+    x: 0,
+    y: 0,
+    width: width * 0.5,
+    height,
+    type: function type(x, y) {
+      return x > width * 0.3 && x < width * 0.4 && y > height * 0.2 && y < height * 0.4 ? CONTINENT : OCEAN;
+    },
+    vx: 2,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const continent = generatePlate({
+    x: width * 0.5,
+    y: 0,
+    width: width * 0.5,
+    height,
+    type: OCEAN,
+    vx: 0,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  return [ocean, continent];
+}
+
+
 export function midOceanRidge(width, height) {
   const cont1 = generatePlate({
     x: 0,
@@ -125,4 +154,3 @@ export function midOceanRidge(width, height) {
   });
   return [cont1, ocean1, ocean2, cont2];
 }
-
