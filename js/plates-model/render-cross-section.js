@@ -28,7 +28,7 @@ export default function renderCrossSection(canvas, points, crossSectionY, mode =
   for (let x = 0; x < maxX; x += 1) {
     const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
     heightData.push(h);
-    const p = (points[x][crossSectionY] || []).map(point => point.plate.id);
+    const p = (points[x][crossSectionY] || []).map(point => point.plate.id % config.plateColor.length);
     plate.push(p);
     const t = (points[x][crossSectionY] || []).map(point => point.type);
     type.push(t);

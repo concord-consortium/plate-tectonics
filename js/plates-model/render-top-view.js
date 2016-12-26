@@ -50,7 +50,7 @@ export default function renderTopView(canvas, points, mode = 'plates', boundarie
           const shade = heightToShade(points[x][y][0].height);
           color = DEF_COLOR_MAP[shade];
         } else if (mode === 'plates') {
-          color = config.plateColor[points[x][y][0].plate.id];
+          color = config.plateColor[points[x][y][0].plate.id % config.plateColor.length];
         }
       }
       const dataIdx = (y * maxX + x) * 4;

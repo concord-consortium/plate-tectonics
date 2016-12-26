@@ -20,7 +20,7 @@ export default class PlatesModel extends PureComponent {
       crossSectionY: HEIGHT * 0.5,
       hotSpotsRendering: false,
       platesRendering: false,
-      plateBoundariesRendering: false,
+      plateBoundariesRendering: true,
       simEnabled: true,
     };
     this.rafCallback = this.rafCallback.bind(this);

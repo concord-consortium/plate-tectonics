@@ -10,9 +10,9 @@ export function getURLParam(name) {
 
 export function shuffle(a) {
   const res = a.concat();
-  for (let i = res.length; i; i -= 1) {
-    const j = Math.floor(Math.random() * i);
-    [res[i - 1], res[j]] = [res[j], res[i - 1]];
+  for (let i = res.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [res[i], res[j]] = [res[j], res[i]];
   }
   return res;
 }

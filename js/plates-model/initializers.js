@@ -48,6 +48,43 @@ export function subduction(width, height) {
   return [ocean, continent];
 }
 
+export function subduction2(width, height) {
+  const ocean = generatePlate({
+    x: 0,
+    y: 0,
+    width: width * 0.5,
+    height,
+    type: OCEAN,
+    vx: 3,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const continent1 = generatePlate({
+    x: width * 0.5,
+    y: 0,
+    width: width * 0.1,
+    height,
+    type: CONTINENT,
+    vx: 0,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const continent2 = generatePlate({
+    x: width * 0.6,
+    y: 0,
+    width: width * 0.4,
+    height,
+    type: CONTINENT,
+    vx: 1,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  return [ocean, continent1, continent2];
+}
+
 export function continentalCollision(width, height) {
   const oceanAndCont = generatePlate({
     x: 0,
@@ -55,7 +92,7 @@ export function continentalCollision(width, height) {
     width: width * 0.5,
     height,
     type: function type(x, y) {
-      return x > width * 0.1 && x < width * 0.4 && y > height * 0.2 && y < height * 0.8 ? CONTINENT : OCEAN;
+      return x > width * 0.05 && x < width * 0.45 && y > height * 0.05 && y < height * 0.95 ? CONTINENT : OCEAN;
     },
     vx: 2,
     vy: 0,
@@ -76,16 +113,46 @@ export function continentalCollision(width, height) {
   return [oceanAndCont, continent];
 }
 
-export function oceanicCollision(width, height) {
+export function islandCollision(width, height) {
+  const oceanAndCont = generatePlate({
+    x: 0,
+    y: 0,
+    width: width * 0.5,
+    height,
+    type: function type(x, y) {
+      return x > width * 0.2 && x < width * 0.4 && y > height * 0.3 && y < height * 0.7 ? CONTINENT : OCEAN;
+    },
+    vx: 2,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  const continent = generatePlate({
+    x: width * 0.5,
+    y: 0,
+    width: width * 0.5,
+    height,
+    type: CONTINENT,
+    vx: 0,
+    vy: 0,
+    maxX: width,
+    maxY: height,
+  });
+  return [oceanAndCont, continent];
+}
+
+export function islandChainCollision(width, height) {
   const ocean = generatePlate({
     x: 0,
     y: 0,
     width: width * 0.5,
     height,
     type: function type(x, y) {
-      return x > width * 0.3 && x < width * 0.4 && y > height * 0.2 && y < height * 0.4 ? CONTINENT : OCEAN;
+      return x > width * 0.05 && x < width * 0.15 &&
+            (y > height * 0.2 && y < height * 0.4 ||
+             y > height * 0.7 && y < height * 0.8) ? CONTINENT : OCEAN;
     },
-    vx: 2,
+    vx: 3,
     vy: 0,
     maxX: width,
     maxY: height,

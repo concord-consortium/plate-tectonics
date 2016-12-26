@@ -37,7 +37,7 @@ export function calcContinents(surface) {
         const y0 = point.y;
         for (let x = x0 - 1; x <= x0 + 1; x += 1) {
           for (let y = y0 - 1; y <= y0 + 1; y += 1) {
-            const points = surface.points[x] && surface.points[x][y];
+            const points = surface.getPoints(x, y);
             if (points) {
               for (let i = 0; i < points.length; i += 1) {
                 const neighbour = points[i];

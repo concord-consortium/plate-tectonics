@@ -93,7 +93,7 @@ export default class Model {
         x: continentPoint.x,
         y: continentPoint.y,
         radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-        strength: oceanPoint.getRelativeVelocity(continentPoint),
+        strength: config.volcanicActStrength * oceanPoint.getRelativeVelocity(continentPoint),
         plate: continentPlate,
       });
       continentPlate.addHotSpot(newHotSpot);
@@ -111,36 +111,38 @@ export default class Model {
       const newPlate = p2.plate.extractContinent(p2.continent.points);
       this.plates.push(newPlate);
     }
-    const p1p2Vx = p1.plate.vx - p2.plate.vx;
-    const p1p2Vy = p1.plate.vy - p2.plate.vy;
-    const relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
-    if (relVelocity > 0.2) {
-      const c1c2SizeRatio = p1.continent.size / p2.continent.size;
-
-      p1.plate.vx -= config.continentCollisionFriction * p1p2Vx / c1c2SizeRatio;
-      p1.plate.vy -= config.continentCollisionFriction * p1p2Vy / c1c2SizeRatio;
-      p2.plate.vx += config.continentCollisionFriction * p1p2Vx * c1c2SizeRatio;
-      p2.plate.vy += config.continentCollisionFriction * p1p2Vy * c1c2SizeRatio;
+    const pl1 = p1.plate;
+    const pl2 = p2.plate;
+    const biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
+    const smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
+    const finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
+    const finalVy = (pl1.size * pl1.vy + pl2.size * pl2.vy) / (pl1.size + pl2.size);
+    const pl1VxDiff = pl1.vx - finalVx;
+    const pl1VyDiff = pl1.vy - finalVy;
+    const pl2VxDiff = pl2.vx - finalVx;
+    const pl2VyDiff = pl2.vy - finalVy;
+    const pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
+    const pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
+    if (Math.max(pl1Diff, pl2Diff) > config.platesMergeSpeedDiff) {
+      const k = Math.min(0.9, config.continentCollisionFriction / Math.pow(smallerPlate.size, 2));
+      pl1.vx -= k * pl1VxDiff;
+      pl1.vy -= k * pl1VyDiff;
+      pl2.vx -= k * pl2VxDiff;
+      pl2.vy -= k * pl2VyDiff;
       const hotSpotConfig = {
         x: p1.x,
         y: p1.y,
         radius: Math.random() * 12 + 4,
-        strength: relVelocity * 7,
+        strength: 10,
       };
-      const newHotSpot1 = new HotSpot(Object.assign({}, hotSpotConfig, { plate: p1.plate }));
+      const newHotSpot1 = new HotSpot(Object.assign({}, hotSpotConfig, { plate: pl1 }));
       p1.plate.addHotSpot(newHotSpot1);
       // Should we add hot spot to the other plate too?
     } else if (p1.plate !== p2.plate) {
       // Merge plates.
-      const vx = 0.5 * (p1.plate.vx + p2.plate.vx);
-      const vy = 0.5 * (p1.plate.vy + p2.plate.vy);
-      p1.plate.merge(p2.plate);
-      p1.plate.vx = vx;
-      p1.plate.vy = vy;
-      // Merge continents.
-      p1.plate.points.forEach((p) => {
-        p.continent = p1.continent;
-      });
+      biggerPlate.merge(smallerPlate);
+      biggerPlate.vx = finalVx;
+      biggerPlate.vy = finalVy;
     }
   }
 
@@ -152,7 +154,7 @@ export default class Model {
         x: p1.x,
         y: p1.y,
         radius: p2.volcanicActProbability * Math.random() * 50 + 10,
-        strength: p2.getRelativeVelocity(p1) * 3 * Math.random(),
+        strength: config.volcanicActStrength * p2.getRelativeVelocity(p1) * 3 * Math.random(),
         plate,
       });
       plate.addHotSpot(newHotSpot);
@@ -164,10 +166,12 @@ export default class Model {
       plate.inactiveHotSpots.forEach((hotSpot) => {
         let volcanicActAllowed = true;
         this.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, (point) => {
-          if (!point.volcanicActAllowed) {
+          // point === null means that boundary between plates has been found. Do not let hot spots overlapping
+          // plate boundaries (it doesn't look good).
+          if (point === null || !point.volcanicActAllowed) {
             volcanicActAllowed = false;
           }
-          point.applyVolcanicActivity(hotSpot);
+          if (point) point.applyVolcanicActivity(hotSpot);
         });
         hotSpot.active = true;
         // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.

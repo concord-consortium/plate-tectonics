@@ -40,9 +40,18 @@ export default class Surface {
     }
   }
 
+  getPoints(x, y) {
+    while (x < 0) x += this.width;
+    while (y < 0) y += this.height;
+    if (x > this.width) x %= this.width;
+    if (y > this.height) y %= this.height;
+    return this.points[x] && this.points[x][y];
+  }
+
   getSurfacePoint(x, y) {
+    const points = this.getPoints(x, y);
     // Points are ordered from highest to lowest. See #setPoint.
-    return this.points[x][y] && this.points[x][y][0];
+    return points && points[0];
   }
 
   forEachPoint(callback) {
@@ -75,15 +84,21 @@ export default class Surface {
     const maxY = Math.floor(cy + radius);
     for (let x = minX; x < maxX; x += 1) {
       for (let y = minY; y < maxY; y += 1) {
-        const xr = (x + this.width) % this.width;
-        const yr = (y + this.height) % this.height;
-        if (this.points[xr][yr] && dist(x, y, cx, cy) <= radius) {
-          const points = this.points[xr][yr];
-          for (let i = 0; i < points.length; i += 1) {
-            if (points[i].plate === plate) {
-              callback(points[i]);
-              break;
+        if (dist(x, y, cx, cy) <= radius) {
+          const points = this.getPoints(x, y);
+          let platePointFound = false;
+          if (points) {
+            for (let i = 0; i < points.length; i += 1) {
+              if (points[i].plate === plate) {
+                callback(points[i]);
+                platePointFound = true;
+                break;
+              }
             }
+          }
+          if (!platePointFound) {
+            // It means that boundary between plates have been found.
+            callback(null);
           }
         }
       }

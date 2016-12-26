@@ -74,7 +74,7 @@ export default class Point {
   }
 
   get volcanicActAllowed() {
-    return this.volcanicActTime < config.volcanicActMaxTime;
+    return this.volcanicActTime < config.volcanicActMaxTime && !this.subduction;
   }
 
   get volcanicActProbability() {
@@ -94,6 +94,7 @@ export default class Point {
     if (!this.subduction) {
       this.subductionDist = 0;
     }
+    this.height = Math.min(config.subductionHeight, this.height);
     this.subductionVelocity = this.getRelativeVelocity(otherPoint);
   }
 
