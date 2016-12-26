@@ -20,7 +20,7 @@ export default class PlatesModel extends PureComponent {
       hotSpotsRendering: false,
       platesRendering: false,
       plateBoundariesRendering: true,
-      simEnabled: false,
+      simEnabled: true,
     };
     this.rafCallback = this.rafCallback.bind(this);
     this.step = this.step.bind(this);
