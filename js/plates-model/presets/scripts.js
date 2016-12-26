@@ -11,13 +11,13 @@ function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX
     for (let py = y; py < y + height; py += 1) {
       const pointType = typeof type === 'function' ? type(px, py) : type;
       if (pointType === OCEAN) {
-        pointHeight = config.newOceanHeight;
+        pointHeight = config.subductionHeight;
       } else if (smoothCont) {
         pointHeight = Math.min(0.1, config.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
       } else {
         pointHeight = 0.1;
       }
-      const point = new Point({ x: px, y: py, height: pointHeight, plate });
+      const point = new Point({ x: px, y: py, height: pointHeight, plate, age: Infinity });
       plate.addPoint(point);
     }
   }
@@ -144,7 +144,7 @@ export function islandCollision(width, height) {
 }
 
 export function islandChainCollision(width, height) {
-  const ocean = generatePlate({
+  const ocean1 = generatePlate({
     x: 0,
     y: 0,
     width: width * 0.5,
@@ -159,7 +159,7 @@ export function islandChainCollision(width, height) {
     maxX: width,
     maxY: height,
   });
-  const continent = generatePlate({
+  const ocean2 = generatePlate({
     x: width * 0.5,
     y: 0,
     width: width * 0.5,
@@ -170,7 +170,7 @@ export function islandChainCollision(width, height) {
     maxX: width,
     maxY: height,
   });
-  return [ocean, continent];
+  return [ocean1, ocean2];
 }
 
 

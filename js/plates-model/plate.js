@@ -6,6 +6,7 @@ function getPlateID() {
 
 export default class Plate {
   constructor({ x, y, vx, vy, maxX, maxY }) {
+    this.id = getPlateID();
     this.x = x;
     this.y = y;
     this.vx = vx;
@@ -16,7 +17,6 @@ export default class Plate {
     this.hotSpots = [];
     // It means that plate consist of a single continent. It's necessary when continents are colliding.
     this.continentOnly = true;
-    this.id = getPlateID();
   }
 
   get size() {

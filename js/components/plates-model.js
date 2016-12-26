@@ -30,12 +30,14 @@ export default class PlatesModel extends PureComponent {
     this.handlePlatesRenderingChange = this.handlePlatesRenderingChange.bind(this);
     this.handlePlateBoundariesRenderingChange = this.handlePlateBoundariesRenderingChange.bind(this);
     this.handleSimEnabledChange = this.handleSimEnabledChange.bind(this);
+    this.handleCanvasClick = this.handleCanvasClick.bind(this);
   }
 
   componentDidMount() {
     loadModel(getURLParam('preset') || 'continentalCollision', (model) => {
       this.model = model;
       window.model = model;
+      window.comp = this;
       this.setState({ modelWidth: model.width, modelHeight: model.height, crossSectionY: model.height * 0.5 }, () => {
         // Warning: try to start model only when width and height is already set. Otherwise, renderers might fail.
         this.renderModel();
@@ -99,6 +101,12 @@ export default class PlatesModel extends PureComponent {
     this.setState({ plateBoundariesRendering: value }, this.renderModel);
   }
 
+  handleCanvasClick(event) {
+    const x = event.pageX - event.target.offsetLeft;
+    const y = event.pageY - event.target.offsetTop;
+    console.log(this.model.getPointAt(x, y));
+  }
+
   renderModel() {
     const { modelHeight, crossSectionY, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
     renderTopView(this.topView, this.model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
@@ -116,7 +124,10 @@ export default class PlatesModel extends PureComponent {
       <div className="plates-model">
         <div>
           <div>
-            <canvas ref={(c) => { this.topView = c; }} width={modelWidth} height={modelHeight} />
+            <canvas
+              ref={(c) => { this.topView = c; }} width={modelWidth} height={modelHeight}
+              onClick={this.handleCanvasClick}
+            />
             <div className="slider">
               <Slider
                 style={{ height: modelHeight }} axis="y" min={1} max={modelHeight} step={1}

@@ -17,6 +17,10 @@ const DEFAULT_CONFIG = {
   // When oceanic crust cools down, it sinks a bit.
   oceanicCrustCoolingRatio: 0.1,
   oceanicCrustCoolingTime: 3,
+  // If heightBasedSubduction === true, always the higher point will go above lower point.
+  // Otherwise, every point from one plate will subduct, no matter what is the current height.
+  // It ensures consistent subduction across the whole boundary.
+  heightBasedSubduction: true,
   // Elevation of the oceanic plate at the beginning of subduction.
   subductionHeight: -0.6,
   // Speed of subduction.
@@ -39,7 +43,7 @@ const DEFAULT_CONFIG = {
   // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
   // during collision with other island or continents. Continents are not and they will slow down the whole plate.
   // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
-  islandRatio: 0.5,
+  islandRatio: 0.3,
   // Visual settings.
   plateColor: PLATE_COLOR,
 };

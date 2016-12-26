@@ -32,6 +32,7 @@ export default class Model {
     this.removePointsBelowMinHeight();
     this.removeDeadHotSpots();
     this.removeEmptyPlates();
+    this.sortSurface();
     this.addNewPoints();
   }
 
@@ -45,6 +46,10 @@ export default class Model {
 
   get hotSpots() {
     return [].concat([], ...this.plates.map(p => p.hotSpots));
+  }
+
+  getPointAt(x, y) {
+    return this.surface.getSurfacePoint(x, y);
   }
 
   movePlates() {
@@ -148,14 +153,22 @@ export default class Model {
   }
 
   oceanOceanCollision(p1, p2) {
-    p2.setupSubduction(p1);
-    if (Math.random() < p2.volcanicActProbability && !p1.volcanicAct) {
-      const plate = p1.plate;
+    // There are two methods to decide which points is going to subduct.
+    // If config.heightBasedSubduction === true, it will be always the higher point.
+    // Otherwise, every point from one plate will subduct, no matter what is the current height.
+    // It ensures consistent subduction across the whole boundary.
+    const subductingPlatePoint = p1.plate.id > p2.plate.id ? p1 : p2;
+    // Note that points are sorted and p1.height > p2.height.
+    const subductingPoint = config.heightBasedSubduction ? p2 : subductingPlatePoint;
+    const surfacePoint = subductingPoint === p1 ? p2 : p1;
+    subductingPoint.setupSubduction(surfacePoint);
+    if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
+      const plate = surfacePoint.plate;
       const newHotSpot = new HotSpot({
-        x: p1.x,
-        y: p1.y,
-        radius: p2.volcanicActProbability * Math.random() * 50 + 10,
-        strength: config.volcanicActStrength * p2.getRelativeVelocity(p1) * 3 * Math.random(),
+        x: surfacePoint.x,
+        y: surfacePoint.y,
+        radius: subductingPoint.volcanicActProbability * Math.random() * 50 + 10,
+        strength: config.volcanicActStrength * subductingPoint.getRelativeVelocity(surfacePoint) * 3 * Math.random(),
         plate,
       });
       plate.addHotSpot(newHotSpot);
@@ -216,6 +229,11 @@ export default class Model {
 
   removeEmptyPlates() {
     this.plates = this.plates.filter(p => p.notEmpty());
+  }
+
+  // This is necessary, as points' heights have been updated.
+  sortSurface() {
+    this.surface.sort();
   }
 
   // This handles divergent boundaries.

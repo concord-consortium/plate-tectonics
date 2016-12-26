@@ -48,7 +48,12 @@ export default function renderTopView(canvas, points, mode = 'plates', boundarie
           color = BOUNDARY_COLOR;
         } else if (mode === 'height') {
           const shade = heightToShade(points[x][y][0].height);
-          color = DEF_COLOR_MAP[shade];
+          if (shade < 0 || shade > DEF_COLOR_MAP.length - 1) {
+            // It should not happen. Mark those points using red color. Usually it means there's some error.
+            color = [255, 0, 0];
+          } else {
+            color = DEF_COLOR_MAP[shade];
+          }
         } else if (mode === 'plates') {
           color = config.plateColor[points[x][y][0].plate.id % config.plateColor.length];
         }

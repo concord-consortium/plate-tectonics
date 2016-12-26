@@ -40,6 +40,14 @@ export default class Surface {
     }
   }
 
+  sort() {
+    for (let x = 0; x < this.width; x += 1) {
+      for (let y = 0; y < this.height; y += 1) {
+        if (this.points[x][y]) this.points[x][y].sort(sortByHeightDesc);
+      }
+    }
+  }
+
   getPoints(x, y) {
     while (x < 0) x += this.width;
     while (y < 0) y += this.height;

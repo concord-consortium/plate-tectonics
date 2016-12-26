@@ -123,7 +123,7 @@ export default class Point {
       this.distFromVolcanoCenter = null;
     }
 
-    if (this.height < config.minHeight) {
+    if (this.height <= config.minHeight) {
       // Point subducted and will be removed.
       this.alive = false;
     }
