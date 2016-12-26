@@ -30,6 +30,10 @@ describe('Point', () => {
     expect(p2.relX).toEqual(plateFloat.maxX - 10);
     expect(p2.y).toEqual(Math.round(plateFloat.y - 10));
     expect(p2.relY).toEqual(plateFloat.maxY - 10);
+    const plateFloat2 = { x: 50.5, y: 50.5, maxX: 100, maxY: 100 };
+    const p3 = new Point({ x: 0, y: 0, plate: plateFloat2 });
+    expect(p3.x).toEqual(0);
+    expect(p3.y).toEqual(0);
   });
 
   test('Volcanic activity probability changes within subduction area', () => {

@@ -13,8 +13,8 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
 export default class Point {
   constructor({ x, y, type, height, plate }) {
     // Make sure that relative coords are always positive and rounded to make other calculations easier.
-    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
     this.type = type;
     this.height = height;
     this.plate = plate;
@@ -35,8 +35,8 @@ export default class Point {
     // Update relative coords!
     const x = this.x;
     const y = this.y;
-    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
     // Finally, update plate.
     this.plate = plate;
   }

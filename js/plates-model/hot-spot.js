@@ -5,8 +5,8 @@ import config from './config';
 export default class HotSpot {
   constructor({ x, y, radius, strength, plate }) {
     // Make sure that relative coords are always positive to make other calculations easier.
-    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
     this.radius = radius;
     this.strength = strength;
     this.plate = plate;
@@ -18,8 +18,8 @@ export default class HotSpot {
     // Update relative coords!
     const x = this.x;
     const y = this.y;
-    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
     // Finally, update plate.
     this.plate = plate;
   }

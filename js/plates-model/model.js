@@ -18,9 +18,11 @@ export default class Model {
     this.plates = initializers[preset](width, height);
     this.prevSurface = null;
     this.surface = new Surface({ width, height, plates: this.plates });
+    this.stepIdx = 0;
   }
 
   step() {
+    this.stepIdx += 1;
     this.movePlates();
     this.updateSurface();
     this.updateContinents();
@@ -231,6 +233,9 @@ export default class Model {
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.setPoint(newPoint);
+          } else {
+            x;
+            y;
           }
         }
       }
