@@ -29456,7 +29456,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(705);
+	__webpack_require__(710);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37395,25 +37395,25 @@
 
 	var _RaisedButton2 = _interopRequireDefault(_RaisedButton);
 
-	var _model = __webpack_require__(680);
+	var _loadModel = __webpack_require__(680);
 
-	var _model2 = _interopRequireDefault(_model);
+	var _loadModel2 = _interopRequireDefault(_loadModel);
 
-	var _renderTopView = __webpack_require__(698);
+	var _renderTopView = __webpack_require__(703);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(699);
+	var _renderHotSpots = __webpack_require__(704);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(700);
+	var _renderCrossSection = __webpack_require__(705);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
-	var _utils = __webpack_require__(692);
+	var _utils = __webpack_require__(693);
 
-	__webpack_require__(701);
+	__webpack_require__(706);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37422,9 +37422,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var WIDTH = 512;
-	var HEIGHT = 512;
 
 	var PlatesModel = function (_PureComponent) {
 	  _inherits(PlatesModel, _PureComponent);
@@ -37435,7 +37432,9 @@
 	    var _this = _possibleConstructorReturn(this, (PlatesModel.__proto__ || Object.getPrototypeOf(PlatesModel)).call(this, props));
 
 	    _this.state = {
-	      crossSectionY: HEIGHT * 0.5,
+	      modelWidth: 512,
+	      modelHeight: 512,
+	      crossSectionY: 10,
 	      hotSpotsRendering: false,
 	      platesRendering: false,
 	      plateBoundariesRendering: true,
@@ -37449,24 +37448,29 @@
 	    _this.handlePlatesRenderingChange = _this.handlePlatesRenderingChange.bind(_this);
 	    _this.handlePlateBoundariesRenderingChange = _this.handlePlateBoundariesRenderingChange.bind(_this);
 	    _this.handleSimEnabledChange = _this.handleSimEnabledChange.bind(_this);
+	    _this.handleCanvasClick = _this.handleCanvasClick.bind(_this);
 	    return _this;
 	  }
 
 	  _createClass(PlatesModel, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var simEnabled = this.state.simEnabled;
+	      var _this2 = this;
 
-	      this.model = new _model2.default({
-	        width: WIDTH,
-	        height: HEIGHT,
-	        preset: (0, _utils.getURLParam)('preset') || 'continentalCollision'
+	      (0, _loadModel2.default)((0, _utils.getURLParam)('preset') || 'continentalCollision', function (model) {
+	        _this2.model = model;
+	        window.model = model;
+	        window.comp = _this2;
+	        _this2.setState({ modelWidth: model.width, modelHeight: model.height, crossSectionY: model.height * 0.5 }, function () {
+	          // Warning: try to start model only when width and height is already set. Otherwise, renderers might fail.
+	          _this2.renderModel();
+	          var simEnabled = _this2.state.simEnabled;
+
+	          if (simEnabled) {
+	            _this2.startSimulation();
+	          }
+	        });
 	      });
-	      window.model = this.model;
-	      window.mComp = this;
-	      if (simEnabled) {
-	        this.startSimulation();
-	      }
 	    }
 	  }, {
 	    key: 'componentDidUpdate',
@@ -37534,9 +37538,17 @@
 	      this.setState({ plateBoundariesRendering: value }, this.renderModel);
 	    }
 	  }, {
+	    key: 'handleCanvasClick',
+	    value: function handleCanvasClick(event) {
+	      var x = event.pageX - event.target.offsetLeft;
+	      var y = event.pageY - event.target.offsetTop;
+	      console.log(this.model.getPointAt(x, y));
+	    }
+	  }, {
 	    key: 'renderModel',
 	    value: function renderModel() {
 	      var _state = this.state,
+	          modelHeight = _state.modelHeight,
 	          crossSectionY = _state.crossSectionY,
 	          hotSpotsRendering = _state.hotSpotsRendering,
 	          platesRendering = _state.platesRendering,
@@ -37546,15 +37558,17 @@
 	      if (hotSpotsRendering) {
 	        (0, _renderHotSpots2.default)(this.topView, this.model.hotSpots);
 	      }
-	      var crossY = HEIGHT - Math.round(crossSectionY);
+	      var crossY = modelHeight - Math.round(crossSectionY);
 	      (0, _renderCrossSection2.default)(this.crossSectionView, this.model.points, crossY, platesRendering ? 'plates' : 'type');
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      var _state2 = this.state,
+	          modelHeight = _state2.modelHeight,
+	          modelWidth = _state2.modelWidth,
 	          crossSectionY = _state2.crossSectionY,
 	          simEnabled = _state2.simEnabled,
 	          hotSpotsRendering = _state2.hotSpotsRendering,
@@ -37570,14 +37584,17 @@
 	          _react2.default.createElement(
 	            'div',
 	            null,
-	            _react2.default.createElement('canvas', { ref: function ref(c) {
-	                _this2.topView = c;
-	              }, width: WIDTH, height: HEIGHT }),
+	            _react2.default.createElement('canvas', {
+	              ref: function ref(c) {
+	                _this3.topView = c;
+	              }, width: modelWidth, height: modelHeight,
+	              onClick: this.handleCanvasClick
+	            }),
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'slider' },
 	              _react2.default.createElement(_Slider2.default, {
-	                style: { height: HEIGHT }, axis: 'y', min: 1, max: HEIGHT, step: 1,
+	                style: { height: modelHeight }, axis: 'y', min: 1, max: modelHeight, step: 1,
 	                value: crossSectionY, onChange: this.handleCrossSectionYChange
 	              })
 	            )
@@ -37590,8 +37607,8 @@
 	            'div',
 	            null,
 	            _react2.default.createElement('canvas', { ref: function ref(c) {
-	                _this2.crossSectionView = c;
-	              }, width: WIDTH, height: 100 })
+	                _this3.crossSectionView = c;
+	              }, width: modelWidth, height: 100 })
 	          )
 	        ),
 	        _react2.default.createElement(
@@ -43948,32 +43965,70 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.default = loadModel;
+
+	var _model = __webpack_require__(681);
+
+	var _model2 = _interopRequireDefault(_model);
+
+	var _scripts = __webpack_require__(697);
+
+	var scriptPresets = _interopRequireWildcard(_scripts);
+
+	var _images = __webpack_require__(699);
+
+	var imgPresets = _interopRequireWildcard(_images);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var DEF_WIDTH = 512;
+	var DEF_HEIGHT = 512;
+
+	function loadModel(presetName, callback) {
+	  // Try to load models using presets based on scripts or presets based on images.
+	  if (scriptPresets[presetName]) {
+	    var width = DEF_WIDTH;
+	    var height = DEF_HEIGHT;
+	    var plates = scriptPresets[presetName](width, height);
+	    callback(new _model2.default({ width: width, height: height, plates: plates }));
+	  } else if (imgPresets[presetName]) {
+	    imgPresets[presetName](function (plates, width, height) {
+	      callback(new _model2.default({ width: width, height: height, plates: plates }));
+	    });
+	  }
+	}
+
+/***/ },
+/* 681 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _surface = __webpack_require__(681);
+	var _surface = __webpack_require__(682);
 
 	var _surface2 = _interopRequireDefault(_surface);
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(693);
+	var _point = __webpack_require__(694);
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _hotSpot = __webpack_require__(694);
+	var _hotSpot = __webpack_require__(695);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
-	var _continent = __webpack_require__(695);
-
-	var _initializers = __webpack_require__(696);
-
-	var initializers = _interopRequireWildcard(_initializers);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	var _continent = __webpack_require__(696);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43994,22 +44049,24 @@
 	        height = _ref$height === undefined ? 512 : _ref$height,
 	        _ref$timeStep = _ref.timeStep,
 	        timeStep = _ref$timeStep === undefined ? 1 : _ref$timeStep,
-	        _ref$preset = _ref.preset,
-	        preset = _ref$preset === undefined ? 'continentalCollision' : _ref$preset;
+	        _ref$plates = _ref.plates,
+	        plates = _ref$plates === undefined ? [] : _ref$plates;
 
 	    _classCallCheck(this, Model);
 
 	    this.width = width;
 	    this.height = height;
 	    this.timeStep = timeStep;
-	    this.plates = initializers[preset](width, height);
+	    this.plates = plates;
 	    this.prevSurface = null;
-	    this.surface = new _surface2.default({ width: width, height: height, plates: this.plates });
+	    this.surface = new _surface2.default({ width: width, height: height, plates: plates });
+	    this.stepIdx = 0;
 	  }
 
 	  _createClass(Model, [{
 	    key: 'step',
 	    value: function step() {
+	      this.stepIdx += 1;
 	      this.movePlates();
 	      this.updateSurface();
 	      this.updateContinents();
@@ -44020,7 +44077,13 @@
 	      this.removePointsBelowMinHeight();
 	      this.removeDeadHotSpots();
 	      this.removeEmptyPlates();
+	      this.sortSurface();
 	      this.addNewPoints();
+	    }
+	  }, {
+	    key: 'getPointAt',
+	    value: function getPointAt(x, y) {
+	      return this.surface.getSurfacePoint(x, y);
 	    }
 	  }, {
 	    key: 'movePlates',
@@ -44137,14 +44200,22 @@
 	  }, {
 	    key: 'oceanOceanCollision',
 	    value: function oceanOceanCollision(p1, p2) {
-	      p2.setupSubduction(p1);
-	      if (Math.random() < p2.volcanicActProbability && !p1.volcanicAct) {
-	        var plate = p1.plate;
+	      // There are two methods to decide which points is going to subduct.
+	      // If config.heightBasedSubduction === true, it will be always the higher point.
+	      // Otherwise, every point from one plate will subduct, no matter what is the current height.
+	      // It ensures consistent subduction across the whole boundary.
+	      var subductingPlatePoint = p1.plate.id > p2.plate.id ? p1 : p2;
+	      // Note that points are sorted and p1.height > p2.height.
+	      var subductingPoint = _config2.default.heightBasedSubduction ? p2 : subductingPlatePoint;
+	      var surfacePoint = subductingPoint === p1 ? p2 : p1;
+	      subductingPoint.setupSubduction(surfacePoint);
+	      if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
+	        var plate = surfacePoint.plate;
 	        var newHotSpot = new _hotSpot2.default({
-	          x: p1.x,
-	          y: p1.y,
-	          radius: p2.volcanicActProbability * Math.random() * 50 + 10,
-	          strength: _config2.default.volcanicActStrength * p2.getRelativeVelocity(p1) * 3 * Math.random(),
+	          x: surfacePoint.x,
+	          y: surfacePoint.y,
+	          radius: subductingPoint.volcanicActProbability * Math.random() * 50 + 10,
+	          strength: _config2.default.volcanicActStrength * subductingPoint.getRelativeVelocity(surfacePoint) * 3 * Math.random(),
 	          plate: plate
 	        });
 	        plate.addHotSpot(newHotSpot);
@@ -44221,6 +44292,14 @@
 	      });
 	    }
 
+	    // This is necessary, as points' heights have been updated.
+
+	  }, {
+	    key: 'sortSurface',
+	    value: function sortSurface() {
+	      this.surface.sort();
+	    }
+
 	    // This handles divergent boundaries.
 
 	  }, {
@@ -44274,7 +44353,7 @@
 	exports.default = Model;
 
 /***/ },
-/* 681 */
+/* 682 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -44285,7 +44364,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _binarysearch = __webpack_require__(682);
+	var _binarysearch = __webpack_require__(683);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
@@ -44341,6 +44420,15 @@
 	      } else {
 	        // Collision!
 	        _binarysearch2.default.insert(this.points[point.x][point.y], point, sortByHeightDesc);
+	      }
+	    }
+	  }, {
+	    key: 'sort',
+	    value: function sort() {
+	      for (var x = 0; x < this.width; x += 1) {
+	        for (var y = 0; y < this.height; y += 1) {
+	          if (this.points[x][y]) this.points[x][y].sort(sortByHeightDesc);
+	        }
 	      }
 	    }
 	  }, {
@@ -44423,7 +44511,7 @@
 	exports.default = Surface;
 
 /***/ },
-/* 682 */
+/* 683 */
 /***/ function(module, exports) {
 
 	
@@ -44646,7 +44734,7 @@
 
 
 /***/ },
-/* 683 */
+/* 684 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -44655,11 +44743,11 @@
 	  value: true
 	});
 
-	var _colormap = __webpack_require__(684);
+	var _colormap = __webpack_require__(685);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
-	var _utils = __webpack_require__(692);
+	var _utils = __webpack_require__(693);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -44679,6 +44767,10 @@
 	  // When oceanic crust cools down, it sinks a bit.
 	  oceanicCrustCoolingRatio: 0.1,
 	  oceanicCrustCoolingTime: 3,
+	  // If heightBasedSubduction === true, always the higher point will go above lower point.
+	  // Otherwise, every point from one plate will subduct, no matter what is the current height.
+	  // It ensures consistent subduction across the whole boundary.
+	  heightBasedSubduction: true,
 	  // Elevation of the oceanic plate at the beginning of subduction.
 	  subductionHeight: -0.6,
 	  // Speed of subduction.
@@ -44701,7 +44793,7 @@
 	  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
 	  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
 	  // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
-	  islandRatio: 0.5,
+	  islandRatio: 0.3,
 	  // Visual settings.
 	  plateColor: PLATE_COLOR
 	};
@@ -44726,7 +44818,7 @@
 	exports.default = finalConfig;
 
 /***/ },
-/* 684 */
+/* 685 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -44736,9 +44828,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(685);
-	var clone = __webpack_require__(686);
-	var colorScale = __webpack_require__(691);
+	var at = __webpack_require__(686);
+	var clone = __webpack_require__(687);
+	var colorScale = __webpack_require__(692);
 
 	module.exports = createColormap;
 
@@ -44867,7 +44959,7 @@
 
 
 /***/ },
-/* 685 */
+/* 686 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -45060,7 +45152,7 @@
 
 
 /***/ },
-/* 686 */
+/* 687 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -45224,10 +45316,10 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(687).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(688).Buffer))
 
 /***/ },
-/* 687 */
+/* 688 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -45240,9 +45332,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(688)
-	var ieee754 = __webpack_require__(689)
-	var isArray = __webpack_require__(690)
+	var base64 = __webpack_require__(689)
+	var ieee754 = __webpack_require__(690)
+	var isArray = __webpack_require__(691)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -47023,7 +47115,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 688 */
+/* 689 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -47143,7 +47235,7 @@
 
 
 /***/ },
-/* 689 */
+/* 690 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -47233,7 +47325,7 @@
 
 
 /***/ },
-/* 690 */
+/* 691 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -47244,7 +47336,7 @@
 
 
 /***/ },
-/* 691 */
+/* 692 */
 /***/ function(module, exports) {
 
 	module.exports={
@@ -47341,7 +47433,7 @@
 
 
 /***/ },
-/* 692 */
+/* 693 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -47373,7 +47465,7 @@
 	}
 
 /***/ },
-/* 693 */
+/* 694 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -47385,7 +47477,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -47407,21 +47499,22 @@
 	  function Point(_ref) {
 	    var x = _ref.x,
 	        y = _ref.y,
-	        type = _ref.type,
 	        height = _ref.height,
-	        plate = _ref.plate;
+	        plate = _ref.plate,
+	        _ref$age = _ref.age,
+	        age = _ref$age === undefined ? 0 : _ref$age;
 
 	    _classCallCheck(this, Point);
 
 	    // Make sure that relative coords are always positive and rounded to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
-	    this.type = type;
+	    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
+	    this.type = height > _config2.default.newOceanHeight ? CONTINENT : OCEAN;
 	    this.height = height;
 	    this.plate = plate;
+	    this.age = age;
 	    // Needs to be calculated later.
 	    this.continent = null;
-	    this.age = 0;
 	    this.alive = true;
 	    // Subduction properties:
 	    this.subductionDist = null;
@@ -47438,8 +47531,8 @@
 	      // Update relative coords!
 	      var x = this.x;
 	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
 	      // Finally, update plate.
 	      this.plate = plate;
 	    }
@@ -47487,7 +47580,7 @@
 	        this.distFromVolcanoCenter = null;
 	      }
 
-	      if (this.height < _config2.default.minHeight) {
+	      if (this.height <= _config2.default.minHeight) {
 	        // Point subducted and will be removed.
 	        this.alive = false;
 	      }
@@ -47562,7 +47655,7 @@
 	exports.default = Point;
 
 /***/ },
-/* 694 */
+/* 695 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -47573,7 +47666,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -47594,8 +47687,8 @@
 	    _classCallCheck(this, HotSpot);
 
 	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+	    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
 	    this.radius = radius;
 	    this.strength = strength;
 	    this.plate = plate;
@@ -47609,8 +47702,8 @@
 	      // Update relative coords!
 	      var x = this.x;
 	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - plate.x : x - plate.x + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - plate.y : y - plate.y + plate.maxY);
+	      this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
+	      this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
 	      // Finally, update plate.
 	      this.plate = plate;
 	    }
@@ -47671,7 +47764,7 @@
 	exports.default = HotSpot;
 
 /***/ },
-/* 695 */
+/* 696 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -47755,7 +47848,7 @@
 	}
 
 /***/ },
-/* 696 */
+/* 697 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -47770,19 +47863,21 @@
 	exports.islandChainCollision = islandChainCollision;
 	exports.midOceanRidge = midOceanRidge;
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _plate = __webpack_require__(697);
+	var _plate = __webpack_require__(698);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
-	var _point = __webpack_require__(693);
+	var _point = __webpack_require__(694);
 
 	var _point2 = _interopRequireDefault(_point);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// A few simple scripts that generate initial plate configuration.
 
 	function generatePlate(_ref) {
 	  var width = _ref.width,
@@ -47807,13 +47902,13 @@
 	    for (var py = y; py < y + height; py += 1) {
 	      var pointType = typeof type === 'function' ? type(px, py) : type;
 	      if (pointType === _point.OCEAN) {
-	        pointHeight = _config2.default.newOceanHeight;
+	        pointHeight = _config2.default.subductionHeight;
 	      } else if (smoothCont) {
 	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
 	      } else {
 	        pointHeight = 0.1;
 	      }
-	      var point = new _point2.default({ x: px, y: py, height: pointHeight, type: pointType, plate: plate });
+	      var point = new _point2.default({ x: px, y: py, height: pointHeight, plate: plate, age: Infinity });
 	      plate.addPoint(point);
 	    }
 	  }
@@ -47940,7 +48035,7 @@
 	}
 
 	function islandChainCollision(width, height) {
-	  var ocean = generatePlate({
+	  var ocean1 = generatePlate({
 	    x: 0,
 	    y: 0,
 	    width: width * 0.5,
@@ -47953,7 +48048,7 @@
 	    maxX: width,
 	    maxY: height
 	  });
-	  var continent = generatePlate({
+	  var ocean2 = generatePlate({
 	    x: width * 0.5,
 	    y: 0,
 	    width: width * 0.5,
@@ -47964,7 +48059,7 @@
 	    maxX: width,
 	    maxY: height
 	  });
-	  return [ocean, continent];
+	  return [ocean1, ocean2];
 	}
 
 	function midOceanRidge(width, height) {
@@ -48018,7 +48113,7 @@
 	}
 
 /***/ },
-/* 697 */
+/* 698 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -48048,6 +48143,7 @@
 
 	    _classCallCheck(this, Plate);
 
+	    this.id = getPlateID();
 	    this.x = x;
 	    this.y = y;
 	    this.vx = vx;
@@ -48058,7 +48154,6 @@
 	    this.hotSpots = [];
 	    // It means that plate consist of a single continent. It's necessary when continents are colliding.
 	    this.continentOnly = true;
-	    this.id = getPlateID();
 	  }
 
 	  _createClass(Plate, [{
@@ -48190,7 +48285,221 @@
 	exports.default = Plate;
 
 /***/ },
-/* 698 */
+/* 699 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.test1 = test1;
+	exports.test2 = test2;
+
+	var _img2Plates = __webpack_require__(700);
+
+	var _img2Plates2 = _interopRequireDefault(_img2Plates);
+
+	var _test = __webpack_require__(702);
+
+	var _test2 = _interopRequireDefault(_test);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function test1(callback) {
+	  (0, _img2Plates2.default)(_test2.default, function (plates) {
+	    plates[1].vx = -1;
+	    plates[2].vx = 1;
+	    plates[3].vx = -1.3;
+	    callback(plates);
+	  });
+	}
+
+	function test2() {
+	  // Keep this placeholder so ESLint doesn't complain about default export.
+	  // Once we add a second function, the problem will be solved...
+	}
+
+/***/ },
+/* 700 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+	exports.default = img2plates;
+
+	var _config = __webpack_require__(684);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _getImgData = __webpack_require__(701);
+
+	var _getImgData2 = _interopRequireDefault(_getImgData);
+
+	var _plate = __webpack_require__(698);
+
+	var _plate2 = _interopRequireDefault(_plate);
+
+	var _point = __webpack_require__(694);
+
+	var _point2 = _interopRequireDefault(_point);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var BOUNDARY_H_VAL = 'b';
+	var PROCESSED_H_VAL = 'p';
+	// Process only 4 neighbours in DFS algorithm. If we processed all 8 (e.g. [-1, -1]),
+	// it would be easier to jump over plate boundary.
+	var NEIGHBOURS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+	// Boundary is defined by red pixels.
+	function isColorBoundary(data, i) {
+	  return data[i] > 32 && data[i + 1] === 0 && data[i + 2] === 0;
+	}
+
+	function normalize(data, i) {
+	  var min = _config2.default.subductionHeight;
+	  var max = _config2.default.maxHeight;
+	  var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+	  var norm = (255 - avg) / 255;
+	  return norm * (max - min) + min;
+	}
+
+	// Transforms ImageData into height map. Boundarys are marked by null values.
+	function getHeightMap(imgData) {
+	  var width = imgData.width;
+	  var height = imgData.height;
+	  var data = imgData.data;
+	  var result = [];
+	  for (var i = 0, len = width * height; i < len; i += 1) {
+	    var x = i % width;
+	    var y = Math.floor(i / width);
+	    if (!result[x]) {
+	      result[x] = [];
+	    }
+	    result[x][y] = isColorBoundary(data, i * 4) ? BOUNDARY_H_VAL : normalize(data, i * 4);
+	  }
+	  return result;
+	}
+
+	function isBoundary(heightVal) {
+	  return heightVal === BOUNDARY_H_VAL;
+	}
+
+	function isProcessed(heightVal) {
+	  return heightVal === PROCESSED_H_VAL;
+	}
+
+	function getPlates(heightMap) {
+	  var width = heightMap.length;
+	  var height = heightMap[0].length;
+	  var plates = [];
+	  var queue = [];
+	  for (var y = 0; y < height; y += 1) {
+	    for (var x = 0; x < width; x += 1) {
+	      var pointHeight = heightMap[x][y];
+	      if (!isBoundary(pointHeight) && !isProcessed(pointHeight)) {
+	        (function () {
+	          var plate = new _plate2.default({ x: 0, y: 0, vx: 0, vy: 0, maxX: width, maxY: height });
+	          plates.push(plate);
+	          var point = new _point2.default({ x: x, y: y, height: pointHeight, plate: plate, age: Infinity });
+	          plate.addPoint(point);
+	          queue.push(point);
+	          heightMap[x][y] = PROCESSED_H_VAL;
+
+	          var _loop = function _loop() {
+	            var p = queue.pop();
+	            var x0 = p.x;
+	            var y0 = p.y;
+	            NEIGHBOURS.forEach(function (_ref) {
+	              var _ref2 = _slicedToArray(_ref, 2),
+	                  dx = _ref2[0],
+	                  dy = _ref2[1];
+
+	              var i = Math.max(0, Math.min(width - 1, x0 + dx));
+	              var j = Math.max(0, Math.min(height - 1, y0 + dy));
+	              var h = heightMap[i][j];
+	              if (!isProcessed(h)) {
+	                // If point is a boundary, use height of its neighbour.
+	                var nHeight = isBoundary(h) ? p.height : h;
+	                var neighbour = new _point2.default({ x: i, y: j, height: nHeight, plate: plate, age: Infinity });
+	                plate.addPoint(neighbour);
+	                if (!isBoundary(h)) {
+	                  queue.push(neighbour);
+	                }
+	                // Mark point processed.
+	                heightMap[i][j] = PROCESSED_H_VAL;
+	              }
+	            });
+	          };
+
+	          while (queue.length > 0) {
+	            _loop();
+	          }
+	        })();
+	      }
+	    }
+	  }
+	  return plates;
+	}
+
+	function img2plates(imgSrc, callback) {
+	  (0, _getImgData2.default)(imgSrc, function (imgData) {
+	    var heightMap = getHeightMap(imgData);
+	    callback(getPlates(heightMap));
+	  });
+	}
+
+/***/ },
+/* 701 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = getImageData;
+	// Returns ImageData object containing data of the image defined by imgSrc argument.
+	function getImageData(imgSrc, callback) {
+	  function imageLoaded(event) {
+	    var img = event.target;
+	    var canvas = document.createElement('canvas');
+	    canvas.width = img.width;
+	    canvas.height = img.height;
+	    var ctx = canvas.getContext('2d');
+	    ctx.drawImage(img, 0, 0, img.width, img.height);
+	    var data = ctx.getImageData(0, 0, img.width, img.height);
+	    callback(data);
+	  }
+
+	  // Load image first.
+	  var img = document.createElement('img');
+	  img.src = imgSrc;
+	  if (img.complete) {
+	    imageLoaded(img);
+	  } else {
+	    img.addEventListener('load', imageLoaded);
+	    img.addEventListener('error', function () {
+	      throw new Error('Cannot load image ' + imgSrc);
+	    });
+	  }
+	}
+
+/***/ },
+/* 702 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "e30c9630c26810abe93055eed92a0180.png";
+
+/***/ },
+/* 703 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48200,11 +48509,11 @@
 	});
 	exports.default = renderTopView;
 
-	var _colormap = __webpack_require__(684);
+	var _colormap = __webpack_require__(685);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -48257,7 +48566,12 @@
 	          color = BOUNDARY_COLOR;
 	        } else if (mode === 'height') {
 	          var shade = heightToShade(points[x][y][0].height);
-	          color = DEF_COLOR_MAP[shade];
+	          if (shade < 0 || shade > DEF_COLOR_MAP.length - 1) {
+	            // It should not happen. Mark those points using red color. Usually it means there's some error.
+	            color = [255, 0, 0];
+	          } else {
+	            color = DEF_COLOR_MAP[shade];
+	          }
 	        } else if (mode === 'plates') {
 	          color = _config2.default.plateColor[points[x][y][0].plate.id % _config2.default.plateColor.length];
 	        }
@@ -48273,7 +48587,7 @@
 	}
 
 /***/ },
-/* 699 */
+/* 704 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -48293,7 +48607,7 @@
 	}
 
 /***/ },
-/* 700 */
+/* 705 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48306,15 +48620,15 @@
 
 	exports.default = renderCrossSection;
 
-	var _binarysearch = __webpack_require__(682);
+	var _binarysearch = __webpack_require__(683);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _config = __webpack_require__(683);
+	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(693);
+	var _point = __webpack_require__(694);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -48377,16 +48691,16 @@
 	}
 
 /***/ },
-/* 701 */
+/* 706 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(702);
+	var content = __webpack_require__(707);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(704)(content, {});
+	var update = __webpack_require__(709)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -48403,10 +48717,10 @@
 	}
 
 /***/ },
-/* 702 */
+/* 707 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(703)();
+	exports = module.exports = __webpack_require__(708)();
 	// imports
 
 
@@ -48417,7 +48731,7 @@
 
 
 /***/ },
-/* 703 */
+/* 708 */
 /***/ function(module, exports) {
 
 	/*
@@ -48473,7 +48787,7 @@
 
 
 /***/ },
-/* 704 */
+/* 709 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -48725,16 +49039,16 @@
 
 
 /***/ },
-/* 705 */
+/* 710 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(706);
+	var content = __webpack_require__(711);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(704)(content, {});
+	var update = __webpack_require__(709)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -48751,10 +49065,10 @@
 	}
 
 /***/ },
-/* 706 */
+/* 711 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(703)();
+	exports = module.exports = __webpack_require__(708)();
 	// imports
 
 
