@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import Slider from 'material-ui/Slider';
 import Toggle from 'material-ui/Toggle';
 import RaisedButton from 'material-ui/RaisedButton';
-import Model from '../plates-model/model';
+import loadModel from '../plates-model/load-model';
 import renderTopView from '../plates-model/render-top-view';
 import renderHotSpots from '../plates-model/render-hot-spots';
 import renderCrossSection from '../plates-model/render-cross-section';
@@ -10,18 +10,17 @@ import { getURLParam } from '../utils';
 
 import '../../css/plates-model.less';
 
-const WIDTH = 512;
-const HEIGHT = 512;
-
 export default class PlatesModel extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      crossSectionY: HEIGHT * 0.5,
+      modelWidth: 512,
+      modelHeight: 512,
+      crossSectionY: 10,
       hotSpotsRendering: false,
       platesRendering: false,
       plateBoundariesRendering: true,
-      simEnabled: true,
+      simEnabled: false,
     };
     this.rafCallback = this.rafCallback.bind(this);
     this.step = this.step.bind(this);
@@ -34,17 +33,18 @@ export default class PlatesModel extends PureComponent {
   }
 
   componentDidMount() {
-    const { simEnabled } = this.state;
-    this.model = new Model({
-      width: WIDTH,
-      height: HEIGHT,
-      preset: getURLParam('preset') || 'continentalCollision',
+    loadModel(getURLParam('preset') || 'continentalCollision', (model) => {
+      this.model = model;
+      window.model = model;
+      this.setState({ modelWidth: model.width, modelHeight: model.height, crossSectionY: model.height * 0.5 }, () => {
+        // Warning: try to start model only when width and height is already set. Otherwise, renderers might fail.
+        this.renderModel();
+        const { simEnabled } = this.state;
+        if (simEnabled) {
+          this.startSimulation();
+        }
+      });
     });
-    window.model = this.model;
-    window.mComp = this;
-    if (simEnabled) {
-      this.startSimulation();
-    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -100,25 +100,26 @@ export default class PlatesModel extends PureComponent {
   }
 
   renderModel() {
-    const { crossSectionY, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
+    const { modelHeight, crossSectionY, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
     renderTopView(this.topView, this.model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
     if (hotSpotsRendering) {
       renderHotSpots(this.topView, this.model.hotSpots);
     }
-    const crossY = HEIGHT - Math.round(crossSectionY);
+    const crossY = modelHeight - Math.round(crossSectionY);
     renderCrossSection(this.crossSectionView, this.model.points, crossY, platesRendering ? 'plates' : 'type');
   }
 
   render() {
-    const { crossSectionY, simEnabled, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
+    const { modelHeight, modelWidth, crossSectionY, simEnabled, hotSpotsRendering,
+            platesRendering, plateBoundariesRendering } = this.state;
     return (
       <div className="plates-model">
         <div>
           <div>
-            <canvas ref={(c) => { this.topView = c; }} width={WIDTH} height={HEIGHT} />
+            <canvas ref={(c) => { this.topView = c; }} width={modelWidth} height={modelHeight} />
             <div className="slider">
               <Slider
-                style={{ height: HEIGHT }} axis="y" min={1} max={HEIGHT} step={1}
+                style={{ height: modelHeight }} axis="y" min={1} max={modelHeight} step={1}
                 value={crossSectionY} onChange={this.handleCrossSectionYChange}
               />
             </div>
@@ -126,7 +127,7 @@ export default class PlatesModel extends PureComponent {
         </div>
         <div>
           <div>
-            <canvas ref={(c) => { this.crossSectionView = c; }} width={WIDTH} height={100} />
+            <canvas ref={(c) => { this.crossSectionView = c; }} width={modelWidth} height={100} />
           </div>
         </div>
         <div>

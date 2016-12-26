@@ -1,6 +1,8 @@
-import config from './config';
-import Plate from './plate';
-import Point, { OCEAN, CONTINENT } from './point';
+import config from '../config';
+import Plate from '../plate';
+import Point, { OCEAN, CONTINENT } from '../point';
+
+// A few simple scripts that generate initial plate configuration.
 
 function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX, maxY, smoothCont = true }) {
   let pointHeight;
@@ -15,7 +17,7 @@ function generatePlate({ width, height, type, x = 0, y = 0, vx = 0, vy = 0, maxX
       } else {
         pointHeight = 0.1;
       }
-      const point = new Point({ x: px, y: py, height: pointHeight, type: pointType, plate });
+      const point = new Point({ x: px, y: py, height: pointHeight, plate });
       plate.addPoint(point);
     }
   }

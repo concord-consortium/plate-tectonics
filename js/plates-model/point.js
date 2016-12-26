@@ -11,16 +11,16 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
 }
 
 export default class Point {
-  constructor({ x, y, type, height, plate }) {
+  constructor({ x, y, height, plate, age = 0 }) {
     // Make sure that relative coords are always positive and rounded to make other calculations easier.
     this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
     this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-    this.type = type;
+    this.type = height > config.newOceanHeight ? CONTINENT : OCEAN;
     this.height = height;
     this.plate = plate;
+    this.age = age;
     // Needs to be calculated later.
     this.continent = null;
-    this.age = 0;
     this.alive = true;
     // Subduction properties:
     this.subductionDist = null;

@@ -3,7 +3,6 @@ import config from './config';
 import Point, { OCEAN, CONTINENT } from './point';
 import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
-import * as initializers from './initializers';
 
 function isIsland(point) {
   // Assume that land is an island if its size is smaller than 50% of the whole plate area.
@@ -11,13 +10,13 @@ function isIsland(point) {
 }
 
 export default class Model {
-  constructor({ width = 512, height = 512, timeStep = 1, preset = 'continentalCollision' }) {
+  constructor({ width = 512, height = 512, timeStep = 1, plates = [] }) {
     this.width = width;
     this.height = height;
     this.timeStep = timeStep;
-    this.plates = initializers[preset](width, height);
+    this.plates = plates;
     this.prevSurface = null;
-    this.surface = new Surface({ width, height, plates: this.plates });
+    this.surface = new Surface({ width, height, plates });
     this.stepIdx = 0;
   }
 
@@ -233,9 +232,6 @@ export default class Model {
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.setPoint(newPoint);
-          } else {
-            x;
-            y;
           }
         }
       }

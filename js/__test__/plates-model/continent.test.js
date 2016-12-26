@@ -1,4 +1,4 @@
-import { continentalCollision } from '../../plates-model/initializers';
+import { continentalCollision } from '../../plates-model/presets/scripts';
 import Surface from '../../plates-model/surface';
 import { calcContinents } from '../../plates-model/continent';
 
