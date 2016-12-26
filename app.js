@@ -37438,7 +37438,7 @@
 	      crossSectionY: HEIGHT * 0.5,
 	      hotSpotsRendering: false,
 	      platesRendering: false,
-	      plateBoundariesRendering: false,
+	      plateBoundariesRendering: true,
 	      simEnabled: true
 	    };
 	    _this.rafCallback = _this.rafCallback.bind(_this);
@@ -44081,7 +44081,7 @@
 	          x: continentPoint.x,
 	          y: continentPoint.y,
 	          radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-	          strength: oceanPoint.getRelativeVelocity(continentPoint),
+	          strength: _config2.default.volcanicActStrength * oceanPoint.getRelativeVelocity(continentPoint),
 	          plate: continentPlate
 	        });
 	        continentPlate.addHotSpot(newHotSpot);
@@ -44100,36 +44100,38 @@
 	        var _newPlate = p2.plate.extractContinent(p2.continent.points);
 	        this.plates.push(_newPlate);
 	      }
-	      var p1p2Vx = p1.plate.vx - p2.plate.vx;
-	      var p1p2Vy = p1.plate.vy - p2.plate.vy;
-	      var relVelocity = Math.sqrt(p1p2Vx * p1p2Vx + p1p2Vy * p1p2Vy);
-	      if (relVelocity > 0.2) {
-	        var c1c2SizeRatio = p1.continent.size / p2.continent.size;
-
-	        p1.plate.vx -= _config2.default.continentCollisionFriction * p1p2Vx / c1c2SizeRatio / p1.continent.size;
-	        p1.plate.vy -= _config2.default.continentCollisionFriction * p1p2Vy / c1c2SizeRatio / p1.continent.size;
-	        p2.plate.vx += _config2.default.continentCollisionFriction * p1p2Vx * c1c2SizeRatio / p2.continent.size;
-	        p2.plate.vy += _config2.default.continentCollisionFriction * p1p2Vy * c1c2SizeRatio / p2.continent.size;
+	      var pl1 = p1.plate;
+	      var pl2 = p2.plate;
+	      var biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
+	      var smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
+	      var finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
+	      var finalVy = (pl1.size * pl1.vy + pl2.size * pl2.vy) / (pl1.size + pl2.size);
+	      var pl1VxDiff = pl1.vx - finalVx;
+	      var pl1VyDiff = pl1.vy - finalVy;
+	      var pl2VxDiff = pl2.vx - finalVx;
+	      var pl2VyDiff = pl2.vy - finalVy;
+	      var pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
+	      var pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
+	      if (Math.max(pl1Diff, pl2Diff) > _config2.default.platesMergeSpeedDiff) {
+	        var k = Math.min(0.9, _config2.default.continentCollisionFriction / Math.pow(smallerPlate.size, 2));
+	        pl1.vx -= k * pl1VxDiff;
+	        pl1.vy -= k * pl1VyDiff;
+	        pl2.vx -= k * pl2VxDiff;
+	        pl2.vy -= k * pl2VyDiff;
 	        var hotSpotConfig = {
 	          x: p1.x,
 	          y: p1.y,
 	          radius: Math.random() * 12 + 4,
-	          strength: relVelocity * 7
+	          strength: 10
 	        };
-	        var newHotSpot1 = new _hotSpot2.default(Object.assign({}, hotSpotConfig, { plate: p1.plate }));
+	        var newHotSpot1 = new _hotSpot2.default(Object.assign({}, hotSpotConfig, { plate: pl1 }));
 	        p1.plate.addHotSpot(newHotSpot1);
 	        // Should we add hot spot to the other plate too?
 	      } else if (p1.plate !== p2.plate) {
 	        // Merge plates.
-	        var vx = 0.5 * (p1.plate.vx + p2.plate.vx);
-	        var vy = 0.5 * (p1.plate.vy + p2.plate.vy);
-	        p1.plate.merge(p2.plate);
-	        p1.plate.vx = vx;
-	        p1.plate.vy = vy;
-	        // Merge continents.
-	        p1.plate.points.forEach(function (p) {
-	          p.continent = p1.continent;
-	        });
+	        biggerPlate.merge(smallerPlate);
+	        biggerPlate.vx = finalVx;
+	        biggerPlate.vy = finalVy;
 	      }
 	    }
 	  }, {
@@ -44142,7 +44144,7 @@
 	          x: p1.x,
 	          y: p1.y,
 	          radius: p2.volcanicActProbability * Math.random() * 50 + 10,
-	          strength: p2.getRelativeVelocity(p1) * 3 * Math.random(),
+	          strength: _config2.default.volcanicActStrength * p2.getRelativeVelocity(p1) * 3 * Math.random(),
 	          plate: plate
 	        });
 	        plate.addHotSpot(newHotSpot);
@@ -44157,10 +44159,12 @@
 	        plate.inactiveHotSpots.forEach(function (hotSpot) {
 	          var volcanicActAllowed = true;
 	          _this3.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, function (point) {
-	            if (!point.volcanicActAllowed) {
+	            // point === null means that boundary between plates has been found. Do not let hot spots overlapping
+	            // plate boundaries (it doesn't look good).
+	            if (point === null || !point.volcanicActAllowed) {
 	              volcanicActAllowed = false;
 	            }
-	            point.applyVolcanicActivity(hotSpot);
+	            if (point) point.applyVolcanicActivity(hotSpot);
 	          });
 	          hotSpot.active = true;
 	          // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.
@@ -44340,10 +44344,22 @@
 	      }
 	    }
 	  }, {
+	    key: 'getPoints',
+	    value: function getPoints(x, y) {
+	      while (x < 0) {
+	        x += this.width;
+	      }while (y < 0) {
+	        y += this.height;
+	      }if (x > this.width) x %= this.width;
+	      if (y > this.height) y %= this.height;
+	      return this.points[x] && this.points[x][y];
+	    }
+	  }, {
 	    key: 'getSurfacePoint',
 	    value: function getSurfacePoint(x, y) {
+	      var points = this.getPoints(x, y);
 	      // Points are ordered from highest to lowest. See #setPoint.
-	      return this.points[x][y] && this.points[x][y][0];
+	      return points && points[0];
 	    }
 	  }, {
 	    key: 'forEachPoint',
@@ -44379,15 +44395,21 @@
 	      var maxY = Math.floor(cy + radius);
 	      for (var x = minX; x < maxX; x += 1) {
 	        for (var y = minY; y < maxY; y += 1) {
-	          var xr = (x + this.width) % this.width;
-	          var yr = (y + this.height) % this.height;
-	          if (this.points[xr][yr] && dist(x, y, cx, cy) <= radius) {
-	            var points = this.points[xr][yr];
-	            for (var i = 0; i < points.length; i += 1) {
-	              if (points[i].plate === plate) {
-	                callback(points[i]);
-	                break;
+	          if (dist(x, y, cx, cy) <= radius) {
+	            var points = this.getPoints(x, y);
+	            var platePointFound = false;
+	            if (points) {
+	              for (var i = 0; i < points.length; i += 1) {
+	                if (points[i].plate === plate) {
+	                  callback(points[i]);
+	                  platePointFound = true;
+	                  break;
+	                }
 	              }
+	            }
+	            if (!platePointFound) {
+	              // It means that boundary between plates have been found.
+	              callback(null);
 	            }
 	          }
 	        }
@@ -44643,7 +44665,7 @@
 
 	var PLATE_COLOR = (0, _utils.shuffle)((0, _colormap2.default)({
 	  colormap: 'cubehelix', // pick a builtin colormap or add your own
-	  nshades: 1000, // how many divisions
+	  nshades: 100, // how many divisions
 	  format: 'rgb', // "hex" or "rgb" or "rgbaString"
 	  alpha: 1
 	}));
@@ -44653,12 +44675,16 @@
 	  maxHeight: 1,
 	  waterLevel: 0,
 	  // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
-	  newOceanHeight: -0.5,
+	  newOceanHeight: -0.3,
 	  // When oceanic crust cools down, it sinks a bit.
-	  oceanicCrustCoolingRatio: 0.025,
+	  oceanicCrustCoolingRatio: 0.1,
 	  oceanicCrustCoolingTime: 3,
+	  // Elevation of the oceanic plate at the beginning of subduction.
+	  subductionHeight: -0.6,
 	  // Speed of subduction.
 	  subductionRatio: 0.00015,
+	  // Strength of volcanic activity related to subduction.
+	  volcanicActStrength: 1,
 	  // Volcanoes are created between min and max distance from convergent boundary.
 	  volcanicActMinDist: 20,
 	  volcanicActMaxDist: 70,
@@ -44669,7 +44695,9 @@
 	  // Volcano lifespan is proportional to this value and its diameter.
 	  volcanoLifeLengthRatio: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
-	  continentCollisionFriction: 0.1,
+	  continentCollisionFriction: 10000,
+	  // Plates are merged when they are overlapping and the difference between their velocities is smaller than this value.
+	  platesMergeSpeedDiff: 0.5,
 	  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
 	  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
 	  // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
@@ -47335,10 +47363,10 @@
 
 	function shuffle(a) {
 	  var res = a.concat();
-	  for (var i = res.length; i; i -= 1) {
-	    var j = Math.floor(Math.random() * i);
-	    var _ref = [res[j], res[i - 1]];
-	    res[i - 1] = _ref[0];
+	  for (var i = res.length - 1; i > 0; i -= 1) {
+	    var j = Math.floor(Math.random() * (i + 1));
+	    var _ref = [res[j], res[i]];
+	    res[i] = _ref[0];
 	    res[j] = _ref[1];
 	  }
 	  return res;
@@ -47428,6 +47456,7 @@
 	      if (!this.subduction) {
 	        this.subductionDist = 0;
 	      }
+	      this.height = Math.min(_config2.default.subductionHeight, this.height);
 	      this.subductionVelocity = this.getRelativeVelocity(otherPoint);
 	    }
 	  }, {
@@ -47516,7 +47545,7 @@
 	  }, {
 	    key: 'volcanicActAllowed',
 	    get: function get() {
-	      return this.volcanicActTime < _config2.default.volcanicActMaxTime;
+	      return this.volcanicActTime < _config2.default.volcanicActMaxTime && !this.subduction;
 	    }
 	  }, {
 	    key: 'volcanicActProbability',
@@ -47705,7 +47734,7 @@
 	        var y0 = point.y;
 	        for (var x = x0 - 1; x <= x0 + 1; x += 1) {
 	          for (var y = y0 - 1; y <= y0 + 1; y += 1) {
-	            var points = surface.points[x] && surface.points[x][y];
+	            var points = surface.getPoints(x, y);
 	            if (points) {
 	              for (var i = 0; i < points.length; i += 1) {
 	                var neighbour = points[i];
@@ -47735,8 +47764,10 @@
 	  value: true
 	});
 	exports.subduction = subduction;
+	exports.subduction2 = subduction2;
 	exports.continentalCollision = continentalCollision;
-	exports.oceanicCollision = oceanicCollision;
+	exports.islandCollision = islandCollision;
+	exports.islandChainCollision = islandChainCollision;
 	exports.midOceanRidge = midOceanRidge;
 
 	var _config = __webpack_require__(683);
@@ -47815,6 +47846,43 @@
 	  return [ocean, continent];
 	}
 
+	function subduction2(width, height) {
+	  var ocean = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.OCEAN,
+	    vx: 3,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent1 = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.1,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent2 = generatePlate({
+	    x: width * 0.6,
+	    y: 0,
+	    width: width * 0.4,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 1,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [ocean, continent1, continent2];
+	}
+
 	function continentalCollision(width, height) {
 	  var oceanAndCont = generatePlate({
 	    x: 0,
@@ -47822,7 +47890,7 @@
 	    width: width * 0.5,
 	    height: height,
 	    type: function type(x, y) {
-	      return x > width * 0.1 && x < width * 0.4 && y > height * 0.2 && y < height * 0.8 ? _point.CONTINENT : _point.OCEAN;
+	      return x > width * 0.05 && x < width * 0.45 && y > height * 0.05 && y < height * 0.95 ? _point.CONTINENT : _point.OCEAN;
 	    },
 	    vx: 2,
 	    vy: 0,
@@ -47843,16 +47911,44 @@
 	  return [oceanAndCont, continent];
 	}
 
-	function oceanicCollision(width, height) {
+	function islandCollision(width, height) {
+	  var oceanAndCont = generatePlate({
+	    x: 0,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: function type(x, y) {
+	      return x > width * 0.2 && x < width * 0.4 && y > height * 0.3 && y < height * 0.7 ? _point.CONTINENT : _point.OCEAN;
+	    },
+	    vx: 2,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  var continent = generatePlate({
+	    x: width * 0.5,
+	    y: 0,
+	    width: width * 0.5,
+	    height: height,
+	    type: _point.CONTINENT,
+	    vx: 0,
+	    vy: 0,
+	    maxX: width,
+	    maxY: height
+	  });
+	  return [oceanAndCont, continent];
+	}
+
+	function islandChainCollision(width, height) {
 	  var ocean = generatePlate({
 	    x: 0,
 	    y: 0,
 	    width: width * 0.5,
 	    height: height,
 	    type: function type(x, y) {
-	      return x > width * 0.3 && x < width * 0.4 && y > height * 0.2 && y < height * 0.4 ? _point.CONTINENT : _point.OCEAN;
+	      return x > width * 0.05 && x < width * 0.15 && (y > height * 0.2 && y < height * 0.4 || y > height * 0.7 && y < height * 0.8) ? _point.CONTINENT : _point.OCEAN;
 	    },
-	    vx: 2,
+	    vx: 3,
 	    vy: 0,
 	    maxX: width,
 	    maxY: height
@@ -48163,7 +48259,7 @@
 	          var shade = heightToShade(points[x][y][0].height);
 	          color = DEF_COLOR_MAP[shade];
 	        } else if (mode === 'plates') {
-	          color = _config2.default.plateColor[points[x][y][0].plate.id];
+	          color = _config2.default.plateColor[points[x][y][0].plate.id % _config2.default.plateColor.length];
 	        }
 	      }
 	      var dataIdx = (y * maxX + x) * 4;
@@ -48253,7 +48349,7 @@
 	    });
 	    heightData.push(h);
 	    var p = (points[x][crossSectionY] || []).map(function (point) {
-	      return point.plate.id;
+	      return point.plate.id % _config2.default.plateColor.length;
 	    });
 	    plate.push(p);
 	    var t = (points[x][crossSectionY] || []).map(function (point) {
