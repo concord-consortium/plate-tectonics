@@ -44037,7 +44037,8 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function isIsland(point) {
-	  // Assume that land is an island if its size is smaller than 50% of the whole plate area.
+	  // Assume that land is an island if its size is smaller than X% of the whole plate area
+	  // (defined by islandRatio value).
 	  return point.continent.size < point.plate.size * _config2.default.islandRatio;
 	}
 
@@ -44126,9 +44127,6 @@
 	        } else if (p1.type === _point.OCEAN && p2.type === _point.OCEAN) {
 	          _this2.oceanOceanCollision(p1, p2);
 	        }
-	        for (var i = 2; i < points.length; i += 1) {
-	          points[i].alive = false;
-	        }
 	      });
 	    }
 	  }, {
@@ -44165,8 +44163,6 @@
 	      }
 	      var pl1 = p1.plate;
 	      var pl2 = p2.plate;
-	      var biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
-	      var smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
 	      var finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
 	      var finalVy = (pl1.size * pl1.vy + pl2.size * pl2.vy) / (pl1.size + pl2.size);
 	      var pl1VxDiff = pl1.vx - finalVx;
@@ -44175,24 +44171,46 @@
 	      var pl2VyDiff = pl2.vy - finalVy;
 	      var pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
 	      var pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
+	      // Make friction proportional to the continent size. It ensures that continents would pretty much overlap in the
+	      // same amount, no matter what's the size of the surrounding plate.
+	      var smallerContinentSize = Math.min(p1.continent.size, p2.continent.size);
+	      var k = Math.min(0.9, _config2.default.continentCollisionFriction / smallerContinentSize);
+	      pl1.vx -= k * pl1VxDiff;
+	      pl1.vy -= k * pl1VyDiff;
+	      pl2.vx -= k * pl2VxDiff;
+	      pl2.vy -= k * pl2VyDiff;
 	      if (Math.max(pl1Diff, pl2Diff) > _config2.default.platesMergeSpeedDiff) {
-	        var k = Math.min(0.9, _config2.default.continentCollisionFriction / Math.pow(smallerPlate.size, 2));
-	        pl1.vx -= k * pl1VxDiff;
-	        pl1.vy -= k * pl1VyDiff;
-	        pl2.vx -= k * pl2VxDiff;
-	        pl2.vy -= k * pl2VyDiff;
-	        var hotSpotConfig = {
-	          x: p1.x,
-	          y: p1.y,
-	          radius: Math.random() * 12 + 4,
-	          strength: 10
-	        };
-	        var newHotSpot1 = new _hotSpot2.default(Object.assign({}, hotSpotConfig, { plate: pl1 }));
-	        p1.plate.addHotSpot(newHotSpot1);
-	        // Should we add hot spot to the other plate too?
-	      } else if (p1.plate !== p2.plate) {
-	        // Merge plates.
-	        biggerPlate.merge(smallerPlate);
+	        var newHotSpot1 = new _hotSpot2.default({
+	          x: p1.x + Math.random() * 30 - 15,
+	          y: p1.y + Math.random() * 30 - 15,
+	          radius: Math.random() * 12 + 2,
+	          strength: 30,
+	          lifeRatio: 0.1,
+	          plate: pl1,
+	          overlapping: true
+	        });
+	        pl1.addHotSpot(newHotSpot1);
+	        var newHotSpot2 = new _hotSpot2.default({
+	          x: p1.x + Math.random() * 30 - 15,
+	          y: p1.y + Math.random() * 30 - 15,
+	          radius: Math.random() * 12 + 2,
+	          strength: 30,
+	          lifeRatio: 0.1,
+	          plate: pl2,
+	          overlapping: true
+	        });
+	        pl2.addHotSpot(newHotSpot2);
+	        // Remove lower point.
+	        p2.alive = false;
+	      } else {
+	        var biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
+	        var smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
+	        // Merge only smaller plates. Two big continents will be still divided, but their velocity be the same.
+	        if (smallerPlate.size < this.size * _config2.default.mergePlateRatio) {
+	          biggerPlate.merge(smallerPlate);
+	        }
+	        smallerPlate.vx = finalVx;
+	        smallerPlate.vy = finalVy;
 	        biggerPlate.vx = finalVx;
 	        biggerPlate.vy = finalVy;
 	      }
@@ -44204,10 +44222,15 @@
 	      // If config.heightBasedSubduction === true, it will be always the higher point.
 	      // Otherwise, every point from one plate will subduct, no matter what is the current height.
 	      // It ensures consistent subduction across the whole boundary.
-	      var subductingPlatePoint = p1.plate.id > p2.plate.id ? p1 : p2;
+	      var subductingPlatePoint = p1.plate.id < p2.plate.id ? p1 : p2;
 	      // Note that points are sorted and p1.height > p2.height.
 	      var subductingPoint = _config2.default.heightBasedSubduction ? p2 : subductingPlatePoint;
 	      var surfacePoint = subductingPoint === p1 ? p2 : p1;
+	      if (surfacePoint.subduction) {
+	        // If surface point is already subducting, ignore this type of collision. It could create weird effects
+	        // when non-height based subduction is enabled.
+	        return;
+	      }
 	      subductingPoint.setupSubduction(surfacePoint);
 	      if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
 	        var plate = surfacePoint.plate;
@@ -44344,6 +44367,11 @@
 	      return (_ref2 = []).concat.apply(_ref2, [[]].concat(_toConsumableArray(this.plates.map(function (p) {
 	        return p.hotSpots;
 	      }))));
+	    }
+	  }, {
+	    key: 'size',
+	    get: function get() {
+	      return this.width * this.height;
 	    }
 	  }]);
 
@@ -44765,12 +44793,12 @@
 	  // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
 	  newOceanHeight: -0.3,
 	  // When oceanic crust cools down, it sinks a bit.
-	  oceanicCrustCoolingRatio: 0.1,
-	  oceanicCrustCoolingTime: 3,
+	  oceanicCrustCoolingRatio: 0.05,
+	  oceanicCrustCoolingTime: 6,
 	  // If heightBasedSubduction === true, always the higher point will go above lower point.
 	  // Otherwise, every point from one plate will subduct, no matter what is the current height.
 	  // It ensures consistent subduction across the whole boundary.
-	  heightBasedSubduction: true,
+	  heightBasedSubduction: false,
 	  // Elevation of the oceanic plate at the beginning of subduction.
 	  subductionHeight: -0.6,
 	  // Speed of subduction.
@@ -44787,13 +44815,16 @@
 	  // Volcano lifespan is proportional to this value and its diameter.
 	  volcanoLifeLengthRatio: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
-	  continentCollisionFriction: 10000,
+	  continentCollisionFriction: 6,
 	  // Plates are merged when they are overlapping and the difference between their velocities is smaller than this value.
-	  platesMergeSpeedDiff: 0.5,
+	  platesMergeSpeedDiff: 0.3,
 	  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
 	  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
-	  // Ratio equal to 0.5 means that land smaller than 0.5 * plate.size is treated as island.
-	  islandRatio: 0.3,
+	  // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
+	  islandRatio: 0.05,
+	  // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
+	  // colliding with big continents will join them.
+	  mergePlateRatio: 0.1,
 	  // Visual settings.
 	  plateColor: PLATE_COLOR
 	};
@@ -47518,7 +47549,7 @@
 	    this.alive = true;
 	    // Subduction properties:
 	    this.subductionDist = null;
-	    this.subductionVelocity = null;
+	    this.subductionVelocity = 0;
 	    // Volcanic activity properties:
 	    this.volcanicHotSpot = false;
 	    this.distFromVolcanoCenter = null;
@@ -47550,7 +47581,7 @@
 	        this.subductionDist = 0;
 	      }
 	      this.height = Math.min(_config2.default.subductionHeight, this.height);
-	      this.subductionVelocity = this.getRelativeVelocity(otherPoint);
+	      this.subductionVelocity = Math.max(this.getRelativeVelocity(otherPoint), 0.5);
 	    }
 	  }, {
 	    key: 'applyVolcanicActivity',
@@ -47570,6 +47601,7 @@
 	      if (this.subduction) {
 	        this.subductionDist += this.subductionVelocity * timeStep;
 	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
+	        this.subductionVelocity = 0;
 	      }
 
 	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
@@ -47682,7 +47714,9 @@
 	        y = _ref.y,
 	        radius = _ref.radius,
 	        strength = _ref.strength,
-	        plate = _ref.plate;
+	        plate = _ref.plate,
+	        _ref$lifeRatio = _ref.lifeRatio,
+	        lifeRatio = _ref$lifeRatio === undefined ? 1 : _ref$lifeRatio;
 
 	    _classCallCheck(this, HotSpot);
 
@@ -47693,7 +47727,7 @@
 	    this.strength = strength;
 	    this.plate = plate;
 	    this.active = false;
-	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius;
+	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius * lifeRatio;
 	  }
 
 	  _createClass(HotSpot, [{
@@ -48013,7 +48047,7 @@
 	    width: width * 0.5,
 	    height: height,
 	    type: function type(x, y) {
-	      return x > width * 0.2 && x < width * 0.4 && y > height * 0.3 && y < height * 0.7 ? _point.CONTINENT : _point.OCEAN;
+	      return x > width * 0.2 && x < width * 0.4 && y > height * 0.45 && y < height * 0.55 ? _point.CONTINENT : _point.OCEAN;
 	    },
 	    vx: 2,
 	    vy: 0,
