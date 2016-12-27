@@ -1,8 +1,12 @@
 import img2plates from '../img-2-plates';
-import test1src from '../../../data/test1.png';
+import test1Src from '../../../data/test1.png';
+import test2Src from '../../../data/test2.png';
+import test3Src from '../../../data/test3.png';
+import test4Src from '../../../data/test4.png';
+import islandsSrc from '../../../data/islands.png';
 
 export function test1(callback) {
-  img2plates(test1src, (plates) => {
+  img2plates(test1Src, (plates) => {
     plates[1].vx = -1;
     plates[2].vx = 1;
     plates[3].vx = -1.3;
@@ -10,7 +14,45 @@ export function test1(callback) {
   });
 }
 
-export function test2() {
-  // Keep this placeholder so ESLint doesn't complain about default export.
-  // Once we add a second function, the problem will be solved...
+export function test2(callback) {
+  img2plates(test2Src, (plates) => {
+    plates[1].vx = -1;
+    plates[2].vx = 1;
+    plates[3].vx = -1.3;
+    callback(plates);
+  });
+}
+
+export function test3(callback) {
+  img2plates(test3Src, (plates) => {
+    plates[0].vy = 0.5;
+    plates[1].vy = -0.5;
+    plates[2].vy = 0.5;
+    plates[3].vy = -0.5;
+    plates[4].vy = 0.5;
+    callback(plates);
+  });
+}
+
+export function test4(callback) {
+  img2plates(test4Src, (plates) => {
+    plates[0].vx = 1;
+    plates[0].vy = 1;
+    plates[1].vx = -1;
+    plates[2].vx = 1;
+    plates[2].vy = -1;
+    plates[3].vx = 1;
+    plates[3].vy = -1;
+    plates[4].vx = -1;
+    plates[4].vy = 1;
+    callback(plates);
+  });
+}
+
+export function islands(callback) {
+  img2plates(islandsSrc, (plates) => {
+    plates[0].vx = 3;
+    plates[1].vx = 0;
+    callback(plates);
+  });
 }

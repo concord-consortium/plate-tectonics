@@ -28,8 +28,8 @@ const DEFAULT_CONFIG = {
   // Strength of volcanic activity related to subduction.
   volcanicActStrength: 1,
   // Volcanoes are created between min and max distance from convergent boundary.
-  volcanicActMinDist: 20,
-  volcanicActMaxDist: 70,
+  volcanicActMinDist: 5,
+  volcanicActMaxDist: 30,
   // Limit amount of time that given point can undergo volcanic activity.
   volcanicActMaxTime: 100,
   // Strength of volcanic activity.

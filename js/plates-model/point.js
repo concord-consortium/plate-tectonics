@@ -113,7 +113,6 @@ export default class Point {
     if (this.subduction) {
       this.subductionDist += this.subductionVelocity * timeStep;
       this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
-      this.subductionVelocity = 0;
     }
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
