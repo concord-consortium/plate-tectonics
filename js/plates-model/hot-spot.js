@@ -3,7 +3,7 @@ import config from './config';
 // Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
 // It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
 export default class HotSpot {
-  constructor({ x, y, radius, strength, plate }) {
+  constructor({ x, y, radius, strength, plate, lifeRatio = 1 }) {
     // Make sure that relative coords are always positive to make other calculations easier.
     this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
     this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
@@ -11,7 +11,7 @@ export default class HotSpot {
     this.strength = strength;
     this.plate = plate;
     this.active = false;
-    this.lifeLeft = config.volcanoLifeLengthRatio * radius;
+    this.lifeLeft = config.volcanoLifeLengthRatio * radius * lifeRatio;
   }
 
   setPlate(plate) {

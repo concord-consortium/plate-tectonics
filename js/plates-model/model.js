@@ -5,7 +5,8 @@ import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
 
 function isIsland(point) {
-  // Assume that land is an island if its size is smaller than 50% of the whole plate area.
+  // Assume that land is an island if its size is smaller than X% of the whole plate area
+  // (defined by islandRatio value).
   return point.continent.size < point.plate.size * config.islandRatio;
 }
 
@@ -48,6 +49,10 @@ export default class Model {
     return [].concat([], ...this.plates.map(p => p.hotSpots));
   }
 
+  get size() {
+    return this.width * this.height;
+  }
+
   getPointAt(x, y) {
     return this.surface.getSurfacePoint(x, y);
   }
@@ -81,9 +86,6 @@ export default class Model {
         this.continentContinentCollision(p1, p2);
       } else if (p1.type === OCEAN && p2.type === OCEAN) {
         this.oceanOceanCollision(p1, p2);
-      }
-      for (let i = 2; i < points.length; i += 1) {
-        points[i].alive = false;
       }
     });
   }
@@ -119,8 +121,6 @@ export default class Model {
     }
     const pl1 = p1.plate;
     const pl2 = p2.plate;
-    const biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
-    const smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
     const finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
     const finalVy = (pl1.size * pl1.vy + pl2.size * pl2.vy) / (pl1.size + pl2.size);
     const pl1VxDiff = pl1.vx - finalVx;
@@ -129,24 +129,46 @@ export default class Model {
     const pl2VyDiff = pl2.vy - finalVy;
     const pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
     const pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
+    // Make friction proportional to the continent size. It ensures that continents would pretty much overlap in the
+    // same amount, no matter what's the size of the surrounding plate.
+    const smallerContinentSize = Math.min(p1.continent.size, p2.continent.size);
+    const k = Math.min(0.9, config.continentCollisionFriction / smallerContinentSize);
+    pl1.vx -= k * pl1VxDiff;
+    pl1.vy -= k * pl1VyDiff;
+    pl2.vx -= k * pl2VxDiff;
+    pl2.vy -= k * pl2VyDiff;
     if (Math.max(pl1Diff, pl2Diff) > config.platesMergeSpeedDiff) {
-      const k = Math.min(0.9, config.continentCollisionFriction / Math.pow(smallerPlate.size, 2));
-      pl1.vx -= k * pl1VxDiff;
-      pl1.vy -= k * pl1VyDiff;
-      pl2.vx -= k * pl2VxDiff;
-      pl2.vy -= k * pl2VyDiff;
-      const hotSpotConfig = {
-        x: p1.x,
-        y: p1.y,
-        radius: Math.random() * 12 + 4,
-        strength: 10,
-      };
-      const newHotSpot1 = new HotSpot(Object.assign({}, hotSpotConfig, { plate: pl1 }));
-      p1.plate.addHotSpot(newHotSpot1);
-      // Should we add hot spot to the other plate too?
-    } else if (p1.plate !== p2.plate) {
-      // Merge plates.
-      biggerPlate.merge(smallerPlate);
+      const newHotSpot1 = new HotSpot({
+        x: p1.x + Math.random() * 30 - 15,
+        y: p1.y + Math.random() * 30 - 15,
+        radius: Math.random() * 12 + 2,
+        strength: 30,
+        lifeRatio: 0.1,
+        plate: pl1,
+        overlapping: true,
+      });
+      pl1.addHotSpot(newHotSpot1);
+      const newHotSpot2 = new HotSpot({
+        x: p1.x + Math.random() * 30 - 15,
+        y: p1.y + Math.random() * 30 - 15,
+        radius: Math.random() * 12 + 2,
+        strength: 30,
+        lifeRatio: 0.1,
+        plate: pl2,
+        overlapping: true,
+      });
+      pl2.addHotSpot(newHotSpot2);
+      // Remove lower point.
+      p2.alive = false;
+    } else {
+      const biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
+      const smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
+      // Merge only smaller plates. Two big continents will be still divided, but their velocity be the same.
+      if (smallerPlate.size < this.size * config.mergePlateRatio) {
+        biggerPlate.merge(smallerPlate);
+      }
+      smallerPlate.vx = finalVx;
+      smallerPlate.vy = finalVy;
       biggerPlate.vx = finalVx;
       biggerPlate.vy = finalVy;
     }
@@ -157,10 +179,15 @@ export default class Model {
     // If config.heightBasedSubduction === true, it will be always the higher point.
     // Otherwise, every point from one plate will subduct, no matter what is the current height.
     // It ensures consistent subduction across the whole boundary.
-    const subductingPlatePoint = p1.plate.id > p2.plate.id ? p1 : p2;
+    const subductingPlatePoint = p1.plate.id < p2.plate.id ? p1 : p2;
     // Note that points are sorted and p1.height > p2.height.
     const subductingPoint = config.heightBasedSubduction ? p2 : subductingPlatePoint;
     const surfacePoint = subductingPoint === p1 ? p2 : p1;
+    if (surfacePoint.subduction) {
+      // If surface point is already subducting, ignore this type of collision. It could create weird effects
+      // when non-height based subduction is enabled.
+      return;
+    }
     subductingPoint.setupSubduction(surfacePoint);
     if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
       const plate = surfacePoint.plate;

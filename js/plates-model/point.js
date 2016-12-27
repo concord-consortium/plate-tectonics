@@ -24,7 +24,7 @@ export default class Point {
     this.alive = true;
     // Subduction properties:
     this.subductionDist = null;
-    this.subductionVelocity = null;
+    this.subductionVelocity = 0;
     // Volcanic activity properties:
     this.volcanicHotSpot = false;
     this.distFromVolcanoCenter = null;
@@ -95,7 +95,7 @@ export default class Point {
       this.subductionDist = 0;
     }
     this.height = Math.min(config.subductionHeight, this.height);
-    this.subductionVelocity = this.getRelativeVelocity(otherPoint);
+    this.subductionVelocity = Math.max(this.getRelativeVelocity(otherPoint), 0.5);
   }
 
   applyVolcanicActivity(hotSpot) {
@@ -113,6 +113,7 @@ export default class Point {
     if (this.subduction) {
       this.subductionDist += this.subductionVelocity * timeStep;
       this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
+      this.subductionVelocity = 0;
     }
 
     if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
