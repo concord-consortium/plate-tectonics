@@ -1,9 +1,12 @@
-import img2plates from '../img-2-plates';
-import test1Src from '../../../data/test1.png';
-import test2Src from '../../../data/test2.png';
-import test3Src from '../../../data/test3.png';
-import test4Src from '../../../data/test4.png';
-import islandsSrc from '../../../data/islands.png';
+import img2plates from './img-2-plates';
+import test1Src from '../../data/test1.png';
+import test2Src from '../../data/test2.png';
+import test3Src from '../../data/test3.png';
+import test4Src from '../../data/test4.png';
+import islandsSrc from '../../data/islands.png';
+import islandCollisionSrc from '../../data/islandCollision.png';
+import continentCollisionSrc from '../../data/continentCollision.png';
+import oceanRidgeSrc from '../../data/oceanRidge.png';
 
 export function test1(callback) {
   img2plates(test1Src, (plates) => {
@@ -53,6 +56,28 @@ export function islands(callback) {
   img2plates(islandsSrc, (plates) => {
     plates[0].vx = 3;
     plates[1].vx = 0;
+    callback(plates);
+  });
+}
+
+export function islandCollision(callback) {
+  img2plates(islandCollisionSrc, (plates) => {
+    plates[0].vx = 2;
+    callback(plates);
+  });
+}
+
+export function continentCollision(callback) {
+  img2plates(continentCollisionSrc, (plates) => {
+    plates[0].vx = 2;
+    callback(plates);
+  });
+}
+
+export function oceanRidge(callback) {
+  img2plates(oceanRidgeSrc, (plates) => {
+    plates[1].vx = -1;
+    plates[2].vx = 1;
     callback(plates);
   });
 }
