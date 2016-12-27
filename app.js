@@ -29456,7 +29456,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(710);
+	__webpack_require__(716);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37399,21 +37399,21 @@
 
 	var _loadModel2 = _interopRequireDefault(_loadModel);
 
-	var _renderTopView = __webpack_require__(703);
+	var _renderTopView = __webpack_require__(709);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(704);
+	var _renderHotSpots = __webpack_require__(710);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(705);
+	var _renderCrossSection = __webpack_require__(711);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
 	var _utils = __webpack_require__(693);
 
-	__webpack_require__(706);
+	__webpack_require__(712);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43971,30 +43971,17 @@
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _scripts = __webpack_require__(697);
+	var _presets = __webpack_require__(697);
 
-	var scriptPresets = _interopRequireWildcard(_scripts);
-
-	var _images = __webpack_require__(699);
-
-	var imgPresets = _interopRequireWildcard(_images);
+	var presets = _interopRequireWildcard(_presets);
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var DEF_WIDTH = 512;
-	var DEF_HEIGHT = 512;
-
 	function loadModel(presetName, callback) {
-	  // Try to load models using presets based on scripts or presets based on images.
-	  if (scriptPresets[presetName]) {
-	    var width = DEF_WIDTH;
-	    var height = DEF_HEIGHT;
-	    var plates = scriptPresets[presetName](width, height);
-	    callback(new _model2.default({ width: width, height: height, plates: plates }));
-	  } else if (imgPresets[presetName]) {
-	    imgPresets[presetName](function (plates, width, height) {
+	  if (presets[presetName]) {
+	    presets[presetName](function (plates, width, height) {
 	      callback(new _model2.default({ width: width, height: height, plates: plates }));
 	    });
 	  }
@@ -44806,8 +44793,8 @@
 	  // Strength of volcanic activity related to subduction.
 	  volcanicActStrength: 1,
 	  // Volcanoes are created between min and max distance from convergent boundary.
-	  volcanicActMinDist: 20,
-	  volcanicActMaxDist: 70,
+	  volcanicActMinDist: 5,
+	  volcanicActMaxDist: 30,
 	  // Limit amount of time that given point can undergo volcanic activity.
 	  volcanicActMaxTime: 100,
 	  // Strength of volcanic activity.
@@ -47601,7 +47588,6 @@
 	      if (this.subduction) {
 	        this.subductionDist += this.subductionVelocity * timeStep;
 	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
-	        this.subductionVelocity = 0;
 	      }
 
 	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
@@ -47890,18 +47876,150 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.subduction = subduction;
-	exports.subduction2 = subduction2;
-	exports.continentalCollision = continentalCollision;
+	exports.test1 = test1;
+	exports.test2 = test2;
+	exports.test3 = test3;
+	exports.test4 = test4;
+	exports.islands = islands;
 	exports.islandCollision = islandCollision;
-	exports.islandChainCollision = islandChainCollision;
-	exports.midOceanRidge = midOceanRidge;
+	exports.continentCollision = continentCollision;
+	exports.oceanRidge = oceanRidge;
+
+	var _img2Plates = __webpack_require__(698);
+
+	var _img2Plates2 = _interopRequireDefault(_img2Plates);
+
+	var _test = __webpack_require__(701);
+
+	var _test2 = _interopRequireDefault(_test);
+
+	var _test3 = __webpack_require__(702);
+
+	var _test4 = _interopRequireDefault(_test3);
+
+	var _test5 = __webpack_require__(703);
+
+	var _test6 = _interopRequireDefault(_test5);
+
+	var _test7 = __webpack_require__(704);
+
+	var _test8 = _interopRequireDefault(_test7);
+
+	var _islands = __webpack_require__(705);
+
+	var _islands2 = _interopRequireDefault(_islands);
+
+	var _islandCollision = __webpack_require__(706);
+
+	var _islandCollision2 = _interopRequireDefault(_islandCollision);
+
+	var _continentCollision = __webpack_require__(707);
+
+	var _continentCollision2 = _interopRequireDefault(_continentCollision);
+
+	var _oceanRidge = __webpack_require__(708);
+
+	var _oceanRidge2 = _interopRequireDefault(_oceanRidge);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function test1(callback) {
+	  (0, _img2Plates2.default)(_test2.default, function (plates) {
+	    plates[1].vx = -1;
+	    plates[2].vx = 1;
+	    plates[3].vx = -1.3;
+	    callback(plates);
+	  });
+	}
+
+	function test2(callback) {
+	  (0, _img2Plates2.default)(_test4.default, function (plates) {
+	    plates[1].vx = -1;
+	    plates[2].vx = 1;
+	    plates[3].vx = -1.3;
+	    callback(plates);
+	  });
+	}
+
+	function test3(callback) {
+	  (0, _img2Plates2.default)(_test6.default, function (plates) {
+	    plates[0].vy = 0.5;
+	    plates[1].vy = -0.5;
+	    plates[2].vy = 0.5;
+	    plates[3].vy = -0.5;
+	    plates[4].vy = 0.5;
+	    callback(plates);
+	  });
+	}
+
+	function test4(callback) {
+	  (0, _img2Plates2.default)(_test8.default, function (plates) {
+	    plates[0].vx = 1;
+	    plates[0].vy = 1;
+	    plates[1].vx = -1;
+	    plates[2].vx = 1;
+	    plates[2].vy = -1;
+	    plates[3].vx = 1;
+	    plates[3].vy = -1;
+	    plates[4].vx = -1;
+	    plates[4].vy = 1;
+	    callback(plates);
+	  });
+	}
+
+	function islands(callback) {
+	  (0, _img2Plates2.default)(_islands2.default, function (plates) {
+	    plates[0].vx = 3;
+	    plates[1].vx = 0;
+	    callback(plates);
+	  });
+	}
+
+	function islandCollision(callback) {
+	  (0, _img2Plates2.default)(_islandCollision2.default, function (plates) {
+	    plates[0].vx = 2;
+	    callback(plates);
+	  });
+	}
+
+	function continentCollision(callback) {
+	  (0, _img2Plates2.default)(_continentCollision2.default, function (plates) {
+	    plates[0].vx = 2;
+	    callback(plates);
+	  });
+	}
+
+	function oceanRidge(callback) {
+	  (0, _img2Plates2.default)(_oceanRidge2.default, function (plates) {
+	    plates[1].vx = -1;
+	    plates[2].vx = 1;
+	    callback(plates);
+	  });
+	}
+
+/***/ },
+/* 698 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+	exports.default = img2plates;
 
 	var _config = __webpack_require__(684);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _plate = __webpack_require__(698);
+	var _getImgData = __webpack_require__(699);
+
+	var _getImgData2 = _interopRequireDefault(_getImgData);
+
+	var _plate = __webpack_require__(700);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
@@ -47911,243 +48029,148 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	// A few simple scripts that generate initial plate configuration.
+	var BOUNDARY_H_VAL = 'b';
+	var PROCESSED_H_VAL = 'p';
+	// Process only 4 neighbours in DFS algorithm. If we processed all 8 (e.g. [-1, -1]),
+	// it would be easier to jump over plate boundary.
+	var NEIGHBOURS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
-	function generatePlate(_ref) {
-	  var width = _ref.width,
-	      height = _ref.height,
-	      type = _ref.type,
-	      _ref$x = _ref.x,
-	      x = _ref$x === undefined ? 0 : _ref$x,
-	      _ref$y = _ref.y,
-	      y = _ref$y === undefined ? 0 : _ref$y,
-	      _ref$vx = _ref.vx,
-	      vx = _ref$vx === undefined ? 0 : _ref$vx,
-	      _ref$vy = _ref.vy,
-	      vy = _ref$vy === undefined ? 0 : _ref$vy,
-	      maxX = _ref.maxX,
-	      maxY = _ref.maxY,
-	      _ref$smoothCont = _ref.smoothCont,
-	      smoothCont = _ref$smoothCont === undefined ? true : _ref$smoothCont;
+	// Boundary is defined by red pixels.
+	function isColorBoundary(data, i) {
+	  return data[i] > 32 && data[i + 1] === 0 && data[i + 2] === 0;
+	}
 
-	  var pointHeight = void 0;
-	  var plate = new _plate2.default({ x: x, y: y, vx: vx, vy: vy, maxX: maxX, maxY: maxY });
-	  for (var px = x; px < x + width; px += 1) {
-	    for (var py = y; py < y + height; py += 1) {
-	      var pointType = typeof type === 'function' ? type(px, py) : type;
-	      if (pointType === _point.OCEAN) {
-	        pointHeight = _config2.default.subductionHeight;
-	      } else if (smoothCont) {
-	        pointHeight = Math.min(0.1, _config2.default.newOceanHeight + Math.pow(3 * ((px - x) / width), 0.5));
-	      } else {
-	        pointHeight = 0.1;
+	function normalize(data, i) {
+	  var min = _config2.default.subductionHeight;
+	  var max = _config2.default.maxHeight;
+	  var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+	  var norm = (255 - avg) / 255;
+	  return norm * (max - min) + min;
+	}
+
+	// Transforms ImageData into height map. Boundarys are marked by null values.
+	function getHeightMap(imgData) {
+	  var width = imgData.width;
+	  var height = imgData.height;
+	  var data = imgData.data;
+	  var result = [];
+	  for (var i = 0, len = width * height; i < len; i += 1) {
+	    var x = i % width;
+	    var y = Math.floor(i / width);
+	    if (!result[x]) {
+	      result[x] = [];
+	    }
+	    result[x][y] = isColorBoundary(data, i * 4) ? BOUNDARY_H_VAL : normalize(data, i * 4);
+	  }
+	  return result;
+	}
+
+	function isBoundary(heightVal) {
+	  return heightVal === BOUNDARY_H_VAL;
+	}
+
+	function isProcessed(heightVal) {
+	  return heightVal === PROCESSED_H_VAL;
+	}
+
+	function getPlates(heightMap) {
+	  var width = heightMap.length;
+	  var height = heightMap[0].length;
+	  var plates = [];
+	  var queue = [];
+	  for (var y = 0; y < height; y += 1) {
+	    for (var x = 0; x < width; x += 1) {
+	      var pointHeight = heightMap[x][y];
+	      if (!isBoundary(pointHeight) && !isProcessed(pointHeight)) {
+	        (function () {
+	          var plate = new _plate2.default({ x: 0, y: 0, vx: 0, vy: 0, maxX: width, maxY: height });
+	          plates.push(plate);
+	          var point = new _point2.default({ x: x, y: y, height: pointHeight, plate: plate, age: Infinity });
+	          plate.addPoint(point);
+	          queue.push(point);
+	          heightMap[x][y] = PROCESSED_H_VAL;
+
+	          var _loop = function _loop() {
+	            var p = queue.pop();
+	            var x0 = p.x;
+	            var y0 = p.y;
+	            NEIGHBOURS.forEach(function (_ref) {
+	              var _ref2 = _slicedToArray(_ref, 2),
+	                  dx = _ref2[0],
+	                  dy = _ref2[1];
+
+	              var i = Math.max(0, Math.min(width - 1, x0 + dx));
+	              var j = Math.max(0, Math.min(height - 1, y0 + dy));
+	              var h = heightMap[i][j];
+	              if (!isProcessed(h)) {
+	                // If point is a boundary, use height of its neighbour.
+	                var nHeight = isBoundary(h) ? p.height : h;
+	                var neighbour = new _point2.default({ x: i, y: j, height: nHeight, plate: plate, age: Infinity });
+	                plate.addPoint(neighbour);
+	                if (!isBoundary(h)) {
+	                  queue.push(neighbour);
+	                }
+	                // Mark point processed.
+	                heightMap[i][j] = PROCESSED_H_VAL;
+	              }
+	            });
+	          };
+
+	          while (queue.length > 0) {
+	            _loop();
+	          }
+	        })();
 	      }
-	      var point = new _point2.default({ x: px, y: py, height: pointHeight, plate: plate, age: Infinity });
-	      plate.addPoint(point);
 	    }
 	  }
-	  return plate;
+	  return plates;
 	}
 
-	function subduction(width, height) {
-	  var ocean = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
+	function img2plates(imgSrc, callback) {
+	  (0, _getImgData2.default)(imgSrc, function (imgData) {
+	    var heightMap = getHeightMap(imgData);
+	    callback(getPlates(heightMap));
 	  });
-	  var continent = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [ocean, continent];
-	}
-
-	function subduction2(width, height) {
-	  var ocean = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: 3,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent1 = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.1,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent2 = generatePlate({
-	    x: width * 0.6,
-	    y: 0,
-	    width: width * 0.4,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 1,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [ocean, continent1, continent2];
-	}
-
-	function continentalCollision(width, height) {
-	  var oceanAndCont = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: function type(x, y) {
-	      return x > width * 0.05 && x < width * 0.45 && y > height * 0.05 && y < height * 0.95 ? _point.CONTINENT : _point.OCEAN;
-	    },
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [oceanAndCont, continent];
-	}
-
-	function islandCollision(width, height) {
-	  var oceanAndCont = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: function type(x, y) {
-	      return x > width * 0.2 && x < width * 0.4 && y > height * 0.45 && y < height * 0.55 ? _point.CONTINENT : _point.OCEAN;
-	    },
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var continent = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [oceanAndCont, continent];
-	}
-
-	function islandChainCollision(width, height) {
-	  var ocean1 = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: function type(x, y) {
-	      return x > width * 0.05 && x < width * 0.15 && (y > height * 0.2 && y < height * 0.4 || y > height * 0.7 && y < height * 0.8) ? _point.CONTINENT : _point.OCEAN;
-	    },
-	    vx: 3,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var ocean2 = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.5,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  return [ocean1, ocean2];
-	}
-
-	function midOceanRidge(width, height) {
-	  var cont1 = generatePlate({
-	    x: 0,
-	    y: 0,
-	    width: width * 0.2,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height,
-	    smoothCont: false
-	  });
-	  var ocean1 = generatePlate({
-	    x: width * 0.2,
-	    y: 0,
-	    width: width * 0.3,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: -2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var ocean2 = generatePlate({
-	    x: width * 0.5,
-	    y: 0,
-	    width: width * 0.3,
-	    height: height,
-	    type: _point.OCEAN,
-	    vx: 2,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height
-	  });
-	  var cont2 = generatePlate({
-	    x: width * 0.8,
-	    y: 0,
-	    width: width * 0.2,
-	    height: height,
-	    type: _point.CONTINENT,
-	    vx: 0,
-	    vy: 0,
-	    maxX: width,
-	    maxY: height,
-	    smoothCont: false
-	  });
-	  return [cont1, ocean1, ocean2, cont2];
 	}
 
 /***/ },
-/* 698 */
+/* 699 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = getImageData;
+	// Returns ImageData object containing data of the image defined by imgSrc argument.
+	function getImageData(imgSrc, callback) {
+	  function imageLoaded(event) {
+	    var img = event.target;
+	    var canvas = document.createElement('canvas');
+	    canvas.width = img.width;
+	    canvas.height = img.height;
+	    var ctx = canvas.getContext('2d');
+	    ctx.drawImage(img, 0, 0, img.width, img.height);
+	    var data = ctx.getImageData(0, 0, img.width, img.height);
+	    callback(data);
+	  }
+
+	  // Load image first.
+	  var img = document.createElement('img');
+	  img.src = imgSrc;
+	  if (img.complete) {
+	    imageLoaded(img);
+	  } else {
+	    img.addEventListener('load', imageLoaded);
+	    img.addEventListener('error', function () {
+	      throw new Error('Cannot load image ' + imgSrc);
+	    });
+	  }
+	}
+
+/***/ },
+/* 700 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -48319,221 +48342,55 @@
 	exports.default = Plate;
 
 /***/ },
-/* 699 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.test1 = test1;
-	exports.test2 = test2;
-
-	var _img2Plates = __webpack_require__(700);
-
-	var _img2Plates2 = _interopRequireDefault(_img2Plates);
-
-	var _test = __webpack_require__(702);
-
-	var _test2 = _interopRequireDefault(_test);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function test1(callback) {
-	  (0, _img2Plates2.default)(_test2.default, function (plates) {
-	    plates[1].vx = -1;
-	    plates[2].vx = 1;
-	    plates[3].vx = -1.3;
-	    callback(plates);
-	  });
-	}
-
-	function test2() {
-	  // Keep this placeholder so ESLint doesn't complain about default export.
-	  // Once we add a second function, the problem will be solved...
-	}
-
-/***/ },
-/* 700 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-	exports.default = img2plates;
-
-	var _config = __webpack_require__(684);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	var _getImgData = __webpack_require__(701);
-
-	var _getImgData2 = _interopRequireDefault(_getImgData);
-
-	var _plate = __webpack_require__(698);
-
-	var _plate2 = _interopRequireDefault(_plate);
-
-	var _point = __webpack_require__(694);
-
-	var _point2 = _interopRequireDefault(_point);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var BOUNDARY_H_VAL = 'b';
-	var PROCESSED_H_VAL = 'p';
-	// Process only 4 neighbours in DFS algorithm. If we processed all 8 (e.g. [-1, -1]),
-	// it would be easier to jump over plate boundary.
-	var NEIGHBOURS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-
-	// Boundary is defined by red pixels.
-	function isColorBoundary(data, i) {
-	  return data[i] > 32 && data[i + 1] === 0 && data[i + 2] === 0;
-	}
-
-	function normalize(data, i) {
-	  var min = _config2.default.subductionHeight;
-	  var max = _config2.default.maxHeight;
-	  var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-	  var norm = (255 - avg) / 255;
-	  return norm * (max - min) + min;
-	}
-
-	// Transforms ImageData into height map. Boundarys are marked by null values.
-	function getHeightMap(imgData) {
-	  var width = imgData.width;
-	  var height = imgData.height;
-	  var data = imgData.data;
-	  var result = [];
-	  for (var i = 0, len = width * height; i < len; i += 1) {
-	    var x = i % width;
-	    var y = Math.floor(i / width);
-	    if (!result[x]) {
-	      result[x] = [];
-	    }
-	    result[x][y] = isColorBoundary(data, i * 4) ? BOUNDARY_H_VAL : normalize(data, i * 4);
-	  }
-	  return result;
-	}
-
-	function isBoundary(heightVal) {
-	  return heightVal === BOUNDARY_H_VAL;
-	}
-
-	function isProcessed(heightVal) {
-	  return heightVal === PROCESSED_H_VAL;
-	}
-
-	function getPlates(heightMap) {
-	  var width = heightMap.length;
-	  var height = heightMap[0].length;
-	  var plates = [];
-	  var queue = [];
-	  for (var y = 0; y < height; y += 1) {
-	    for (var x = 0; x < width; x += 1) {
-	      var pointHeight = heightMap[x][y];
-	      if (!isBoundary(pointHeight) && !isProcessed(pointHeight)) {
-	        (function () {
-	          var plate = new _plate2.default({ x: 0, y: 0, vx: 0, vy: 0, maxX: width, maxY: height });
-	          plates.push(plate);
-	          var point = new _point2.default({ x: x, y: y, height: pointHeight, plate: plate, age: Infinity });
-	          plate.addPoint(point);
-	          queue.push(point);
-	          heightMap[x][y] = PROCESSED_H_VAL;
-
-	          var _loop = function _loop() {
-	            var p = queue.pop();
-	            var x0 = p.x;
-	            var y0 = p.y;
-	            NEIGHBOURS.forEach(function (_ref) {
-	              var _ref2 = _slicedToArray(_ref, 2),
-	                  dx = _ref2[0],
-	                  dy = _ref2[1];
-
-	              var i = Math.max(0, Math.min(width - 1, x0 + dx));
-	              var j = Math.max(0, Math.min(height - 1, y0 + dy));
-	              var h = heightMap[i][j];
-	              if (!isProcessed(h)) {
-	                // If point is a boundary, use height of its neighbour.
-	                var nHeight = isBoundary(h) ? p.height : h;
-	                var neighbour = new _point2.default({ x: i, y: j, height: nHeight, plate: plate, age: Infinity });
-	                plate.addPoint(neighbour);
-	                if (!isBoundary(h)) {
-	                  queue.push(neighbour);
-	                }
-	                // Mark point processed.
-	                heightMap[i][j] = PROCESSED_H_VAL;
-	              }
-	            });
-	          };
-
-	          while (queue.length > 0) {
-	            _loop();
-	          }
-	        })();
-	      }
-	    }
-	  }
-	  return plates;
-	}
-
-	function img2plates(imgSrc, callback) {
-	  (0, _getImgData2.default)(imgSrc, function (imgData) {
-	    var heightMap = getHeightMap(imgData);
-	    callback(getPlates(heightMap));
-	  });
-	}
-
-/***/ },
 /* 701 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = getImageData;
-	// Returns ImageData object containing data of the image defined by imgSrc argument.
-	function getImageData(imgSrc, callback) {
-	  function imageLoaded(event) {
-	    var img = event.target;
-	    var canvas = document.createElement('canvas');
-	    canvas.width = img.width;
-	    canvas.height = img.height;
-	    var ctx = canvas.getContext('2d');
-	    ctx.drawImage(img, 0, 0, img.width, img.height);
-	    var data = ctx.getImageData(0, 0, img.width, img.height);
-	    callback(data);
-	  }
-
-	  // Load image first.
-	  var img = document.createElement('img');
-	  img.src = imgSrc;
-	  if (img.complete) {
-	    imageLoaded(img);
-	  } else {
-	    img.addEventListener('load', imageLoaded);
-	    img.addEventListener('error', function () {
-	      throw new Error('Cannot load image ' + imgSrc);
-	    });
-	  }
-	}
-
-/***/ },
-/* 702 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "e30c9630c26810abe93055eed92a0180.png";
 
 /***/ },
+/* 702 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "9b25e56ad97ec9fa271fc5bcb04269ef.png";
+
+/***/ },
 /* 703 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "669a8322dc8ec6b46154af0184d3a2c0.png";
+
+/***/ },
+/* 704 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "79832591eaf4fd8ae8a67196a2d5a028.png";
+
+/***/ },
+/* 705 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "cccf24a30887faa57edd27e35ed145a6.png";
+
+/***/ },
+/* 706 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "7dd1a724b0e862105e610eaa40177cad.png";
+
+/***/ },
+/* 707 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "801be5086143e96c61c818514ad9b073.png";
+
+/***/ },
+/* 708 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "f705cb9c926aa56e8801ed7acf1fb139.png";
+
+/***/ },
+/* 709 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48621,7 +48478,7 @@
 	}
 
 /***/ },
-/* 704 */
+/* 710 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -48641,7 +48498,7 @@
 	}
 
 /***/ },
-/* 705 */
+/* 711 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48725,16 +48582,16 @@
 	}
 
 /***/ },
-/* 706 */
+/* 712 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(707);
+	var content = __webpack_require__(713);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(709)(content, {});
+	var update = __webpack_require__(715)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -48751,10 +48608,10 @@
 	}
 
 /***/ },
-/* 707 */
+/* 713 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(708)();
+	exports = module.exports = __webpack_require__(714)();
 	// imports
 
 
@@ -48765,7 +48622,7 @@
 
 
 /***/ },
-/* 708 */
+/* 714 */
 /***/ function(module, exports) {
 
 	/*
@@ -48821,7 +48678,7 @@
 
 
 /***/ },
-/* 709 */
+/* 715 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -49073,16 +48930,16 @@
 
 
 /***/ },
-/* 710 */
+/* 716 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(711);
+	var content = __webpack_require__(717);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(709)(content, {});
+	var update = __webpack_require__(715)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -49099,10 +48956,10 @@
 	}
 
 /***/ },
-/* 711 */
+/* 717 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(708)();
+	exports = module.exports = __webpack_require__(714)();
 	// imports
 
 
