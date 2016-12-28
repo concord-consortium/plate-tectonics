@@ -171,6 +171,16 @@ export default class Model {
       smallerPlate.vy = finalVy;
       biggerPlate.vx = finalVx;
       biggerPlate.vy = finalVy;
+      // Make sure that plates have the same fractional part of the coordinates, e.g. both have X = 1.35, but not
+      // 1.35 and 1.78. It matters, as everything is casted on the grid where coordinates are integers. If fractional
+      // part of plate coords is different, plates can move to next cells at different time and some visual artifacts
+      // might be visible.
+      const xFracDiff = 0.5 * (Math.abs(smallerPlate.x % 1) - Math.abs(biggerPlate.x % 1));
+      const yFracDiff = 0.5 * (Math.abs(smallerPlate.y % 1) - Math.abs(biggerPlate.y % 1));
+      smallerPlate.x -= Math.sign(smallerPlate.x) * xFracDiff;
+      biggerPlate.x += Math.sign(biggerPlate.x) * xFracDiff;
+      smallerPlate.y -= Math.sign(smallerPlate.y) * yFracDiff;
+      biggerPlate.y += Math.sign(biggerPlate.y) * yFracDiff;
     }
   }
 

@@ -65,6 +65,10 @@ export default class Point {
     return this.plate.vy;
   }
 
+  get speed() {
+    return Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
+  }
+
   get subduction() {
     return this.subductionDist !== null;
   }
@@ -107,7 +111,9 @@ export default class Point {
   update(timeStep) {
     if (this.type === OCEAN && this.age < config.oceanicCrustCoolingTime) {
       // Oceanic crust cools down and becomes denser.
-      this.height -= config.oceanicCrustCoolingRatio * timeStep;
+      this.height -= config.oceanicCrustCoolingRatio * timeStep * this.speed;
+      this.height = Math.max(this.height, config.subductionHeight);
+      this.age += timeStep * this.speed;
     }
 
     if (this.subduction) {
@@ -135,7 +141,5 @@ export default class Point {
     if (this.height > 1) {
       this.height = 1;
     }
-
-    this.age += timeStep;
   }
 }

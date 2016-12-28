@@ -46,7 +46,7 @@ const DEFAULT_CONFIG = {
   islandRatio: 0.05,
   // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
   // colliding with big continents will join them.
-  mergePlateRatio: 0.1,
+  mergePlateRatio: 0.05,
   // Visual settings.
   plateColor: PLATE_COLOR,
 };

@@ -28,7 +28,7 @@ export function test2(callback) {
 
 export function test3(callback) {
   img2plates(test3Src, (plates) => {
-    plates[0].vy = 0.5;
+    plates[0].vy = 1;
     plates[1].vy = -0.5;
     plates[2].vy = 0.5;
     plates[3].vy = -0.5;
