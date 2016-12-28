@@ -52,6 +52,19 @@ export function test4(callback) {
   });
 }
 
+export function test4pinned(callback) {
+  img2plates(test4Src, (plates) => {
+    plates[0].pinned = true;
+    plates[1].vx = -2;
+    plates[2].vx = 2;
+    plates[2].vy = -2;
+    plates[3].vx = 2;
+    plates[3].vy = -2;
+    plates[4].pinned = true;
+    callback(plates);
+  });
+}
+
 export function islands(callback) {
   img2plates(islandsSrc, (plates) => {
     plates[0].vx = 3;

@@ -5,8 +5,9 @@ function getPlateID() {
 }
 
 export default class Plate {
-  constructor({ x, y, vx, vy, maxX, maxY }) {
+  constructor({ x = 0, y = 0, vx = 0, vy = 0, maxX, maxY, pinned = false }) {
     this.id = getPlateID();
+    this.pinned = pinned;
     this.x = x;
     this.y = y;
     this.vx = vx;
@@ -17,6 +18,34 @@ export default class Plate {
     this.hotSpots = [];
     // It means that plate consist of a single continent. It's necessary when continents are colliding.
     this.continentOnly = true;
+  }
+
+  set vx(v) {
+    this._vx = this.pinned ? 0 : v;
+  }
+
+  get vx() {
+    return this._vx;
+  }
+
+  set vy(v) {
+    this._vy = this.pinned ? 0 : v;
+  }
+
+  get vy() {
+    return this._vy;
+  }
+
+  set pinned(v) {
+    this._pinned = v;
+    if (v) {
+      this.vx = 0;
+      this.vy = 0;
+    }
+  }
+
+  get pinned() {
+    return this._pinned;
   }
 
   get size() {
@@ -63,6 +92,7 @@ export default class Plate {
   }
 
   move(timeStep) {
+    if (this.pinned) return;
     this.x += this.vx * timeStep;
     this.y += this.vy * timeStep;
     if (this.x > this.maxX) this.x = this.x % this.maxX;
