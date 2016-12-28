@@ -1,4 +1,3 @@
-import img2plates from './img-2-plates';
 import test1Src from '../../data/test1.png';
 import test2Src from '../../data/test2.png';
 import test3Src from '../../data/test3.png';
@@ -8,89 +7,85 @@ import islandCollisionSrc from '../../data/islandCollision.png';
 import continentCollisionSrc from '../../data/continentCollision.png';
 import oceanRidgeSrc from '../../data/oceanRidge.png';
 
-export function test1(callback) {
-  img2plates(test1Src, (plates) => {
-    plates[1].vx = -1;
-    plates[2].vx = 1;
-    plates[3].vx = -1.3;
-    callback(plates);
-  });
-}
-
-export function test2(callback) {
-  img2plates(test2Src, (plates) => {
-    plates[1].vx = -1;
-    plates[2].vx = 1;
-    plates[3].vx = -1.3;
-    callback(plates);
-  });
-}
-
-export function test3(callback) {
-  img2plates(test3Src, (plates) => {
-    plates[0].vy = 1;
-    plates[1].vy = -0.5;
-    plates[2].vy = 0.5;
-    plates[3].vy = -0.5;
-    plates[4].vy = 0.5;
-    callback(plates);
-  });
-}
-
-export function test4(callback) {
-  img2plates(test4Src, (plates) => {
-    plates[0].vx = 1;
-    plates[0].vy = 1;
-    plates[1].vx = -1;
-    plates[2].vx = 1;
-    plates[2].vy = -1;
-    plates[3].vx = 1;
-    plates[3].vy = -1;
-    plates[4].vx = -1;
-    plates[4].vy = 1;
-    callback(plates);
-  });
-}
-
-export function test4pinned(callback) {
-  img2plates(test4Src, (plates) => {
-    plates[0].pinned = true;
-    plates[1].vx = -2;
-    plates[2].vx = 2;
-    plates[2].vy = -2;
-    plates[3].vx = 2;
-    plates[3].vy = -2;
-    plates[4].pinned = true;
-    callback(plates);
-  });
-}
-
-export function islands(callback) {
-  img2plates(islandsSrc, (plates) => {
-    plates[0].vx = 3;
-    plates[1].vx = 0;
-    callback(plates);
-  });
-}
-
-export function islandCollision(callback) {
-  img2plates(islandCollisionSrc, (plates) => {
-    plates[0].vx = 2;
-    callback(plates);
-  });
-}
-
-export function continentCollision(callback) {
-  img2plates(continentCollisionSrc, (plates) => {
-    plates[0].vx = 2;
-    callback(plates);
-  });
-}
-
-export function oceanRidge(callback) {
-  img2plates(oceanRidgeSrc, (plates) => {
-    plates[1].vx = -1;
-    plates[2].vx = 1;
-    callback(plates);
-  });
-}
+export default {
+  continentCollision: {
+    img: continentCollisionSrc,
+    init: (plates) => {
+      plates[0].vx = 2;
+    },
+  },
+  oceanRidge: {
+    img: oceanRidgeSrc,
+    init: (plates) => {
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+    },
+  },
+  islands: {
+    img: islandsSrc,
+    init: (plates) => {
+      plates[0].vx = 3;
+      plates[1].vx = 0;
+    },
+  },
+  islandCollision: {
+    img: islandCollisionSrc,
+    init: (plates) => {
+      plates[0].vx = 2;
+    },
+  },
+  // test1-4 are implementation of initial Amy's ideas, described here:
+  // https://drive.google.com/open?id=0B4CijKAWlpBtVFpHVVRjQWh5LTQ
+  test1: {
+    img: test1Src,
+    init: (plates) => {
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+      plates[3].vx = -1.3;
+    },
+  },
+  test2: {
+    img: test2Src,
+    init: (plates) => {
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+      plates[3].vx = -1.3;
+    },
+  },
+  test3: {
+    img: test3Src,
+    init: (plates) => {
+      plates[0].vy = 1;
+      plates[1].vy = -0.5;
+      plates[2].vy = 0.5;
+      plates[3].vy = -0.5;
+      plates[4].vy = 0.5;
+    },
+  },
+  test4: {
+    img: test4Src,
+    init: (plates) => {
+      plates[0].vx = 1;
+      plates[0].vy = 1;
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+      plates[2].vy = -1;
+      plates[3].vx = 1;
+      plates[3].vy = -1;
+      plates[4].vx = -1;
+      plates[4].vy = 1;
+    },
+  },
+  test4Pinned: {
+    img: test4Src,
+    init: (plates) => {
+      plates[0].pinned = true;
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+      plates[2].vy = -1;
+      plates[3].vx = 1;
+      plates[3].vy = -1;
+      plates[4].pinned = true;
+    },
+  },
+};

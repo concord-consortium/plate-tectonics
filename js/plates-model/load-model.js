@@ -1,10 +1,12 @@
 import Model from './model';
-import * as presets from './presets';
+import presets from './presets';
+import img2plates from './img-2-plates';
 
 export default function loadModel(presetName, callback) {
-  if (presets[presetName]) {
-    presets[presetName]((plates, width, height) => {
-      callback(new Model({ width, height, plates }));
-    });
-  }
+  const preset = presets[presetName];
+  if (!preset) return;
+  img2plates(preset.img, (plates, width, height) => {
+    preset.init(plates);
+    callback(new Model({ plates, width, height }));
+  });
 }

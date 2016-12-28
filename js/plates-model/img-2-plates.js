@@ -92,7 +92,6 @@ function getPlates(heightMap) {
 
 export default function img2plates(imgSrc, callback) {
   getImgData(imgSrc, (imgData) => {
-    const heightMap = getHeightMap(imgData);
-    callback(getPlates(heightMap));
+    callback(getPlates(getHeightMap(imgData)), imgData.width, imgData.height);
   });
 }
