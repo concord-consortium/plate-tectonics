@@ -49115,7 +49115,7 @@
 	      _react2.default.createElement(
 	        'a',
 	        {
-	          href: '/?preset=' + props.name, target: '_blank', rel: 'noopener noreferrer'
+	          href: '?preset=' + props.name, target: '_blank', rel: 'noopener noreferrer'
 	        },
 	        props.name
 	      )
