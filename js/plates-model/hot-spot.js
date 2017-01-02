@@ -13,7 +13,7 @@ export default class HotSpot extends PlatePoint {
   }
 
   get alive() {
-    return this.lifeLeft > 0;
+    return this.lifeLeft > 0 && !this.outOfBounds;
   }
 
   pointInside(point) {

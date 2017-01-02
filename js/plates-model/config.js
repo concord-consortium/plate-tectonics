@@ -9,6 +9,7 @@ const PLATE_COLOR = shuffle(colormap({
 }));
 
 const DEFAULT_CONFIG = {
+  wrappingBoundaries: true,
   minHeight: -1,
   maxHeight: 1,
   waterLevel: 0,

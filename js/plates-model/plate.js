@@ -95,10 +95,6 @@ export default class Plate {
     if (this.pinned) return;
     this.x += this.vx * timeStep;
     this.y += this.vy * timeStep;
-    if (this.x > this.maxX) this.x = this.x % this.maxX;
-    if (this.x < 0) this.x += this.maxX;
-    if (this.y > this.maxY) this.y = this.y % this.maxY;
-    if (this.y < 0) this.y += this.maxY;
   }
 
   removeDeadPoints() {

@@ -41,6 +41,10 @@ export default class Point extends PlatePoint {
     return this.subductionDist !== null;
   }
 
+  get hasSubducted() {
+    return this.height <= config.minHeight;
+  }
+
   get volcanicAct() {
     return this.volcanicHotSpot !== null;
   }
@@ -91,17 +95,16 @@ export default class Point extends PlatePoint {
       this.distFromVolcanoCenter = null;
     }
 
-    if (this.height <= config.minHeight) {
-      // Point subducted and will be removed.
-      this.alive = false;
-    }
-
     if (this.type === OCEAN && this.height > 0) {
       this.type = CONTINENT;
     }
 
     if (this.height > 1) {
       this.height = 1;
+    }
+
+    if (this.hasSubducted || this.outOfBounds) {
+      this.alive = false;
     }
   }
 }

@@ -16,3 +16,10 @@ export function shuffle(a) {
   }
   return res;
 }
+
+// Normal modulo operator (%) returns negative numbers if value is negative. We don't want this. E.g.:
+// -5 % 100 === -5
+// mod(-5, 100) === 95.
+export function mod(v, n) {
+  return ((v % n) + n) % n;
+}

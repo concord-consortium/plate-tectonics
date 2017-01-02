@@ -1,11 +1,12 @@
 import Point from '../../plates-model/point';
 import config from '../../plates-model/config';
 
-const plate = { x: 50, y: 51, maxX: 100, maxY: 100 };
-const defConfig = { x: plate.x + 10, y: plate.y + 10, plate };
+const defPlate = { x: 50, y: 51, maxX: 100, maxY: 100 };
+const defConfig = { x: defPlate.x + 10, y: defPlate.y + 10, plate: defPlate };
 
 describe('Point', () => {
   test('Coordinates are relative to plate coordinates', () => {
+    const plate = { x: 50, y: 51, maxX: 100, maxY: 100 };
     const p1 = new Point({ x: plate.x + 10, y: plate.y + 10, plate });
     expect(p1.x).toEqual(plate.x + 10);
     expect(p1.relX).toEqual(10);
@@ -13,9 +14,18 @@ describe('Point', () => {
     expect(p1.relY).toEqual(10);
     const p2 = new Point({ x: plate.x - 10, y: plate.y - 10, plate });
     expect(p2.x).toEqual(plate.x - 10);
-    expect(p2.relX).toEqual(plate.maxX - 10);
+    expect(p2.relX).toEqual(-10);
     expect(p2.y).toEqual(plate.y - 10);
-    expect(p2.relY).toEqual(plate.maxY - 10);
+    expect(p2.relY).toEqual(-10);
+    // Move plate.
+    plate.x += 1000;
+    plate.y += 1000;
+    expect(p1.x).toEqual(60);
+    expect(p1.y).toEqual(61);
+    plate.x -= 1000;
+    plate.y -= 1000;
+    expect(p1.x).toEqual(60);
+    expect(p1.y).toEqual(61);
   });
 
   test('Coordinates are always rounded (especially relative coordinates)', () => {
@@ -27,9 +37,9 @@ describe('Point', () => {
     expect(p1.relY).toEqual(10);
     const p2 = new Point({ x: plateFloat.x - 10, y: plateFloat.y - 10, plate: plateFloat });
     expect(p2.x).toEqual(Math.round(plateFloat.x - 10));
-    expect(p2.relX).toEqual(plateFloat.maxX - 10);
+    expect(p2.relX).toEqual(-10);
     expect(p2.y).toEqual(Math.round(plateFloat.y - 10));
-    expect(p2.relY).toEqual(plateFloat.maxY - 10);
+    expect(p2.relY).toEqual(-10);
     const plateFloat2 = { x: 50.5, y: 50.5, maxX: 100, maxY: 100 };
     const p3 = new Point({ x: 0, y: 0, plate: plateFloat2 });
     expect(p3.x).toEqual(0);

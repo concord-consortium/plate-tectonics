@@ -1,4 +1,6 @@
 import bs from 'binarysearch';
+import config from './config';
+import { mod } from '../utils';
 
 function getGrid(width, height) {
   const data = [];
@@ -32,6 +34,9 @@ export default class Surface {
   }
 
   setPoint(point) {
+    if (point.outOfBounds) {
+      return;
+    }
     if (!this.points[point.x][point.y]) {
       this.points[point.x][point.y] = [point];
     } else {
@@ -49,10 +54,10 @@ export default class Surface {
   }
 
   getPoints(x, y) {
-    while (x < 0) x += this.width;
-    while (y < 0) y += this.height;
-    if (x > this.width) x %= this.width;
-    if (y > this.height) y %= this.height;
+    if (config.wrappingBoundaries) {
+      x = mod(x, this.width);
+      y = mod(y, this.height);
+    }
     return this.points[x] && this.points[x][y];
   }
 
