@@ -30,23 +30,24 @@ const DEFAULT_CONFIG = {
   // Volcanoes are created between min and max distance from convergent boundary.
   volcanicActMinDist: 5,
   volcanicActMaxDist: 30,
-  // Limit amount of time that given point can undergo volcanic activity.
-  volcanicActMaxTime: 100,
-  // Strength of volcanic activity.
-  volcanoHeightChangeRatio: 0.0008,
+  // Limit amount of time that given point can undergo orogenesis or volcanic activity.
+  hotSpotActMaxTime: 100,
+  // Strength of orogenesis or volcanic activity.
+  hotSpotStrength: 0.0008,
   // Volcano lifespan is proportional to this value and its diameter.
-  volcanoLifeLengthRatio: 0.5,
+  hotSpotLifeLength: 0.5,
   // Controls how fast continents would slow down when they are colliding.
   continentCollisionFriction: 6,
-  // Plates are merged when they are overlapping and the difference between their velocities is smaller than this value.
+  // Plates are merged together when they are overlapping and the difference between their speed is smaller
+  // than this value. Note that big plates are not merged, the model just makes sure that their velocity is the same.
   platesMergeSpeedDiff: 0.3,
+  // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
+  // colliding with big continents will join them.
+  mergePlateRatio: 0.05,
   // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
   // during collision with other island or continents. Continents are not and they will slow down the whole plate.
   // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
   islandRatio: 0.05,
-  // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
-  // colliding with big continents will join them.
-  mergePlateRatio: 0.05,
   // Visual settings.
   plateColor: PLATE_COLOR,
 };

@@ -46,7 +46,7 @@ export default class Point extends PlatePoint {
   }
 
   get volcanicActAllowed() {
-    return this.volcanicActTime < config.volcanicActMaxTime && !this.subduction;
+    return this.volcanicActTime < config.hotSpotActMaxTime && !this.subduction;
   }
 
   get volcanicActProbability() {

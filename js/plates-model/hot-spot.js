@@ -9,7 +9,7 @@ export default class HotSpot extends PlatePoint {
     this.radius = radius;
     this.strength = strength;
     this.active = false;
-    this.lifeLeft = config.volcanoLifeLengthRatio * radius * lifeRatio;
+    this.lifeLeft = config.hotSpotLifeLength * radius * lifeRatio;
   }
 
   get alive() {
@@ -26,7 +26,7 @@ export default class HotSpot extends PlatePoint {
 
   heightChange(dist) {
     const normDist = dist / this.radius;
-    return config.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
+    return config.hotSpotStrength * (1 - normDist) * this.radius * this.strength;
   }
 
   update(timeStep) {
