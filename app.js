@@ -69,7 +69,7 @@
 
 	var _app2 = _interopRequireDefault(_app);
 
-	var _indexPage = __webpack_require__(718);
+	var _indexPage = __webpack_require__(719);
 
 	var _indexPage2 = _interopRequireDefault(_indexPage);
 
@@ -29868,7 +29868,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(716);
+	__webpack_require__(717);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37404,21 +37404,21 @@
 
 	var _loadModel2 = _interopRequireDefault(_loadModel);
 
-	var _renderTopView = __webpack_require__(709);
+	var _renderTopView = __webpack_require__(710);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderHotSpots = __webpack_require__(710);
+	var _renderHotSpots = __webpack_require__(711);
 
 	var _renderHotSpots2 = _interopRequireDefault(_renderHotSpots);
 
-	var _renderCrossSection = __webpack_require__(711);
+	var _renderCrossSection = __webpack_require__(712);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
 	var _utils = __webpack_require__(693);
 
-	__webpack_require__(712);
+	__webpack_require__(713);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43976,11 +43976,11 @@
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _presets = __webpack_require__(697);
+	var _presets = __webpack_require__(698);
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	var _img2Plates = __webpack_require__(706);
+	var _img2Plates = __webpack_require__(707);
 
 	var _img2Plates2 = _interopRequireDefault(_img2Plates);
 
@@ -44019,11 +44019,11 @@
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _hotSpot = __webpack_require__(695);
+	var _hotSpot = __webpack_require__(696);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
-	var _continent = __webpack_require__(696);
+	var _continent = __webpack_require__(697);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -44137,7 +44137,7 @@
 	          x: continentPoint.x,
 	          y: continentPoint.y,
 	          radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-	          strength: _config2.default.volcanicActStrength * oceanPoint.getRelativeVelocity(continentPoint),
+	          strength: _config2.default.volcanicActStrength * oceanPoint.relativeSpeed(continentPoint),
 	          plate: continentPlate
 	        });
 	        continentPlate.addHotSpot(newHotSpot);
@@ -44243,7 +44243,7 @@
 	          x: surfacePoint.x,
 	          y: surfacePoint.y,
 	          radius: subductingPoint.volcanicActProbability * Math.random() * 50 + 10,
-	          strength: _config2.default.volcanicActStrength * subductingPoint.getRelativeVelocity(surfacePoint) * 3 * Math.random(),
+	          strength: _config2.default.volcanicActStrength * subductingPoint.relativeSpeed(surfacePoint) * 3 * Math.random(),
 	          plate: plate
 	        });
 	        plate.addHotSpot(newHotSpot);
@@ -44401,6 +44401,12 @@
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
+	var _config = __webpack_require__(684);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _utils = __webpack_require__(693);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -44448,6 +44454,9 @@
 	  _createClass(Surface, [{
 	    key: 'setPoint',
 	    value: function setPoint(point) {
+	      if (point.outOfBounds) {
+	        return;
+	      }
 	      if (!this.points[point.x][point.y]) {
 	        this.points[point.x][point.y] = [point];
 	      } else {
@@ -44467,12 +44476,10 @@
 	  }, {
 	    key: 'getPoints',
 	    value: function getPoints(x, y) {
-	      while (x < 0) {
-	        x += this.width;
-	      }while (y < 0) {
-	        y += this.height;
-	      }if (x > this.width) x %= this.width;
-	      if (y > this.height) y %= this.height;
+	      if (_config2.default.wrappingBoundaries) {
+	        x = (0, _utils.mod)(x, this.width);
+	        y = (0, _utils.mod)(y, this.height);
+	      }
 	      return this.points[x] && this.points[x][y];
 	    }
 	  }, {
@@ -44792,6 +44799,7 @@
 	}));
 
 	var DEFAULT_CONFIG = {
+	  wrappingBoundaries: true,
 	  minHeight: -1,
 	  maxHeight: 1,
 	  waterLevel: 0,
@@ -44813,23 +44821,24 @@
 	  // Volcanoes are created between min and max distance from convergent boundary.
 	  volcanicActMinDist: 5,
 	  volcanicActMaxDist: 30,
-	  // Limit amount of time that given point can undergo volcanic activity.
-	  volcanicActMaxTime: 100,
-	  // Strength of volcanic activity.
-	  volcanoHeightChangeRatio: 0.0008,
+	  // Limit amount of time that given point can undergo orogenesis or volcanic activity.
+	  hotSpotActMaxTime: 100,
+	  // Strength of orogenesis or volcanic activity.
+	  hotSpotStrength: 0.0008,
 	  // Volcano lifespan is proportional to this value and its diameter.
-	  volcanoLifeLengthRatio: 0.5,
+	  hotSpotLifeLength: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
 	  continentCollisionFriction: 6,
-	  // Plates are merged when they are overlapping and the difference between their velocities is smaller than this value.
+	  // Plates are merged together when they are overlapping and the difference between their speed is smaller
+	  // than this value. Note that big plates are not merged, the model just makes sure that their velocity is the same.
 	  platesMergeSpeedDiff: 0.3,
+	  // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
+	  // colliding with big continents will join them.
+	  mergePlateRatio: 0.05,
 	  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
 	  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
 	  // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
 	  islandRatio: 0.05,
-	  // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
-	  // colliding with big continents will join them.
-	  mergePlateRatio: 0.05,
 	  // Visual settings.
 	  plateColor: PLATE_COLOR
 	};
@@ -47479,6 +47488,7 @@
 	});
 	exports.getURLParam = getURLParam;
 	exports.shuffle = shuffle;
+	exports.mod = mod;
 	function getURLParam(name) {
 	  var url = window.location.href;
 	  name = name.replace(/[[]]/g, '\\$&');
@@ -47500,6 +47510,13 @@
 	  return res;
 	}
 
+	// Normal modulo operator (%) returns negative numbers if value is negative. We don't want this. E.g.:
+	// -5 % 100 === -5
+	// mod(-5, 100) === 95.
+	function mod(v, n) {
+	  return (v % n + n) % n;
+	}
+
 /***/ },
 /* 694 */
 /***/ function(module, exports, __webpack_require__) {
@@ -47517,9 +47534,17 @@
 
 	var _config2 = _interopRequireDefault(_config);
 
+	var _platePoint = __webpack_require__(695);
+
+	var _platePoint2 = _interopRequireDefault(_platePoint);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var OCEAN = exports.OCEAN = 0;
 	var CONTINENT = exports.CONTINENT = 1;
@@ -47531,62 +47556,45 @@
 	  return _config2.default.subductionRatio * subductionVelocity * timeStep * subductionDist;
 	}
 
-	var Point = function () {
+	var Point = function (_PlatePoint) {
+	  _inherits(Point, _PlatePoint);
+
 	  function Point(_ref) {
 	    var x = _ref.x,
 	        y = _ref.y,
-	        height = _ref.height,
 	        plate = _ref.plate,
+	        height = _ref.height,
 	        _ref$age = _ref.age,
 	        age = _ref$age === undefined ? 0 : _ref$age;
 
 	    _classCallCheck(this, Point);
 
-	    // Make sure that relative coords are always positive and rounded to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-	    this.type = height > _config2.default.newOceanHeight ? CONTINENT : OCEAN;
-	    this.height = height;
-	    this.plate = plate;
-	    this.age = age;
+	    var _this = _possibleConstructorReturn(this, (Point.__proto__ || Object.getPrototypeOf(Point)).call(this, { x: x, y: y, plate: plate }));
+
+	    _this.type = height > _config2.default.newOceanHeight ? CONTINENT : OCEAN;
+	    _this.height = height;
+	    _this.age = age;
 	    // Needs to be calculated later.
-	    this.continent = null;
-	    this.alive = true;
+	    _this.continent = null;
+	    _this.alive = true;
 	    // Subduction properties:
-	    this.subductionDist = null;
-	    this.subductionVelocity = 0;
+	    _this.subductionDist = null;
+	    _this.subductionVelocity = 0;
 	    // Volcanic activity properties:
-	    this.volcanicHotSpot = false;
-	    this.distFromVolcanoCenter = null;
-	    this.volcanicActTime = 0;
+	    _this.volcanicHotSpot = false;
+	    _this.distFromVolcanoCenter = null;
+	    _this.volcanicActTime = 0;
+	    return _this;
 	  }
 
 	  _createClass(Point, [{
-	    key: 'setPlate',
-	    value: function setPlate(plate) {
-	      // Update relative coords!
-	      var x = this.x;
-	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-	      // Finally, update plate.
-	      this.plate = plate;
-	    }
-	  }, {
-	    key: 'getRelativeVelocity',
-	    value: function getRelativeVelocity(otherPoint) {
-	      var vxDiff = this.vx - otherPoint.vx;
-	      var vyDiff = this.vy - otherPoint.vy;
-	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
-	    }
-	  }, {
 	    key: 'setupSubduction',
 	    value: function setupSubduction(otherPoint) {
 	      if (!this.subduction) {
 	        this.subductionDist = 0;
 	      }
 	      this.height = Math.min(_config2.default.subductionHeight, this.height);
-	      this.subductionVelocity = Math.max(this.getRelativeVelocity(otherPoint), 0.5);
+	      this.subductionVelocity = Math.max(this.relativeSpeed(otherPoint), 0.5);
 	    }
 	  }, {
 	    key: 'applyVolcanicActivity',
@@ -47618,17 +47626,16 @@
 	        this.distFromVolcanoCenter = null;
 	      }
 
-	      if (this.height <= _config2.default.minHeight) {
-	        // Point subducted and will be removed.
-	        this.alive = false;
-	      }
-
 	      if (this.type === OCEAN && this.height > 0) {
 	        this.type = CONTINENT;
 	      }
 
 	      if (this.height > 1) {
 	        this.height = 1;
+	      }
+
+	      if (this.hasSubducted || this.outOfBounds) {
+	        this.alive = false;
 	      }
 	    }
 	  }, {
@@ -47642,34 +47649,14 @@
 	      return this.type === CONTINENT;
 	    }
 	  }, {
-	    key: 'x',
-	    get: function get() {
-	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-	    }
-	  }, {
-	    key: 'y',
-	    get: function get() {
-	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-	    }
-	  }, {
-	    key: 'vx',
-	    get: function get() {
-	      return this.plate.vx;
-	    }
-	  }, {
-	    key: 'vy',
-	    get: function get() {
-	      return this.plate.vy;
-	    }
-	  }, {
-	    key: 'speed',
-	    get: function get() {
-	      return Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
-	    }
-	  }, {
 	    key: 'subduction',
 	    get: function get() {
 	      return this.subductionDist !== null;
+	    }
+	  }, {
+	    key: 'hasSubducted',
+	    get: function get() {
+	      return this.height <= _config2.default.minHeight;
 	    }
 	  }, {
 	    key: 'volcanicAct',
@@ -47679,7 +47666,7 @@
 	  }, {
 	    key: 'volcanicActAllowed',
 	    get: function get() {
-	      return this.volcanicActTime < _config2.default.volcanicActMaxTime && !this.subduction;
+	      return this.volcanicActTime < _config2.default.hotSpotActMaxTime && !this.subduction;
 	    }
 	  }, {
 	    key: 'volcanicActProbability',
@@ -47691,7 +47678,7 @@
 	  }]);
 
 	  return Point;
-	}();
+	}(_platePoint2.default);
 
 	exports.default = Point;
 
@@ -47711,44 +47698,31 @@
 
 	var _config2 = _interopRequireDefault(_config);
 
+	var _utils = __webpack_require__(693);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
-	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
-	var HotSpot = function () {
-	  function HotSpot(_ref) {
+	var PlatePoint = function () {
+	  function PlatePoint(_ref) {
 	    var x = _ref.x,
 	        y = _ref.y,
-	        radius = _ref.radius,
-	        strength = _ref.strength,
-	        plate = _ref.plate,
-	        _ref$lifeRatio = _ref.lifeRatio,
-	        lifeRatio = _ref$lifeRatio === undefined ? 1 : _ref$lifeRatio;
+	        plate = _ref.plate;
 
-	    _classCallCheck(this, HotSpot);
+	    _classCallCheck(this, PlatePoint);
 
-	    // Make sure that relative coords are always positive to make other calculations easier.
-	    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-	    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-	    this.radius = radius;
-	    this.strength = strength;
 	    this.plate = plate;
-	    this.active = false;
-	    this.lifeLeft = _config2.default.volcanoLifeLengthRatio * radius * lifeRatio;
+	    this.x = x;
+	    this.y = y;
 	  }
 
-	  _createClass(HotSpot, [{
-	    key: 'setPlate',
-	    value: function setPlate(plate) {
-	      // Update relative coords!
-	      var x = this.x;
-	      var y = this.y;
-	      this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-	      this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-	      // Finally, update plate.
-	      this.plate = plate;
+	  _createClass(PlatePoint, [{
+	    key: 'relativeSpeed',
+	    value: function relativeSpeed(otherPoint) {
+	      var vxDiff = this.vx - otherPoint.vx;
+	      var vyDiff = this.vy - otherPoint.vy;
+	      return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
 	    }
 	  }, {
 	    key: 'dist',
@@ -47758,12 +47732,129 @@
 
 	      var xDiff = Math.abs(this.x - x);
 	      var yDiff = Math.abs(this.y - y);
-	      // Note that grid has wrapping boundaries!
-	      if (xDiff > this.plate.maxX * 0.5) xDiff = this.plate.maxX - xDiff;
-	      if (yDiff > this.plate.maxY * 0.5) yDiff = this.plate.maxY - yDiff;
+	      if (_config2.default.wrappingBoundaries) {
+	        if (xDiff > this.plate.maxX * 0.5) xDiff = this.plate.maxX - xDiff;
+	        if (yDiff > this.plate.maxY * 0.5) yDiff = this.plate.maxY - yDiff;
+	      }
 	      return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 	    }
 	  }, {
+	    key: 'setPlate',
+	    value: function setPlate(plate) {
+	      var oldX = this.x;
+	      var oldY = this.y;
+	      // Update plate. That effectively changes returned (x, y) values.
+	      this.plate = plate;
+	      // Set (x, y) again to update relative coords and make sure that point stays in the same place!
+	      this.x = oldX;
+	      this.y = oldY;
+	    }
+	  }, {
+	    key: 'x',
+	    set: function set(v) {
+	      // Make sure that relative coords are always rounded to make other calculations easier.
+	      this.relX = Math.round(v - Math.round(this.plate.x));
+	    },
+	    get: function get() {
+	      if (_config2.default.wrappingBoundaries) {
+	        return (0, _utils.mod)(Math.round(this.relX + this.plate.x), this.plate.maxX);
+	      }
+	      return Math.round(this.relX + this.plate.x);
+	    }
+	  }, {
+	    key: 'y',
+	    set: function set(v) {
+	      // Make sure that relative coords are always rounded to make other calculations easier.
+	      this.relY = Math.round(v - Math.round(this.plate.y));
+	    },
+	    get: function get() {
+	      if (_config2.default.wrappingBoundaries) {
+	        return (0, _utils.mod)(Math.round(this.relY + this.plate.y), this.plate.maxY);
+	      }
+	      return Math.round(this.relY + this.plate.y);
+	    }
+	  }, {
+	    key: 'vx',
+	    get: function get() {
+	      return this.plate.vx;
+	    }
+	  }, {
+	    key: 'vy',
+	    get: function get() {
+	      return this.plate.vy;
+	    }
+	  }, {
+	    key: 'speed',
+	    get: function get() {
+	      return Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
+	    }
+	  }, {
+	    key: 'outOfBounds',
+	    get: function get() {
+	      // Little optimization. Point can be out of bounds only if wrapping boundaries are disabled.
+	      return !_config2.default.wrappingBoundaries && (this.x < 0 || this.x >= this.plate.maxX || this.y < 0 && this.y >= this.plate.maxY);
+	    }
+	  }]);
+
+	  return PlatePoint;
+	}();
+
+	exports.default = PlatePoint;
+
+/***/ },
+/* 696 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _config = __webpack_require__(684);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _platePoint = __webpack_require__(695);
+
+	var _platePoint2 = _interopRequireDefault(_platePoint);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	// Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
+	// It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
+	var HotSpot = function (_PlatePoint) {
+	  _inherits(HotSpot, _PlatePoint);
+
+	  function HotSpot(_ref) {
+	    var x = _ref.x,
+	        y = _ref.y,
+	        plate = _ref.plate,
+	        radius = _ref.radius,
+	        strength = _ref.strength,
+	        _ref$lifeRatio = _ref.lifeRatio,
+	        lifeRatio = _ref$lifeRatio === undefined ? 1 : _ref$lifeRatio;
+
+	    _classCallCheck(this, HotSpot);
+
+	    var _this = _possibleConstructorReturn(this, (HotSpot.__proto__ || Object.getPrototypeOf(HotSpot)).call(this, { x: x, y: y, plate: plate }));
+
+	    _this.radius = radius;
+	    _this.strength = strength;
+	    _this.active = false;
+	    _this.lifeLeft = _config2.default.hotSpotLifeLength * radius * lifeRatio;
+	    return _this;
+	  }
+
+	  _createClass(HotSpot, [{
 	    key: 'pointInside',
 	    value: function pointInside(point) {
 	      return this.dist(point) < this.radius;
@@ -47777,7 +47868,7 @@
 	    key: 'heightChange',
 	    value: function heightChange(dist) {
 	      var normDist = dist / this.radius;
-	      return _config2.default.volcanoHeightChangeRatio * (1 - normDist) * this.radius * this.strength;
+	      return _config2.default.hotSpotStrength * (1 - normDist) * this.radius * this.strength;
 	    }
 	  }, {
 	    key: 'update',
@@ -47785,29 +47876,19 @@
 	      this.lifeLeft -= timeStep;
 	    }
 	  }, {
-	    key: 'x',
-	    get: function get() {
-	      return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-	    }
-	  }, {
-	    key: 'y',
-	    get: function get() {
-	      return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-	    }
-	  }, {
 	    key: 'alive',
 	    get: function get() {
-	      return this.lifeLeft > 0;
+	      return this.lifeLeft > 0 && !this.outOfBounds;
 	    }
 	  }]);
 
 	  return HotSpot;
-	}();
+	}(_platePoint2.default);
 
 	exports.default = HotSpot;
 
 /***/ },
-/* 696 */
+/* 697 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -47891,7 +47972,7 @@
 	}
 
 /***/ },
-/* 697 */
+/* 698 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -47900,35 +47981,35 @@
 	  value: true
 	});
 
-	var _test = __webpack_require__(698);
+	var _test = __webpack_require__(699);
 
 	var _test2 = _interopRequireDefault(_test);
 
-	var _test3 = __webpack_require__(699);
+	var _test3 = __webpack_require__(700);
 
 	var _test4 = _interopRequireDefault(_test3);
 
-	var _test5 = __webpack_require__(700);
+	var _test5 = __webpack_require__(701);
 
 	var _test6 = _interopRequireDefault(_test5);
 
-	var _test7 = __webpack_require__(701);
+	var _test7 = __webpack_require__(702);
 
 	var _test8 = _interopRequireDefault(_test7);
 
-	var _islands = __webpack_require__(702);
+	var _islands = __webpack_require__(703);
 
 	var _islands2 = _interopRequireDefault(_islands);
 
-	var _islandCollision = __webpack_require__(703);
+	var _islandCollision = __webpack_require__(704);
 
 	var _islandCollision2 = _interopRequireDefault(_islandCollision);
 
-	var _continentCollision = __webpack_require__(704);
+	var _continentCollision = __webpack_require__(705);
 
 	var _continentCollision2 = _interopRequireDefault(_continentCollision);
 
-	var _oceanRidge = __webpack_require__(705);
+	var _oceanRidge = __webpack_require__(706);
 
 	var _oceanRidge2 = _interopRequireDefault(_oceanRidge);
 
@@ -48018,55 +48099,55 @@
 	};
 
 /***/ },
-/* 698 */
+/* 699 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "e30c9630c26810abe93055eed92a0180.png";
 
 /***/ },
-/* 699 */
+/* 700 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "9b25e56ad97ec9fa271fc5bcb04269ef.png";
 
 /***/ },
-/* 700 */
+/* 701 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "669a8322dc8ec6b46154af0184d3a2c0.png";
 
 /***/ },
-/* 701 */
+/* 702 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "79832591eaf4fd8ae8a67196a2d5a028.png";
 
 /***/ },
-/* 702 */
+/* 703 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "cccf24a30887faa57edd27e35ed145a6.png";
 
 /***/ },
-/* 703 */
+/* 704 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "7dd1a724b0e862105e610eaa40177cad.png";
 
 /***/ },
-/* 704 */
+/* 705 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "801be5086143e96c61c818514ad9b073.png";
 
 /***/ },
-/* 705 */
+/* 706 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "f705cb9c926aa56e8801ed7acf1fb139.png";
 
 /***/ },
-/* 706 */
+/* 707 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48083,11 +48164,11 @@
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _getImgData = __webpack_require__(707);
+	var _getImgData = __webpack_require__(708);
 
 	var _getImgData2 = _interopRequireDefault(_getImgData);
 
-	var _plate = __webpack_require__(708);
+	var _plate = __webpack_require__(709);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
@@ -48201,7 +48282,7 @@
 	}
 
 /***/ },
-/* 707 */
+/* 708 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -48237,7 +48318,7 @@
 	}
 
 /***/ },
-/* 708 */
+/* 709 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -48346,10 +48427,6 @@
 	      if (this.pinned) return;
 	      this.x += this.vx * timeStep;
 	      this.y += this.vy * timeStep;
-	      if (this.x > this.maxX) this.x = this.x % this.maxX;
-	      if (this.x < 0) this.x += this.maxX;
-	      if (this.y > this.maxY) this.y = this.y % this.maxY;
-	      if (this.y < 0) this.y += this.maxY;
 	    }
 	  }, {
 	    key: "removeDeadPoints",
@@ -48445,7 +48522,7 @@
 	exports.default = Plate;
 
 /***/ },
-/* 709 */
+/* 710 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48533,7 +48610,7 @@
 	}
 
 /***/ },
-/* 710 */
+/* 711 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -48553,7 +48630,7 @@
 	}
 
 /***/ },
-/* 711 */
+/* 712 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48637,16 +48714,16 @@
 	}
 
 /***/ },
-/* 712 */
+/* 713 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(713);
+	var content = __webpack_require__(714);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(715)(content, {});
+	var update = __webpack_require__(716)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -48663,10 +48740,10 @@
 	}
 
 /***/ },
-/* 713 */
+/* 714 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(714)();
+	exports = module.exports = __webpack_require__(715)();
 	// imports
 
 
@@ -48677,7 +48754,7 @@
 
 
 /***/ },
-/* 714 */
+/* 715 */
 /***/ function(module, exports) {
 
 	/*
@@ -48733,7 +48810,7 @@
 
 
 /***/ },
-/* 715 */
+/* 716 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -48985,16 +49062,16 @@
 
 
 /***/ },
-/* 716 */
+/* 717 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(717);
+	var content = __webpack_require__(718);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(715)(content, {});
+	var update = __webpack_require__(716)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -49011,10 +49088,10 @@
 	}
 
 /***/ },
-/* 717 */
+/* 718 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(714)();
+	exports = module.exports = __webpack_require__(715)();
 	// imports
 
 
@@ -49025,7 +49102,7 @@
 
 
 /***/ },
-/* 718 */
+/* 719 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -49042,11 +49119,11 @@
 
 	var _MuiThemeProvider2 = _interopRequireDefault(_MuiThemeProvider);
 
-	var _presets = __webpack_require__(697);
+	var _presets = __webpack_require__(698);
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	__webpack_require__(719);
+	__webpack_require__(720);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -49136,16 +49213,16 @@
 	exports.default = IndexPage;
 
 /***/ },
-/* 719 */
+/* 720 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(720);
+	var content = __webpack_require__(721);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(715)(content, {});
+	var update = __webpack_require__(716)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -49162,10 +49239,10 @@
 	}
 
 /***/ },
-/* 720 */
+/* 721 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(714)();
+	exports = module.exports = __webpack_require__(715)();
 	// imports
 
 
