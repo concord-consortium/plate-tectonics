@@ -34,7 +34,7 @@ const Preset = props => (
   <tr>
     <td>
       <a
-        href={`/?preset=${props.name}`} target="_blank" rel="noopener noreferrer"
+        href={`${window.location.pathname}?preset=${props.name}`} target="_blank" rel="noopener noreferrer"
       >{props.name}</a>
     </td>
     <td><img key={props.img} alt="data-img" src={props.img} /></td>

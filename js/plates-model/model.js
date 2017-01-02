@@ -101,7 +101,7 @@ export default class Model {
         x: continentPoint.x,
         y: continentPoint.y,
         radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-        strength: config.volcanicActStrength * oceanPoint.getRelativeVelocity(continentPoint),
+        strength: config.volcanicActStrength * oceanPoint.relativeSpeed(continentPoint),
         plate: continentPlate,
       });
       continentPlate.addHotSpot(newHotSpot);
@@ -205,7 +205,7 @@ export default class Model {
         x: surfacePoint.x,
         y: surfacePoint.y,
         radius: subductingPoint.volcanicActProbability * Math.random() * 50 + 10,
-        strength: config.volcanicActStrength * subductingPoint.getRelativeVelocity(surfacePoint) * 3 * Math.random(),
+        strength: config.volcanicActStrength * subductingPoint.relativeSpeed(surfacePoint) * 3 * Math.random(),
         plate,
       });
       plate.addHotSpot(newHotSpot);

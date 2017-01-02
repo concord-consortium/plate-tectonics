@@ -1,4 +1,5 @@
 import config from './config';
+import PlatePoint from './plate-point';
 
 export const OCEAN = 0;
 export const CONTINENT = 1;
@@ -10,14 +11,11 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
   return config.subductionRatio * subductionVelocity * timeStep * subductionDist;
 }
 
-export default class Point {
-  constructor({ x, y, height, plate, age = 0 }) {
-    // Make sure that relative coords are always positive and rounded to make other calculations easier.
-    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
+export default class Point extends PlatePoint {
+  constructor({ x, y, plate, height, age = 0 }) {
+    super({ x, y, plate });
     this.type = height > config.newOceanHeight ? CONTINENT : OCEAN;
     this.height = height;
-    this.plate = plate;
     this.age = age;
     // Needs to be calculated later.
     this.continent = null;
@@ -31,42 +29,12 @@ export default class Point {
     this.volcanicActTime = 0;
   }
 
-  setPlate(plate) {
-    // Update relative coords!
-    const x = this.x;
-    const y = this.y;
-    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-    // Finally, update plate.
-    this.plate = plate;
-  }
-
   get isOcean() {
     return this.type === OCEAN;
   }
 
   get isContinent() {
     return this.type === CONTINENT;
-  }
-
-  get x() {
-    return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-  }
-
-  get y() {
-    return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-  }
-
-  get vx() {
-    return this.plate.vx;
-  }
-
-  get vy() {
-    return this.plate.vy;
-  }
-
-  get speed() {
-    return Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
   }
 
   get subduction() {
@@ -88,18 +56,12 @@ export default class Point {
     return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
   }
 
-  getRelativeVelocity(otherPoint) {
-    const vxDiff = this.vx - otherPoint.vx;
-    const vyDiff = this.vy - otherPoint.vy;
-    return Math.sqrt(vxDiff * vxDiff + vyDiff * vyDiff);
-  }
-
   setupSubduction(otherPoint) {
     if (!this.subduction) {
       this.subductionDist = 0;
     }
     this.height = Math.min(config.subductionHeight, this.height);
-    this.subductionVelocity = Math.max(this.getRelativeVelocity(otherPoint), 0.5);
+    this.subductionVelocity = Math.max(this.relativeSpeed(otherPoint), 0.5);
   }
 
   applyVolcanicActivity(hotSpot) {

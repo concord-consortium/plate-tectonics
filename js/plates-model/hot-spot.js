@@ -1,48 +1,19 @@
 import config from './config';
+import PlatePoint from './plate-point';
 
 // Hot spot name refers to geological hot spot. However in practice it's used to generate mountains and/or volcanoes.
 // It's a circle that causes all the points lying inside to be pushed up in a way described by its function.
-export default class HotSpot {
-  constructor({ x, y, radius, strength, plate, lifeRatio = 1 }) {
-    // Make sure that relative coords are always positive to make other calculations easier.
-    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
+export default class HotSpot extends PlatePoint {
+  constructor({ x, y, plate, radius, strength, lifeRatio = 1 }) {
+    super({ x, y, plate });
     this.radius = radius;
     this.strength = strength;
-    this.plate = plate;
     this.active = false;
     this.lifeLeft = config.volcanoLifeLengthRatio * radius * lifeRatio;
   }
 
-  setPlate(plate) {
-    // Update relative coords!
-    const x = this.x;
-    const y = this.y;
-    this.relX = Math.round(x >= plate.x ? x - Math.round(plate.x) : x - Math.round(plate.x) + plate.maxX);
-    this.relY = Math.round(y >= plate.y ? y - Math.round(plate.y) : y - Math.round(plate.y) + plate.maxY);
-    // Finally, update plate.
-    this.plate = plate;
-  }
-
-  get x() {
-    return Math.round(this.relX + this.plate.x) % this.plate.maxX;
-  }
-
-  get y() {
-    return Math.round(this.relY + this.plate.y) % this.plate.maxY;
-  }
-
   get alive() {
     return this.lifeLeft > 0;
-  }
-
-  dist({ x, y }) {
-    let xDiff = Math.abs(this.x - x);
-    let yDiff = Math.abs(this.y - y);
-    // Note that grid has wrapping boundaries!
-    if (xDiff > this.plate.maxX * 0.5) xDiff = this.plate.maxX - xDiff;
-    if (yDiff > this.plate.maxY * 0.5) yDiff = this.plate.maxY - yDiff;
-    return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
   }
 
   pointInside(point) {
