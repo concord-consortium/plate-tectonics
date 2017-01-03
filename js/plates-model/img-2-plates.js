@@ -47,7 +47,7 @@ function isProcessed(heightVal) {
   return heightVal === PROCESSED_H_VAL;
 }
 
-function getPlates(heightMap) {
+export function getPlates(heightMap) {
   const width = heightMap.length;
   const height = heightMap[0].length;
   const plates = [];
@@ -90,8 +90,8 @@ function getPlates(heightMap) {
 }
 
 
-export default function img2plates(imgSrc, callback) {
+export function img2heightMap(imgSrc, callback) {
   getImgData(imgSrc, (imgData) => {
-    callback(getPlates(getHeightMap(imgData)), imgData.width, imgData.height);
+    callback(getHeightMap(imgData), imgData.width, imgData.height);
   });
 }

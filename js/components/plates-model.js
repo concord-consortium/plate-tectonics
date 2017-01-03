@@ -6,6 +6,7 @@ import loadModel from '../plates-model/load-model';
 import renderTopView from '../plates-model/render-top-view';
 import renderHotSpots from '../plates-model/render-hot-spots';
 import renderCrossSection from '../plates-model/render-cross-section';
+import ModelWorker from 'worker-loader?inline!../plates-model/model.worker';
 import { getURLParam } from '../utils';
 
 import '../../css/plates-model.less';
@@ -34,19 +35,34 @@ export default class PlatesModel extends PureComponent {
   }
 
   componentDidMount() {
-    loadModel(getURLParam('preset') || 'continentalCollision', (model) => {
-      this.model = model;
-      window.model = model;
-      window.comp = this;
-      this.setState({ modelWidth: model.width, modelHeight: model.height, crossSectionY: model.height * 0.5 }, () => {
-        // Warning: try to start model only when width and height is already set. Otherwise, renderers might fail.
-        this.renderModel();
-        const { simEnabled } = this.state;
-        if (simEnabled) {
-          this.startSimulation();
-        }
-      });
+    this.worker = new ModelWorker();
+    this.worker.addEventListener('message', (event) => {
+      console.log('msg');
+      if (event.data.type === 'loaded') {
+        this.modelLoaded(event.data);
+      } else if (event.data.type === 'step') {
+        this.worker.postMessage({ type: 'step' });
+        this.renderPoints(event.data.points);
+      }
     });
+
+    loadModel(getURLParam('preset') || 'continentalCollision', (model) => {
+      this.worker.postMessage({ type: 'load', model });
+    });
+  }
+
+  modelLoaded(data) {
+    this.setState({ modelWidth: data.width, modelHeight: data.height, crossSectionY: data.height * 0.5 }, () => {
+      this.renderPoints(data.points);
+    });
+    this.worker.postMessage({ type: 'step' });
+  }
+
+  renderPoints(points) {
+    const { modelHeight, crossSectionY, platesRendering, plateBoundariesRendering } = this.state;
+    renderTopView(this.topView, points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
+    const crossY = modelHeight - Math.round(crossSectionY);
+    renderCrossSection(this.crossSectionView, points, crossY, platesRendering ? 'plates' : 'type');
   }
 
   componentDidUpdate(prevProps, prevState) {
