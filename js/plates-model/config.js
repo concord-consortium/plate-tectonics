@@ -19,16 +19,16 @@ const DEFAULT_CONFIG = {
   // Speed of subduction.
   subductionRatio: 0.00015,
   // Strength of orogeny related to collision between continents.
-  orogenyStrength: 30,
+  orogenyStrength: 40,
   // Strength of volcanic activity related to subduction.
-  volcanicActStrength: 2,
+  volcanicActStrength: 1.5,
   // Volcanoes are created between min and max distance from convergent boundary.
   volcanicActMinDist: 5,
   volcanicActMaxDist: 30,
   // Limit amount of time that given point can undergo orogenesis or volcanic activity.
   hotSpotActMaxTime: 100,
   // Strength of orogenesis or volcanic activity.
-  hotSpotStrength: 0.00135,
+  hotSpotStrength: 0.002,
   // Volcano lifespan is proportional to this value and its diameter.
   hotSpotLifeLength: 0.5,
   // Controls how fast continents would slow down when they are colliding.

@@ -23,10 +23,12 @@ export default class Point extends PlatePoint {
     // Subduction properties:
     this.subductionDist = null;
     this.subductionVelocity = 0;
-    // Volcanic activity properties:
-    this.volcanicHotSpot = false;
-    this.distFromVolcanoCenter = null;
-    this.volcanicActTime = 0;
+    // Volcanic activity and orogeny properties:
+    this.currentHotSpot = false;
+    this.distFromHotSpotCenter = null;
+    // Counts how much time given point has been under influence of hot spots. At some point doesn't accept
+    // any more activity, so we don't create infinitely high mountains.
+    this.hotSpotActTime = 0;
   }
 
   get isOcean() {
@@ -45,12 +47,12 @@ export default class Point extends PlatePoint {
     return this.height <= config.minHeight;
   }
 
-  get volcanicAct() {
-    return this.volcanicHotSpot !== null;
+  get hotSpotAct() {
+    return this.currentHotSpot !== null;
   }
 
-  get volcanicActAllowed() {
-    return this.volcanicActTime < config.hotSpotActMaxTime && !this.subduction;
+  get hotSpotAllowed() {
+    return this.hotSpotActTime < config.hotSpotActMaxTime && !this.subduction;
   }
 
   get volcanicActProbability() {
@@ -68,10 +70,11 @@ export default class Point extends PlatePoint {
     this.subductionVelocity = Math.max(this.relativeSpeed(otherPoint), 0.5);
   }
 
-  applyVolcanicActivity(hotSpot) {
-    this.volcanicHotSpot = hotSpot;
-    // Cache distance so we don't need to recalculate it in each simulation step.
-    this.distFromVolcanoCenter = hotSpot.dist(this);
+  applyHotSpot(hotSpot) {
+    this.currentHotSpot = hotSpot;
+    // Cache distance so we don't need to recalculate it in each simulation step. Hot spots are always affecting
+    // only one plate, so distance within point and plate can't change.
+    this.distFromHotSpotCenter = hotSpot.dist(this);
   }
 
   update(timeStep) {
@@ -87,12 +90,15 @@ export default class Point extends PlatePoint {
       this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
     }
 
-    if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
-      this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
-      this.volcanicActTime += timeStep;
+    if (this.currentHotSpot && this.currentHotSpot.alive) {
+      const diff = this.currentHotSpot.heightChange(this.distFromHotSpotCenter) * timeStep;
+      // Multiply diff by (maxHeight - currentHeight) so points don't reach max height too fast.
+      // It creates nicer visual effect.
+      this.height += diff * (config.maxHeight - this.height);
+      this.hotSpotActTime += timeStep;
     } else {
-      this.volcanicHotSpot = null;
-      this.distFromVolcanoCenter = null;
+      this.currentHotSpot = null;
+      this.distFromHotSpotCenter = null;
     }
 
     if (this.type === OCEAN && this.height > 0) {

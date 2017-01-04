@@ -95,7 +95,7 @@ export default class Model {
     const oceanPoint = p1.type === OCEAN ? p1 : p2;
     const continentPoint = p1.type === CONTINENT ? p1 : p2;
     oceanPoint.setupSubduction(continentPoint);
-    if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
+    if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.hotSpotAct) {
       const continentPlate = continentPoint.plate;
       const newHotSpot = new HotSpot({
         x: continentPoint.x,
@@ -197,7 +197,7 @@ export default class Model {
       return;
     }
     subductingPoint.setupSubduction(surfacePoint);
-    if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
+    if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.hotSpotAct) {
       const plate = surfacePoint.plate;
       const newHotSpot = new HotSpot({
         x: surfacePoint.x,
@@ -213,20 +213,20 @@ export default class Model {
   activateHotSpots() {
     this.plates.forEach((plate) => {
       plate.inactiveHotSpots.forEach((hotSpot) => {
-        let volcanicActAllowed = true;
+        let hotSpotAllowed = true;
         this.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, (point) => {
           // point === null means that boundary between plates has been found. Do not let hot spots overlapping
           // plate boundaries (it doesn't look good).
-          if (point === null || !point.volcanicActAllowed) {
-            volcanicActAllowed = false;
+          if (point === null || !point.hotSpotAllowed) {
+            hotSpotAllowed = false;
           }
-          if (point) point.applyVolcanicActivity(hotSpot);
+          if (point) point.applyHotSpot(hotSpot);
         });
         hotSpot.active = true;
         // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.
         // Don't remove hot spot immediately, so we don't try to create new hot spots immediately in the next step.
         // We could control that point by point, but it would cause more noisy look of the volcanoes / mountains.
-        if (!volcanicActAllowed) {
+        if (!hotSpotAllowed) {
           hotSpot.strength = 0;
         }
       });
