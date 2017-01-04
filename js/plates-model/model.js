@@ -280,9 +280,12 @@ export default class Model {
         // If there's some point missing, create a new ocean crust and add it to the plate that
         // was in the same location before.
         if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
-          const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
-          if (plate) {
-            const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate, cooling: true });
+          const prevPoint = prevSurface.points[x][y] && prevSurface.points[x][y][0];
+          if (prevPoint) {
+            const plate = prevPoint.plate;
+            // Don't set config.newOceanHeight immediately, so the ridge builds up its height slowly.
+            const newHeight = Math.min(prevPoint.height + 0.03, config.newOceanHeight);
+            const newPoint = new Point({ x, y, type: OCEAN, height: newHeight, plate, cooling: true });
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.setPoint(newPoint);
