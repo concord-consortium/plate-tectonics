@@ -44346,9 +44346,12 @@
 	          // If there's some point missing, create a new ocean crust and add it to the plate that
 	          // was in the same location before.
 	          if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
-	            var plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
-	            if (plate) {
-	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate, cooling: true });
+	            var prevPoint = prevSurface.points[x][y] && prevSurface.points[x][y][0];
+	            if (prevPoint) {
+	              var plate = prevPoint.plate;
+	              // Don't set config.newOceanHeight immediately, so the ridge builds up its height slowly.
+	              var newHeight = Math.min(prevPoint.height + 0.03, _config2.default.newOceanHeight);
+	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: newHeight, plate: plate, cooling: true });
 	              plate.addPoint(newPoint);
 	              // Update surface object too, so prevSurface in the next step is valid!
 	              surface.setPoint(newPoint);
