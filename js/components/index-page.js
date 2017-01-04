@@ -16,13 +16,13 @@ const IndexPage = () => (
       </div>
       <table>
         <tbody>
-          { FROM_DOC.map(name => <Preset name={name} img={presets[name].img} />) }
+          { FROM_DOC.map(name => <Preset key={name} name={name} img={presets[name].img} />) }
         </tbody>
       </table>
       <div>Other examples:</div>
       <table>
         <tbody>
-          { OTHERS.map(name => <Preset name={name} img={presets[name].img} />) }
+          { OTHERS.map(name => <Preset key={name} name={name} img={presets[name].img} />) }
         </tbody>
       </table>
     </div>
@@ -37,7 +37,7 @@ const Preset = props => (
         href={`${window.location.pathname}?preset=${props.name}`} target="_blank" rel="noopener noreferrer"
       >{props.name}</a>
     </td>
-    <td><img key={props.img} alt="data-img" src={props.img} /></td>
+    <td><img alt="data-img" src={props.img} /></td>
   </tr>
 );
 
