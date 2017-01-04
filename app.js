@@ -44348,7 +44348,7 @@
 	          if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
 	            var plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
 	            if (plate) {
-	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate });
+	              var newPoint = new _point2.default({ x: x, y: y, type: _point.OCEAN, height: _config2.default.newOceanHeight, plate: plate, cooling: true });
 	              plate.addPoint(newPoint);
 	              // Update surface object too, so prevSurface in the next step is valid!
 	              surface.setPoint(newPoint);
@@ -44796,8 +44796,7 @@
 	  // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
 	  newOceanHeight: -0.3,
 	  // When oceanic crust cools down, it sinks a bit.
-	  oceanicCrustCoolingRatio: 0.05,
-	  oceanicCrustCoolingTime: 6,
+	  oceanicCrustCoolingRatio: 0.0333,
 	  // If heightBasedSubduction === true, always the higher point will go above lower point.
 	  // Otherwise, every point from one plate will subduct, no matter what is the current height.
 	  // It ensures consistent subduction across the whole boundary.
@@ -44953,7 +44952,9 @@
 	        plate = _ref.plate,
 	        height = _ref.height,
 	        _ref$age = _ref.age,
-	        age = _ref$age === undefined ? 0 : _ref$age;
+	        age = _ref$age === undefined ? 0 : _ref$age,
+	        _ref$cooling = _ref.cooling,
+	        cooling = _ref$cooling === undefined ? false : _ref$cooling;
 
 	    _classCallCheck(this, Point);
 
@@ -44962,6 +44963,7 @@
 	    _this.type = height > _config2.default.newOceanHeight ? CONTINENT : OCEAN;
 	    _this.height = height;
 	    _this.age = age;
+	    _this.cooling = cooling;
 	    // Needs to be calculated later.
 	    _this.continent = null;
 	    _this.alive = true;
@@ -44997,12 +44999,16 @@
 	  }, {
 	    key: 'update',
 	    value: function update(timeStep) {
-	      if (this.type === OCEAN && this.age < _config2.default.oceanicCrustCoolingTime) {
-	        // Oceanic crust cools down and becomes denser.
-	        this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep * this.speed;
-	        this.height = Math.max(this.height, oceanFloorHeight());
-	        this.age += timeStep * this.speed;
+	      if (this.type === OCEAN && this.cooling) {
+	        if (this.height > oceanFloorHeight()) {
+	          // Oceanic crust cools down and becomes denser.
+	          this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep * this.speed / Math.max(Math.pow(this.age, 0.5), 2);
+	        } else {
+	          this.cooling = false;
+	        }
 	      }
+
+	      this.age += timeStep * this.speed;
 
 	      if (this.subduction) {
 	        this.subductionDist += this.subductionVelocity * timeStep;
@@ -45242,7 +45248,7 @@
 	    var _this = _possibleConstructorReturn(this, (HotSpot.__proto__ || Object.getPrototypeOf(HotSpot)).call(this, { x: x, y: y, plate: plate }));
 
 	    _this.radius = radius;
-	    _this.strength = strength;
+	    _this.strength = strength * Math.pow(_this.radius, 0.6);
 	    _this.active = false;
 	    _this.lifeLeft = _config2.default.hotSpotLifeLength * radius * lifeRatio;
 	    return _this;
@@ -45262,7 +45268,7 @@
 	    key: 'heightChange',
 	    value: function heightChange(dist) {
 	      var normDist = dist / this.radius;
-	      return _config2.default.hotSpotStrength * (1 - normDist) * Math.pow(this.radius, 0.6) * this.strength;
+	      return _config2.default.hotSpotStrength * (1 - normDist) * this.strength;
 	    }
 	  }, {
 	    key: 'update',
