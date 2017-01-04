@@ -3,6 +3,7 @@ import config from './config';
 import Point, { OCEAN, CONTINENT } from './point';
 import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
+import { mod } from '../utils';
 
 function isIsland(point) {
   // Assume that land is an island if its size is smaller than X% of the whole plate area
@@ -173,12 +174,12 @@ export default class Model {
       // 1.35 and 1.78. It matters, as everything is casted on the grid where coordinates are integers. If fractional
       // part of plate coords is different, plates can move to next cells at different time and some visual artifacts
       // might be visible.
-      const xFracDiff = 0.5 * (Math.abs(smallerPlate.x % 1) - Math.abs(biggerPlate.x % 1));
-      const yFracDiff = 0.5 * (Math.abs(smallerPlate.y % 1) - Math.abs(biggerPlate.y % 1));
-      smallerPlate.x -= Math.sign(smallerPlate.x) * xFracDiff;
-      biggerPlate.x += Math.sign(biggerPlate.x) * xFracDiff;
-      smallerPlate.y -= Math.sign(smallerPlate.y) * yFracDiff;
-      biggerPlate.y += Math.sign(biggerPlate.y) * yFracDiff;
+      const xFracDiff = 0.5 * (mod(smallerPlate.x, 1) - mod(biggerPlate.x, 1));
+      const yFracDiff = 0.5 * (mod(smallerPlate.y, 1) - mod(biggerPlate.y, 1));
+      smallerPlate.x -= xFracDiff;
+      biggerPlate.x += xFracDiff;
+      smallerPlate.y -= yFracDiff;
+      biggerPlate.y += yFracDiff;
     }
   }
 
