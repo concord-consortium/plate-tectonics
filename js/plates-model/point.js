@@ -4,6 +4,16 @@ import PlatePoint from './plate-point';
 export const OCEAN = 0;
 export const CONTINENT = 1;
 
+let oceanFloorTexture = 0.05;
+function oceanFloorHeight() {
+  // Add some random factor to the ocean floor height so there's visible texture and users can see that oceans
+  // are moving.
+  if (Math.random() < 0.00002) {
+    oceanFloorTexture *= -1;
+  }
+  return config.subductionHeight + oceanFloorTexture;
+}
+
 // Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
 // pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
 // function rather than linear.
@@ -81,7 +91,7 @@ export default class Point extends PlatePoint {
     if (this.type === OCEAN && this.age < config.oceanicCrustCoolingTime) {
       // Oceanic crust cools down and becomes denser.
       this.height -= config.oceanicCrustCoolingRatio * timeStep * this.speed;
-      this.height = Math.max(this.height, config.subductionHeight);
+      this.height = Math.max(this.height, oceanFloorHeight());
       this.age += timeStep * this.speed;
     }
 

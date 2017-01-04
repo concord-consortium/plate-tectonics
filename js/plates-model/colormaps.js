@@ -19,6 +19,16 @@ function d3ScaleToArray(d3Scale) {
   return result;
 }
 
+function d3Colormap(desc) {
+  const keys = Object.keys(desc).sort();
+  const colors = keys.map(k => desc[k]);
+  const d3Scale = scaleLinear()
+    .domain(keys)
+    .range(colors)
+    .interpolate(interpolateHcl);
+  return d3ScaleToArray(d3Scale);
+}
+
 const elevationColormap = {
   heat: colormap({
     colormap: 'jet',   // pick a builtin colormap or add your own
@@ -29,19 +39,22 @@ const elevationColormap = {
 
   // https://gist.github.com/hugolpz/4351d8f1b3da93de2c61
   // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Maps/Conventions#Topographic_maps
-  topo: d3ScaleToArray(scaleLinear()
-    .domain([0, 0.499999, 0.50001, 0.6, 0.65, 0.686, 0.7, 0.9, 0.9999])
-    .range([
-      '#3696d8',
-      '#b5ebfe',
-      '#ACD0A5',
-      '#94BF8B',
-      '#EFEBC0',
-      '#AA8753',
-      '#AC9A7C',
-      '#F5F4F2',
-      '#FFFFFF',
-    ]).interpolate(interpolateHcl)),
+  topo: d3Colormap({
+    0.00: '#004e83',
+    0.20: '#3696d8',
+    0.49: '#b5ebfe',
+    0.50: '#ACD0A5',
+    0.55: '#94BF8B',
+    0.60: '#A8C68F',
+    0.65: '#BDCC96',
+    0.70: '#EFEBC0',
+    0.75: '#DED6A3',
+    0.80: '#AA8753',
+    0.85: '#AC9A7C',
+    0.90: '#CAC3B8',
+    0.99: '#F5F4F2',
+    1.00: '#FFFFFF',
+  }),
 };
 
 const plateColormap = {
