@@ -73,12 +73,15 @@
 
 	var _indexPage2 = _interopRequireDefault(_indexPage);
 
+	var _utils = __webpack_require__(685);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	// Required by Material-UI library.
 	(0, _reactTapEventPlugin2.default)();
 
-	var component = window.location.search === '?index' ? _react2.default.createElement(_indexPage2.default, null) : _react2.default.createElement(_app2.default, null);
+	// Load model if there's ?preset= parameter defined, otherwise show index page with all the available examples.
+	var component = (0, _utils.getURLParam)('preset') ? _react2.default.createElement(_app2.default, null) : _react2.default.createElement(_indexPage2.default, null);
 	(0, _reactDom.render)(component, document.getElementById('app'));
 
 /***/ },
@@ -53236,7 +53239,7 @@
 	          'tbody',
 	          null,
 	          FROM_DOC.map(function (name) {
-	            return _react2.default.createElement(Preset, { name: name, img: _presets2.default[name].img });
+	            return _react2.default.createElement(Preset, { key: name, name: name, img: _presets2.default[name].img });
 	          })
 	        )
 	      ),
@@ -53252,7 +53255,7 @@
 	          'tbody',
 	          null,
 	          OTHERS.map(function (name) {
-	            return _react2.default.createElement(Preset, { name: name, img: _presets2.default[name].img });
+	            return _react2.default.createElement(Preset, { key: name, name: name, img: _presets2.default[name].img });
 	          })
 	        )
 	      )
@@ -53278,7 +53281,7 @@
 	    _react2.default.createElement(
 	      'td',
 	      null,
-	      _react2.default.createElement('img', { key: props.img, alt: 'data-img', src: props.img })
+	      _react2.default.createElement('img', { alt: 'data-img', src: props.img })
 	    )
 	  );
 	};
