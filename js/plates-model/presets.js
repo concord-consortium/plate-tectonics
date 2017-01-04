@@ -17,8 +17,8 @@ export default {
   oceanRidge: {
     img: oceanRidgeSrc,
     init: (plates) => {
-      plates[1].vx = -1;
-      plates[2].vx = 1;
+      plates[1].vx = -3;
+      plates[2].vx = 3;
     },
   },
   islands: {

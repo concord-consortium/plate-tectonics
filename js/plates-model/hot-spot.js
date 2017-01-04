@@ -26,7 +26,7 @@ export default class HotSpot extends PlatePoint {
 
   heightChange(dist) {
     const normDist = dist / this.radius;
-    return config.hotSpotStrength * (1 - normDist) * this.radius * this.strength;
+    return config.hotSpotStrength * (1 - normDist) * Math.pow(this.radius, 0.6) * this.strength;
   }
 
   update(timeStep) {

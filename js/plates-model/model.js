@@ -101,7 +101,7 @@ export default class Model {
         x: continentPoint.x,
         y: continentPoint.y,
         radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-        strength: config.volcanicActStrength * oceanPoint.relativeSpeed(continentPoint),
+        strength: config.volcanicActStrength,
         plate: continentPlate,
       });
       continentPlate.addHotSpot(newHotSpot);
@@ -142,20 +142,18 @@ export default class Model {
         x: p1.x + Math.random() * 30 - 15,
         y: p1.y + Math.random() * 30 - 15,
         radius: Math.random() * 12 + 2,
-        strength: 30,
+        strength: config.orogenyStrength,
         lifeRatio: 0.1,
         plate: pl1,
-        overlapping: true,
       });
       pl1.addHotSpot(newHotSpot1);
       const newHotSpot2 = new HotSpot({
         x: p1.x + Math.random() * 30 - 15,
         y: p1.y + Math.random() * 30 - 15,
         radius: Math.random() * 12 + 2,
-        strength: 30,
+        strength: config.orogenyStrength,
         lifeRatio: 0.1,
         plate: pl2,
-        overlapping: true,
       });
       pl2.addHotSpot(newHotSpot2);
       // Remove lower point.
