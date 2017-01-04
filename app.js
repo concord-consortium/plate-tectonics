@@ -44025,6 +44025,8 @@
 
 	var _continent = __webpack_require__(689);
 
+	var _utils = __webpack_require__(685);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -44210,12 +44212,12 @@
 	        // 1.35 and 1.78. It matters, as everything is casted on the grid where coordinates are integers. If fractional
 	        // part of plate coords is different, plates can move to next cells at different time and some visual artifacts
 	        // might be visible.
-	        var xFracDiff = 0.5 * (Math.abs(smallerPlate.x % 1) - Math.abs(biggerPlate.x % 1));
-	        var yFracDiff = 0.5 * (Math.abs(smallerPlate.y % 1) - Math.abs(biggerPlate.y % 1));
-	        smallerPlate.x -= Math.sign(smallerPlate.x) * xFracDiff;
-	        biggerPlate.x += Math.sign(biggerPlate.x) * xFracDiff;
-	        smallerPlate.y -= Math.sign(smallerPlate.y) * yFracDiff;
-	        biggerPlate.y += Math.sign(biggerPlate.y) * yFracDiff;
+	        var xFracDiff = 0.5 * ((0, _utils.mod)(smallerPlate.x, 1) - (0, _utils.mod)(biggerPlate.x, 1));
+	        var yFracDiff = 0.5 * ((0, _utils.mod)(smallerPlate.y, 1) - (0, _utils.mod)(biggerPlate.y, 1));
+	        smallerPlate.x -= xFracDiff;
+	        biggerPlate.x += xFracDiff;
+	        smallerPlate.y -= yFracDiff;
+	        biggerPlate.y += yFracDiff;
 	      }
 	    }
 	  }, {
@@ -44922,6 +44924,16 @@
 	var OCEAN = exports.OCEAN = 0;
 	var CONTINENT = exports.CONTINENT = 1;
 
+	var oceanFloorTexture = 0.05;
+	function oceanFloorHeight() {
+	  // Add some random factor to the ocean floor height so there's visible texture and users can see that oceans
+	  // are moving.
+	  if (Math.random() < 0.00002) {
+	    oceanFloorTexture *= -1;
+	  }
+	  return _config2.default.subductionHeight + oceanFloorTexture;
+	}
+
 	// Subduction should be proportional to velocity and time step - it ensures that the plate will disappear in the same
 	// pace and curve would look the same for every velocity and time step. subductionDist makes curve look like quadratic
 	// function rather than linear.
@@ -44985,7 +44997,7 @@
 	      if (this.type === OCEAN && this.age < _config2.default.oceanicCrustCoolingTime) {
 	        // Oceanic crust cools down and becomes denser.
 	        this.height -= _config2.default.oceanicCrustCoolingRatio * timeStep * this.speed;
-	        this.height = Math.max(this.height, _config2.default.subductionHeight);
+	        this.height = Math.max(this.height, oceanFloorHeight());
 	        this.age += timeStep * this.speed;
 	      }
 
@@ -45404,8 +45416,8 @@
 	  oceanRidge: {
 	    img: _oceanRidge2.default,
 	    init: function init(plates) {
-	      plates[1].vx = -3;
-	      plates[2].vx = 3;
+	      plates[1].vx = -1;
+	      plates[2].vx = 1;
 	    }
 	  },
 	  islands: {
@@ -46002,6 +46014,15 @@
 	  return result;
 	}
 
+	function d3Colormap(desc) {
+	  var keys = Object.keys(desc).sort();
+	  var colors = keys.map(function (k) {
+	    return desc[k];
+	  });
+	  var d3Scale = (0, _d3Scale.scaleLinear)().domain(keys).range(colors).interpolate(_d3Interpolate.interpolateHcl);
+	  return d3ScaleToArray(d3Scale);
+	}
+
 	var elevationColormap = {
 	  heat: (0, _colormap2.default)({
 	    colormap: 'jet', // pick a builtin colormap or add your own
@@ -46012,7 +46033,22 @@
 
 	  // https://gist.github.com/hugolpz/4351d8f1b3da93de2c61
 	  // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Maps/Conventions#Topographic_maps
-	  topo: d3ScaleToArray((0, _d3Scale.scaleLinear)().domain([0, 0.499999, 0.50001, 0.6, 0.65, 0.686, 0.7, 0.9, 0.9999]).range(['#3696d8', '#b5ebfe', '#ACD0A5', '#94BF8B', '#EFEBC0', '#AA8753', '#AC9A7C', '#F5F4F2', '#FFFFFF']).interpolate(_d3Interpolate.interpolateHcl))
+	  topo: d3Colormap({
+	    0.00: '#004e83',
+	    0.20: '#3696d8',
+	    0.49: '#b5ebfe',
+	    0.50: '#ACD0A5',
+	    0.55: '#94BF8B',
+	    0.60: '#A8C68F',
+	    0.65: '#BDCC96',
+	    0.70: '#EFEBC0',
+	    0.75: '#DED6A3',
+	    0.80: '#AA8753',
+	    0.85: '#AC9A7C',
+	    0.90: '#CAC3B8',
+	    0.99: '#F5F4F2',
+	    1.00: '#FFFFFF'
+	  })
 	};
 
 	var plateColormap = {
