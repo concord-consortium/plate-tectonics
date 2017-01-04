@@ -44131,13 +44131,13 @@
 	      var oceanPoint = p1.type === _point.OCEAN ? p1 : p2;
 	      var continentPoint = p1.type === _point.CONTINENT ? p1 : p2;
 	      oceanPoint.setupSubduction(continentPoint);
-	      if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.volcanicAct) {
+	      if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.hotSpotAct) {
 	        var continentPlate = continentPoint.plate;
 	        var newHotSpot = new _hotSpot2.default({
 	          x: continentPoint.x,
 	          y: continentPoint.y,
 	          radius: oceanPoint.volcanicActProbability * Math.random() * 20 + 5,
-	          strength: _config2.default.volcanicActStrength * oceanPoint.relativeSpeed(continentPoint),
+	          strength: _config2.default.volcanicActStrength,
 	          plate: continentPlate
 	        });
 	        continentPlate.addHotSpot(newHotSpot);
@@ -44179,20 +44179,18 @@
 	          x: p1.x + Math.random() * 30 - 15,
 	          y: p1.y + Math.random() * 30 - 15,
 	          radius: Math.random() * 12 + 2,
-	          strength: 30,
+	          strength: _config2.default.orogenyStrength,
 	          lifeRatio: 0.1,
-	          plate: pl1,
-	          overlapping: true
+	          plate: pl1
 	        });
 	        pl1.addHotSpot(newHotSpot1);
 	        var newHotSpot2 = new _hotSpot2.default({
 	          x: p1.x + Math.random() * 30 - 15,
 	          y: p1.y + Math.random() * 30 - 15,
 	          radius: Math.random() * 12 + 2,
-	          strength: 30,
+	          strength: _config2.default.orogenyStrength,
 	          lifeRatio: 0.1,
-	          plate: pl2,
-	          overlapping: true
+	          plate: pl2
 	        });
 	        pl2.addHotSpot(newHotSpot2);
 	        // Remove lower point.
@@ -44237,7 +44235,7 @@
 	        return;
 	      }
 	      subductingPoint.setupSubduction(surfacePoint);
-	      if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.volcanicAct) {
+	      if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.hotSpotAct) {
 	        var plate = surfacePoint.plate;
 	        var newHotSpot = new _hotSpot2.default({
 	          x: surfacePoint.x,
@@ -44256,20 +44254,20 @@
 
 	      this.plates.forEach(function (plate) {
 	        plate.inactiveHotSpots.forEach(function (hotSpot) {
-	          var volcanicActAllowed = true;
+	          var hotSpotAllowed = true;
 	          _this3.surface.forEachPlatePointWithinRadius(plate, hotSpot.x, hotSpot.y, hotSpot.radius, function (point) {
 	            // point === null means that boundary between plates has been found. Do not let hot spots overlapping
 	            // plate boundaries (it doesn't look good).
-	            if (point === null || !point.volcanicActAllowed) {
-	              volcanicActAllowed = false;
+	            if (point === null || !point.hotSpotAllowed) {
+	              hotSpotAllowed = false;
 	            }
-	            if (point) point.applyVolcanicActivity(hotSpot);
+	            if (point) point.applyHotSpot(hotSpot);
 	          });
 	          hotSpot.active = true;
 	          // If at least one point within hot spot area doesn't allow hot spot activity, then disable it completely.
 	          // Don't remove hot spot immediately, so we don't try to create new hot spots immediately in the next step.
 	          // We could control that point by point, but it would cause more noisy look of the volcanoes / mountains.
-	          if (!volcanicActAllowed) {
+	          if (!hotSpotAllowed) {
 	            hotSpot.strength = 0;
 	          }
 	        });
@@ -44803,15 +44801,17 @@
 	  subductionHeight: -0.6,
 	  // Speed of subduction.
 	  subductionRatio: 0.00015,
+	  // Strength of orogeny related to collision between continents.
+	  orogenyStrength: 40,
 	  // Strength of volcanic activity related to subduction.
-	  volcanicActStrength: 1,
+	  volcanicActStrength: 1.5,
 	  // Volcanoes are created between min and max distance from convergent boundary.
 	  volcanicActMinDist: 5,
 	  volcanicActMaxDist: 30,
 	  // Limit amount of time that given point can undergo orogenesis or volcanic activity.
 	  hotSpotActMaxTime: 100,
 	  // Strength of orogenesis or volcanic activity.
-	  hotSpotStrength: 0.0008,
+	  hotSpotStrength: 0.002,
 	  // Volcano lifespan is proportional to this value and its diameter.
 	  hotSpotLifeLength: 0.5,
 	  // Controls how fast continents would slow down when they are colliding.
@@ -44953,10 +44953,12 @@
 	    // Subduction properties:
 	    _this.subductionDist = null;
 	    _this.subductionVelocity = 0;
-	    // Volcanic activity properties:
-	    _this.volcanicHotSpot = false;
-	    _this.distFromVolcanoCenter = null;
-	    _this.volcanicActTime = 0;
+	    // Volcanic activity and orogeny properties:
+	    _this.currentHotSpot = false;
+	    _this.distFromHotSpotCenter = null;
+	    // Counts how much time given point has been under influence of hot spots. At some point doesn't accept
+	    // any more activity, so we don't create infinitely high mountains.
+	    _this.hotSpotActTime = 0;
 	    return _this;
 	  }
 
@@ -44970,11 +44972,12 @@
 	      this.subductionVelocity = Math.max(this.relativeSpeed(otherPoint), 0.5);
 	    }
 	  }, {
-	    key: 'applyVolcanicActivity',
-	    value: function applyVolcanicActivity(hotSpot) {
-	      this.volcanicHotSpot = hotSpot;
-	      // Cache distance so we don't need to recalculate it in each simulation step.
-	      this.distFromVolcanoCenter = hotSpot.dist(this);
+	    key: 'applyHotSpot',
+	    value: function applyHotSpot(hotSpot) {
+	      this.currentHotSpot = hotSpot;
+	      // Cache distance so we don't need to recalculate it in each simulation step. Hot spots are always affecting
+	      // only one plate, so distance within point and plate can't change.
+	      this.distFromHotSpotCenter = hotSpot.dist(this);
 	    }
 	  }, {
 	    key: 'update',
@@ -44991,12 +44994,15 @@
 	        this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
 	      }
 
-	      if (this.volcanicHotSpot && this.volcanicHotSpot.alive) {
-	        this.height += this.volcanicHotSpot.heightChange(this.distFromVolcanoCenter) * timeStep;
-	        this.volcanicActTime += timeStep;
+	      if (this.currentHotSpot && this.currentHotSpot.alive) {
+	        var diff = this.currentHotSpot.heightChange(this.distFromHotSpotCenter) * timeStep;
+	        // Multiply diff by (maxHeight - currentHeight) so points don't reach max height too fast.
+	        // It creates nicer visual effect.
+	        this.height += diff * (_config2.default.maxHeight - this.height);
+	        this.hotSpotActTime += timeStep;
 	      } else {
-	        this.volcanicHotSpot = null;
-	        this.distFromVolcanoCenter = null;
+	        this.currentHotSpot = null;
+	        this.distFromHotSpotCenter = null;
 	      }
 
 	      if (this.type === OCEAN && this.height > 0) {
@@ -45032,14 +45038,14 @@
 	      return this.height <= _config2.default.minHeight;
 	    }
 	  }, {
-	    key: 'volcanicAct',
+	    key: 'hotSpotAct',
 	    get: function get() {
-	      return this.volcanicHotSpot !== null;
+	      return this.currentHotSpot !== null;
 	    }
 	  }, {
-	    key: 'volcanicActAllowed',
+	    key: 'hotSpotAllowed',
 	    get: function get() {
-	      return this.volcanicActTime < _config2.default.hotSpotActMaxTime && !this.subduction;
+	      return this.hotSpotActTime < _config2.default.hotSpotActMaxTime && !this.subduction;
 	    }
 	  }, {
 	    key: 'volcanicActProbability',
@@ -45241,7 +45247,7 @@
 	    key: 'heightChange',
 	    value: function heightChange(dist) {
 	      var normDist = dist / this.radius;
-	      return _config2.default.hotSpotStrength * (1 - normDist) * this.radius * this.strength;
+	      return _config2.default.hotSpotStrength * (1 - normDist) * Math.pow(this.radius, 0.6) * this.strength;
 	    }
 	  }, {
 	    key: 'update',
@@ -45398,8 +45404,8 @@
 	  oceanRidge: {
 	    img: _oceanRidge2.default,
 	    init: function init(plates) {
-	      plates[1].vx = -1;
-	      plates[2].vx = 1;
+	      plates[1].vx = -3;
+	      plates[2].vx = 3;
 	    }
 	  },
 	  islands: {
