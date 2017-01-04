@@ -22,11 +22,12 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
 }
 
 export default class Point extends PlatePoint {
-  constructor({ x, y, plate, height, age = 0 }) {
+  constructor({ x, y, plate, height, age = 0, cooling = false }) {
     super({ x, y, plate });
     this.type = height > config.newOceanHeight ? CONTINENT : OCEAN;
     this.height = height;
     this.age = age;
+    this.cooling = cooling;
     // Needs to be calculated later.
     this.continent = null;
     this.alive = true;
@@ -88,12 +89,16 @@ export default class Point extends PlatePoint {
   }
 
   update(timeStep) {
-    if (this.type === OCEAN && this.age < config.oceanicCrustCoolingTime) {
-      // Oceanic crust cools down and becomes denser.
-      this.height -= config.oceanicCrustCoolingRatio * timeStep * this.speed;
-      this.height = Math.max(this.height, oceanFloorHeight());
-      this.age += timeStep * this.speed;
+    if (this.type === OCEAN && this.cooling) {
+      if (this.height > oceanFloorHeight()) {
+        // Oceanic crust cools down and becomes denser.
+        this.height -= (config.oceanicCrustCoolingRatio * timeStep * this.speed) / Math.max(Math.pow(this.age, 0.5), 2);
+      } else {
+        this.cooling = false;
+      }
     }
+
+    this.age += timeStep * this.speed;
 
     if (this.subduction) {
       this.subductionDist += this.subductionVelocity * timeStep;

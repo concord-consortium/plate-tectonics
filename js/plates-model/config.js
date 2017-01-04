@@ -8,8 +8,7 @@ const DEFAULT_CONFIG = {
   // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
   newOceanHeight: -0.3,
   // When oceanic crust cools down, it sinks a bit.
-  oceanicCrustCoolingRatio: 0.05,
-  oceanicCrustCoolingTime: 6,
+  oceanicCrustCoolingRatio: 0.0333,
   // If heightBasedSubduction === true, always the higher point will go above lower point.
   // Otherwise, every point from one plate will subduct, no matter what is the current height.
   // It ensures consistent subduction across the whole boundary.

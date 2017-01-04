@@ -7,7 +7,7 @@ export default class HotSpot extends PlatePoint {
   constructor({ x, y, plate, radius, strength, lifeRatio = 1 }) {
     super({ x, y, plate });
     this.radius = radius;
-    this.strength = strength;
+    this.strength = strength * Math.pow(this.radius, 0.6);
     this.active = false;
     this.lifeLeft = config.hotSpotLifeLength * radius * lifeRatio;
   }
@@ -26,7 +26,7 @@ export default class HotSpot extends PlatePoint {
 
   heightChange(dist) {
     const normDist = dist / this.radius;
-    return config.hotSpotStrength * (1 - normDist) * Math.pow(this.radius, 0.6) * this.strength;
+    return config.hotSpotStrength * (1 - normDist) * this.strength;
   }
 
   update(timeStep) {

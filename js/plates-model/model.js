@@ -282,7 +282,7 @@ export default class Model {
         if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
           const plate = prevSurface.points[x][y] && prevSurface.points[x][y][0].plate;
           if (plate) {
-            const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate });
+            const newPoint = new Point({ x, y, type: OCEAN, height: config.newOceanHeight, plate, cooling: true });
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.setPoint(newPoint);
