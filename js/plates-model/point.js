@@ -99,8 +99,8 @@ export default class Point extends PlatePoint {
       this.type = CONTINENT;
     }
 
-    if (this.height > 1) {
-      this.height = 1;
+    if (this.height > config.maxHeight) {
+      this.height = config.maxHeight;
     }
 
     if (this.hasSubducted || this.outOfBounds) {

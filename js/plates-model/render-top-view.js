@@ -1,21 +1,4 @@
-import colormap from 'colormap';
-import config from './config';
-
-const N_SHADES = 200;
-
-const DEF_COLOR_MAP = colormap({
-  colormap: 'jet',   // pick a builtin colormap or add your own
-  nshades: N_SHADES, // how many divisions
-  format: 'rgb',     // "hex" or "rgb" or "rgbaString"
-  alpha: 1,
-});
-const NO_PLATE_COLOR = [220, 220, 220];
-const BOUNDARY_COLOR = [16, 16, 16];
-
-function heightToShade(val) {
-  if (val == null) return -1;
-  return Math.floor((val - config.minHeight) / (config.maxHeight - config.minHeight) * (N_SHADES - 1));
-}
+import { elevationColor, plateColor, BOUNDARY_COL, NO_PLATE_COL } from './colormaps';
 
 export default function renderTopView(canvas, points, mode = 'plates', boundaries = false) {
   const maxX = points.length;
@@ -41,21 +24,15 @@ export default function renderTopView(canvas, points, mode = 'plates', boundarie
 
   for (let x = 0; x < maxX; x += 1) {
     for (let y = 0; y < maxY; y += 1) {
-      let color = NO_PLATE_COLOR;
+      let color = NO_PLATE_COL;
       if (points[x] && points[x][y]) {
         if (boundaries && boundary(x, y)) {
           // Don't render plate boundaries in plates mode. Plate boundaries are visible anyway.
-          color = BOUNDARY_COLOR;
+          color = BOUNDARY_COL;
         } else if (mode === 'height') {
-          const shade = heightToShade(points[x][y][0].height);
-          if (shade < 0 || shade > DEF_COLOR_MAP.length - 1) {
-            // It should not happen. Mark those points using red color. Usually it means there's some error.
-            color = [255, 0, 0];
-          } else {
-            color = DEF_COLOR_MAP[shade];
-          }
+          color = elevationColor(points[x][y][0].height);
         } else if (mode === 'plates') {
-          color = config.plateColor[points[x][y][0].plate.id % config.plateColor.length];
+          color = plateColor(points[x][y][0].plate.id);
         }
       }
       const dataIdx = (y * maxX + x) * 4;

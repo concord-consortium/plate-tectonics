@@ -1,6 +1,7 @@
 import bs from 'binarysearch';
 import config from './config';
 import { OCEAN, CONTINENT } from './point';
+import { plateColor } from './colormaps';
 
 const COLORS = {
   nothing: [220, 220, 220],
@@ -28,7 +29,7 @@ export default function renderCrossSection(canvas, points, crossSectionY, mode =
   for (let x = 0; x < maxX; x += 1) {
     const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
     heightData.push(h);
-    const p = (points[x][crossSectionY] || []).map(point => point.plate.id % config.plateColor.length);
+    const p = (points[x][crossSectionY] || []).map(point => point.plate.id);
     plate.push(p);
     const t = (points[x][crossSectionY] || []).map(point => point.type);
     type.push(t);
@@ -41,7 +42,7 @@ export default function renderCrossSection(canvas, points, crossSectionY, mode =
       let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
         const pointIdx = bs.closest(heightData[x], y);
-        color = mode === 'type' ? COLORS[type[x][pointIdx]] : config.plateColor[plate[x][pointIdx]];
+        color = mode === 'type' ? COLORS[type[x][pointIdx]] : plateColor(plate[x][pointIdx]);
       }
       imageData.data[idx] = color[0];
       imageData.data[idx + 1] = color[1];

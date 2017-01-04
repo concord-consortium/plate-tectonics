@@ -1,12 +1,4 @@
-import colormap from 'colormap';
-import { shuffle, getURLParam } from '../utils';
-
-const PLATE_COLOR = shuffle(colormap({
-  colormap: 'cubehelix', // pick a builtin colormap or add your own
-  nshades: 100,          // how many divisions
-  format: 'rgb',         // "hex" or "rgb" or "rgbaString"
-  alpha: 1,
-}));
+import { getURLParam } from '../utils';
 
 const DEFAULT_CONFIG = {
   wrappingBoundaries: true,
@@ -50,7 +42,8 @@ const DEFAULT_CONFIG = {
   // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
   islandRatio: 0.05,
   // Visual settings.
-  plateColor: PLATE_COLOR,
+  elevationColormap: 'topo', // or 'heat', check colormaps.js
+  plateColormap: 'default',
 };
 
 const urlConfig = {};
