@@ -1,5 +1,4 @@
 import config from './config';
-import getImgData from '../get-img-data';
 import Plate from './plate';
 import Point from './point';
 
@@ -90,8 +89,6 @@ function getPlates(heightMap) {
 }
 
 
-export default function img2plates(imgSrc, callback) {
-  getImgData(imgSrc, (imgData) => {
-    callback(getPlates(getHeightMap(imgData)), imgData.width, imgData.height);
-  });
+export default function imgData2plates(imgData) {
+  return getPlates(getHeightMap(imgData));
 }

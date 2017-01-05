@@ -1,6 +1,6 @@
 import { elevationColor, plateColor, BOUNDARY_COL, NO_PLATE_COL } from './colormaps';
 
-export default function renderTopView(canvas, points, mode = 'plates', boundaries = false) {
+export default function renderTopView(imageData, points, mode = 'plates', boundaries = false) {
   const maxX = points.length;
   const maxY = points[0].length;
   const boundary = function boundary(x, y) {
@@ -16,11 +16,9 @@ export default function renderTopView(canvas, points, mode = 'plates', boundarie
            p3.plate !== plate;
   };
 
-  if (maxX !== canvas.width || maxY !== canvas.height) {
+  if (maxX !== imageData.width || maxY !== imageData.height) {
     throw new Error('Data has to have the same dimensions as canvas');
   }
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.createImageData(canvas.width, canvas.height);
 
   for (let x = 0; x < maxX; x += 1) {
     for (let y = 0; y < maxY; y += 1) {
@@ -42,5 +40,4 @@ export default function renderTopView(canvas, points, mode = 'plates', boundarie
       imageData.data[dataIdx + 3] = 255;
     }
   }
-  ctx.putImageData(imageData, 0, 0);
 }

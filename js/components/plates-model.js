@@ -2,11 +2,9 @@ import React, { PureComponent } from 'react';
 import Slider from 'material-ui/Slider';
 import Toggle from 'material-ui/Toggle';
 import RaisedButton from 'material-ui/RaisedButton';
-import loadModel from '../plates-model/load-model';
-import renderTopView from '../plates-model/render-top-view';
-import renderHotSpots from '../plates-model/render-hot-spots';
-import renderCrossSection from '../plates-model/render-cross-section';
 import { getURLParam } from '../utils';
+import getImgData from '../get-img-data';
+import presets from '../plates-model/presets';
 
 import '../../css/plates-model.less';
 
@@ -22,9 +20,7 @@ export default class PlatesModel extends PureComponent {
       plateBoundariesRendering: true,
       simEnabled: true,
     };
-    this.rafCallback = this.rafCallback.bind(this);
     this.step = this.step.bind(this);
-    this.renderModel = this.renderModel.bind(this);
     this.handleCrossSectionYChange = this.handleCrossSectionYChange.bind(this);
     this.handleHotSpotsRenderingChange = this.handleHotSpotsRenderingChange.bind(this);
     this.handlePlatesRenderingChange = this.handlePlatesRenderingChange.bind(this);
@@ -34,13 +30,33 @@ export default class PlatesModel extends PureComponent {
   }
 
   componentDidMount() {
-    loadModel(getURLParam('preset') || 'continentalCollision', (model) => {
-      this.model = model;
-      window.model = model;
-      window.comp = this;
-      this.setState({ modelWidth: model.width, modelHeight: model.height, crossSectionY: model.height * 0.5 }, () => {
+    // modelWorker.js is defined in model.worker.js and build by webpack.
+    this.modelWorker = new Worker('modelWorker.js');
+    this.modelWorker.addEventListener('message', (event) => {
+      const type = event.data.type;
+      if (type === 'topViewImgData') {
+        this.handleTopViewImgData(event.data.imgData);
+      } else if (type === 'crossSectionImgData') {
+        this.handleCrossSectionImgData(event.data.imgData);
+      } else if (type === 'stepDone') {
+        this.handleStepDone();
+      }
+    });
+
+    const presetName = getURLParam('preset') || 'continentalCollision';
+    const modelImgSrc = presets[presetName].img;
+    getImgData(modelImgSrc, (imageData) => {
+      const modelWidth = imageData.width;
+      const modelHeight = imageData.height;
+      this.setState({ modelWidth, modelHeight, crossSectionY: modelHeight * 0.5 }, () => {
         // Warning: try to start model only when width and height is already set. Otherwise, renderers might fail.
+        const topViewCtx = this.topView.getContext('2d');
+        const crossSectionCtx = this.topView.getContext('2d');
+        const topViewImgData = topViewCtx.createImageData(this.topView.width, this.topView.height);
+        const crossSectionImgData = crossSectionCtx.createImageData(this.crossSection.width, this.crossSection.height);
+        this.modelWorker.postMessage({ type: 'load', imageData, presetName, topViewImgData, crossSectionImgData });
         this.renderModel();
+
         const { simEnabled } = this.state;
         if (simEnabled) {
           this.startSimulation();
@@ -61,24 +77,22 @@ export default class PlatesModel extends PureComponent {
   }
 
   startSimulation() {
-    this.rafCallback();
+    this.step();
   }
 
   stopSimulation() {
-    cancelAnimationFrame(this.rafId);
-  }
-
-  rafCallback() {
-    const { simEnabled } = this.state;
-    if (simEnabled) {
-      this.rafId = requestAnimationFrame(this.rafCallback);
-      this.step();
-    }
   }
 
   step() {
-    this.model.step();
+    this.modelWorker.postMessage({ type: 'step' });
     this.renderModel();
+  }
+
+  handleStepDone() {
+    const { simEnabled } = this.state;
+    if (simEnabled) {
+      this.step();
+    }
   }
 
   handleSimEnabledChange(event, value) {
@@ -107,14 +121,43 @@ export default class PlatesModel extends PureComponent {
     console.log(this.model.getPointAt(x, y));
   }
 
+  handleTopViewImgData(imgData) {
+    const ctx = this.topView.getContext('2d');
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  handleCrossSectionImgData(imgData) {
+    const ctx = this.crossSection.getContext('2d');
+    ctx.putImageData(imgData, 0, 0);
+  }
+
   renderModel() {
-    const { modelHeight, crossSectionY, hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
-    renderTopView(this.topView, this.model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
-    if (hotSpotsRendering) {
-      renderHotSpots(this.topView, this.model.hotSpots);
-    }
+    this.renderTopView();
+    this.renderCrossSection();
+  }
+
+  renderTopView() {
+    // Posts messages to worker. Worker will respond with updated / rendered image data
+    // and #handleTopViewImgData will be called.
+    const { hotSpotsRendering, platesRendering, plateBoundariesRendering } = this.state;
+    this.modelWorker.postMessage({
+      type: 'renderTopView',
+      platesRendering,
+      plateBoundariesRendering,
+      hotSpotsRendering,
+    });
+  }
+
+  renderCrossSection() {
+    // Posts messages to worker. Worker will respond with updated / rendered image data
+    // and #handleCrossSectionImgData will be called.
+    const { modelHeight, crossSectionY, platesRendering } = this.state;
     const crossY = modelHeight - Math.round(crossSectionY);
-    renderCrossSection(this.crossSectionView, this.model.points, crossY, platesRendering ? 'plates' : 'type');
+    this.modelWorker.postMessage({
+      type: 'renderCrossSection',
+      platesRendering,
+      crossY,
+    });
   }
 
   render() {
@@ -138,7 +181,7 @@ export default class PlatesModel extends PureComponent {
         </div>
         <div>
           <div>
-            <canvas ref={(c) => { this.crossSectionView = c; }} width={modelWidth} height={100} />
+            <canvas ref={(c) => { this.crossSection = c; }} width={modelWidth} height={100} />
           </div>
         </div>
         <div>

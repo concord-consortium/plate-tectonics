@@ -14,14 +14,12 @@ function normalizedHeight(val) {
   return (val - config.minHeight) / (config.maxHeight - config.minHeight);
 }
 
-export default function renderCrossSection(canvas, points, crossSectionY, mode = 'type') {
+export default function renderCrossSection(imageData, points, crossSectionY, mode = 'type') {
   const maxX = points.length;
-  if (maxX !== canvas.width) {
+  if (maxX !== imageData.width) {
     throw new Error('Data has to have the same width as canvas');
   }
-  const ctx = canvas.getContext('2d');
-  const canvHeight = canvas.height;
-  const imageData = ctx.createImageData(canvas.width, canvas.height);
+  const canvHeight = imageData.height;
 
   const heightData = [];
   const plate = [];
@@ -50,5 +48,4 @@ export default function renderCrossSection(canvas, points, crossSectionY, mode =
       imageData.data[idx + 3] = 255;
     }
   }
-  ctx.putImageData(imageData, 0, 0);
 }
