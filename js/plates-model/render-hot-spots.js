@@ -1,4 +1,4 @@
-export default function renderHotSpots(imageData, hotSpots) {
+export default function renderHotSpots(canvas, hotSpots) {
   const ctx = canvas.getContext('2d');
   ctx.strokeStyle = '#ff0000';
   hotSpots.forEach((hotSpot) => {

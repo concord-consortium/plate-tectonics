@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { getURLParam } from '../utils';
 import getImgData from '../get-img-data';
 import presets from '../plates-model/presets';
+import renderHotSpots from '../plates-model/render-hot-spots';
 
 import '../../css/plates-model.less';
 
@@ -107,17 +108,28 @@ export default class PlatesModel extends PureComponent {
   }
 
   renderTopView() {
+    const { topViewImgData } = this.modelOutput;
+    if (!topViewImgData) return;
     const ctx = this.topView.getContext('2d');
-    ctx.putImageData(this.modelOutput.topViewImgData, 0, 0);
+    ctx.putImageData(topViewImgData, 0, 0);
   }
 
   renderCrossSection() {
+    const { crossSectionImgData } = this.modelOutput;
+    if (!crossSectionImgData) return;
     const ctx = this.crossSection.getContext('2d');
-    ctx.putImageData(this.modelOutput.crossSectionImgData, 0, 0);
+    ctx.putImageData(crossSectionImgData, 0, 0);
+  }
+
+  renderHotSpots() {
+    const { hotSpots } = this.modelOutput;
+    if (!hotSpots) return;
+    renderHotSpots(this.topView, hotSpots);
   }
 
   renderModel() {
     this.renderTopView();
+    this.renderHotSpots();
     this.renderCrossSection();
   }
 

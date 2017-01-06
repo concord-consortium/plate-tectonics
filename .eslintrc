@@ -13,6 +13,7 @@
   },
   "env": {
     "browser": true,
+    "worker": true,
     "jest": true
   }
 }

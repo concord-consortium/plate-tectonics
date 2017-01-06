@@ -1,6 +1,5 @@
 import loadModel from './load-model';
 import renderTopView from './render-top-view';
-import renderHotSpots from './render-hot-spots';
 import renderCrossSection from './render-cross-section';
 
 let model = null;
@@ -9,12 +8,9 @@ let topViewImgData = null;
 let crossSectionImgData = null;
 
 function calcTopViewImgData() {
-  const { platesRendering, plateBoundariesRendering, hotSpotsRendering } = input;
+  const { platesRendering, plateBoundariesRendering } = input;
   const imgData = topViewImgData;
   renderTopView(imgData, model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
-  if (hotSpotsRendering) {
-    renderHotSpots(imgData, model.hotSpots);
-  }
   return imgData;
 }
 
@@ -25,18 +21,21 @@ function calcCrossSectionImgData() {
   return imgData;
 }
 
-function calcOutput() {
-  return {
-    topViewImgData: calcTopViewImgData(),
-    crossSectionImgData: calcCrossSectionImgData(),
-  };
+function calcHotSpotsData() {
+  return model.hotSpots.map(hs => ({ x: hs.x, y: hs.y, radius: hs.radius }));
 }
 
 function workerFunction() {
+  const output = {};
   if (input.simEnabled) {
     model.step();
-    postMessage({ type: 'output', output: calcOutput() });
+    output.topViewImgData = calcTopViewImgData();
+    output.crossSectionImgData = calcCrossSectionImgData();
+    if (input.hotSpotsRendering) {
+      output.hotSpots = calcHotSpotsData();
+    }
   }
+  postMessage({ type: 'output', output });
 }
 
 onmessage = function modelWorkerMsgHandler(event) {
@@ -46,7 +45,7 @@ onmessage = function modelWorkerMsgHandler(event) {
     topViewImgData = data.topViewImgData;
     crossSectionImgData = data.crossSectionImgData;
     input = data.input;
-    setInterval(workerFunction, 0);
+    setInterval(workerFunction, 1);
   } else if (data.type === 'input') {
     input = data.input;
   }
