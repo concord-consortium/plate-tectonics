@@ -8,7 +8,12 @@ const N_SHADES = 1000;
 
 export const ERROR_COL = [255, 0, 0];
 export const NO_PLATE_COL = [220, 220, 220];
-export const BOUNDARY_COL = [16, 16, 16];
+export const BOUNDARY_COL = {
+  default: [16, 16, 16],
+  convergent: [255, 0, 0],
+  divergent: [255, 255, 0],
+  transform: [0, 255, 0],
+};
 
 function d3ScaleToArray(d3Scale) {
   const result = [];
