@@ -37,7 +37,8 @@ export default class PlatesModel extends PureComponent {
   componentDidMount() {
     // modelWorker.js is defined in model.worker.js and build by webpack.
     // There's worker-loader available, but it doesn't seem to work reliably and be well maintained.
-    this.modelWorker = new Worker('modelWorker.js');
+    // Pass search part of the URL, so worker can read the URL configuration.
+    this.modelWorker = new Worker(`modelWorker.js${window.location.search}`);
     this.modelWorker.addEventListener('message', (event) => {
       const type = event.data.type;
       if (type === 'output') {
@@ -104,7 +105,7 @@ export default class PlatesModel extends PureComponent {
 
   handleModelOutput(output) {
     this.modelOutput = output;
-    window.requestAnimationFrame(this.renderModel);
+    this.renderModel();
   }
 
   renderTopView() {
