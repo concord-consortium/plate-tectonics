@@ -62,7 +62,7 @@
 
 	var _app2 = _interopRequireDefault(_app);
 
-	var _indexPage = __webpack_require__(690);
+	var _indexPage = __webpack_require__(691);
 
 	var _indexPage2 = _interopRequireDefault(_indexPage);
 
@@ -29864,7 +29864,7 @@
 
 	var _platesModel2 = _interopRequireDefault(_platesModel);
 
-	__webpack_require__(688);
+	__webpack_require__(689);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37402,11 +37402,11 @@
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	var _renderHotSpots2 = __webpack_require__(683);
+	var _renderHotSpots2 = __webpack_require__(684);
 
 	var _renderHotSpots3 = _interopRequireDefault(_renderHotSpots2);
 
-	__webpack_require__(684);
+	__webpack_require__(685);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43002,6 +43002,10 @@
 
 	var _oceanRidge2 = _interopRequireDefault(_oceanRidge);
 
+	var _subductionIssue = __webpack_require__(683);
+
+	var _subductionIssue2 = _interopRequireDefault(_subductionIssue);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = {
@@ -43029,6 +43033,20 @@
 	    img: _islandCollision2.default,
 	    init: function init(plates) {
 	      plates[0].vx = 2;
+	    }
+	  },
+	  subductionIssue1: {
+	    img: _subductionIssue2.default,
+	    init: function init(plates) {
+	      plates[0].vx = 2;
+	      plates[1].vx = 0;
+	    }
+	  },
+	  subductionIssue2: {
+	    img: _subductionIssue2.default,
+	    init: function init(plates) {
+	      plates[0].vx = 0;
+	      plates[1].vx = -2;
 	    }
 	  },
 	  // test1-4 are implementation of initial Amy's ideas, described here:
@@ -43137,6 +43155,12 @@
 
 /***/ },
 /* 683 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "28daf24933fb0f34e7affc205deb1ce3.png";
+
+/***/ },
+/* 684 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -43156,16 +43180,16 @@
 	}
 
 /***/ },
-/* 684 */
+/* 685 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(685);
+	var content = __webpack_require__(686);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(687)(content, {});
+	var update = __webpack_require__(688)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -43182,10 +43206,10 @@
 	}
 
 /***/ },
-/* 685 */
+/* 686 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(686)();
+	exports = module.exports = __webpack_require__(687)();
 	// imports
 
 
@@ -43196,7 +43220,7 @@
 
 
 /***/ },
-/* 686 */
+/* 687 */
 /***/ function(module, exports) {
 
 	/*
@@ -43252,7 +43276,7 @@
 
 
 /***/ },
-/* 687 */
+/* 688 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -43504,16 +43528,16 @@
 
 
 /***/ },
-/* 688 */
+/* 689 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(689);
+	var content = __webpack_require__(690);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(687)(content, {});
+	var update = __webpack_require__(688)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -43530,10 +43554,10 @@
 	}
 
 /***/ },
-/* 689 */
+/* 690 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(686)();
+	exports = module.exports = __webpack_require__(687)();
 	// imports
 
 
@@ -43544,7 +43568,7 @@
 
 
 /***/ },
-/* 690 */
+/* 691 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43565,7 +43589,7 @@
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	__webpack_require__(691);
+	__webpack_require__(692);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43655,16 +43679,16 @@
 	exports.default = IndexPage;
 
 /***/ },
-/* 691 */
+/* 692 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(692);
+	var content = __webpack_require__(693);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(687)(content, {});
+	var update = __webpack_require__(688)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -43681,10 +43705,10 @@
 	}
 
 /***/ },
-/* 692 */
+/* 693 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(686)();
+	exports = module.exports = __webpack_require__(687)();
 	// imports
 
 

@@ -47,15 +47,15 @@
 
 	'use strict';
 
-	var _loadModel = __webpack_require__(693);
+	var _loadModel = __webpack_require__(694);
 
 	var _loadModel2 = _interopRequireDefault(_loadModel);
 
-	var _renderTopView = __webpack_require__(704);
+	var _renderTopView = __webpack_require__(705);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderCrossSection = __webpack_require__(722);
+	var _renderCrossSection = __webpack_require__(723);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
@@ -234,6 +234,10 @@
 
 	var _oceanRidge2 = _interopRequireDefault(_oceanRidge);
 
+	var _subductionIssue = __webpack_require__(683);
+
+	var _subductionIssue2 = _interopRequireDefault(_subductionIssue);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = {
@@ -261,6 +265,20 @@
 	    img: _islandCollision2.default,
 	    init: function init(plates) {
 	      plates[0].vx = 2;
+	    }
+	  },
+	  subductionIssue1: {
+	    img: _subductionIssue2.default,
+	    init: function init(plates) {
+	      plates[0].vx = 2;
+	      plates[1].vx = 0;
+	    }
+	  },
+	  subductionIssue2: {
+	    img: _subductionIssue2.default,
+	    init: function init(plates) {
+	      plates[0].vx = 0;
+	      plates[1].vx = -2;
 	    }
 	  },
 	  // test1-4 are implementation of initial Amy's ideas, described here:
@@ -377,7 +395,14 @@
 
 /***/ },
 
-/***/ 693:
+/***/ 683:
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "28daf24933fb0f34e7affc205deb1ce3.png";
+
+/***/ },
+
+/***/ 694:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -387,7 +412,7 @@
 	});
 	exports.default = loadModel;
 
-	var _model = __webpack_require__(694);
+	var _model = __webpack_require__(695);
 
 	var _model2 = _interopRequireDefault(_model);
 
@@ -395,7 +420,7 @@
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	var _imgData2Plates = __webpack_require__(702);
+	var _imgData2Plates = __webpack_require__(703);
 
 	var _imgData2Plates2 = _interopRequireDefault(_imgData2Plates);
 
@@ -409,7 +434,7 @@
 
 /***/ },
 
-/***/ 694:
+/***/ 695:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -420,23 +445,23 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _surface = __webpack_require__(695);
+	var _surface = __webpack_require__(696);
 
 	var _surface2 = _interopRequireDefault(_surface);
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(698);
+	var _point = __webpack_require__(699);
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _hotSpot = __webpack_require__(700);
+	var _hotSpot = __webpack_require__(701);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
-	var _continent = __webpack_require__(701);
+	var _continent = __webpack_require__(702);
 
 	var _utils = __webpack_require__(672);
 
@@ -803,7 +828,7 @@
 
 /***/ },
 
-/***/ 695:
+/***/ 696:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -814,11 +839,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _binarysearch = __webpack_require__(696);
+	var _binarysearch = __webpack_require__(697);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -969,7 +994,7 @@
 
 /***/ },
 
-/***/ 696:
+/***/ 697:
 /***/ function(module, exports) {
 
 	
@@ -1193,7 +1218,7 @@
 
 /***/ },
 
-/***/ 697:
+/***/ 698:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1275,7 +1300,7 @@
 
 /***/ },
 
-/***/ 698:
+/***/ 699:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1287,11 +1312,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _platePoint = __webpack_require__(699);
+	var _platePoint = __webpack_require__(700);
 
 	var _platePoint2 = _interopRequireDefault(_platePoint);
 
@@ -1488,7 +1513,7 @@
 
 /***/ },
 
-/***/ 699:
+/***/ 700:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1499,7 +1524,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -1608,7 +1633,7 @@
 
 /***/ },
 
-/***/ 700:
+/***/ 701:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1619,11 +1644,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _platePoint = __webpack_require__(699);
+	var _platePoint = __webpack_require__(700);
 
 	var _platePoint2 = _interopRequireDefault(_platePoint);
 
@@ -1695,7 +1720,7 @@
 
 /***/ },
 
-/***/ 701:
+/***/ 702:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1780,7 +1805,7 @@
 
 /***/ },
 
-/***/ 702:
+/***/ 703:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1793,15 +1818,15 @@
 
 	exports.default = imgData2plates;
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _plate = __webpack_require__(703);
+	var _plate = __webpack_require__(704);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
-	var _point = __webpack_require__(698);
+	var _point = __webpack_require__(699);
 
 	var _point2 = _interopRequireDefault(_point);
 
@@ -1910,7 +1935,7 @@
 
 /***/ },
 
-/***/ 703:
+/***/ 704:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2115,7 +2140,7 @@
 
 /***/ },
 
-/***/ 704:
+/***/ 705:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2125,11 +2150,11 @@
 	});
 	exports.default = renderTopView;
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _colormaps = __webpack_require__(705);
+	var _colormaps = __webpack_require__(706);
 
 	var _utils = __webpack_require__(672);
 
@@ -2202,7 +2227,7 @@
 
 /***/ },
 
-/***/ 705:
+/***/ 706:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2214,17 +2239,17 @@
 	exports.elevationColor = elevationColor;
 	exports.plateColor = plateColor;
 
-	var _colormap = __webpack_require__(706);
+	var _colormap = __webpack_require__(707);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
-	var _d3Scale = __webpack_require__(714);
+	var _d3Scale = __webpack_require__(715);
 
-	var _d3Interpolate = __webpack_require__(717);
+	var _d3Interpolate = __webpack_require__(718);
 
-	var _d3Color = __webpack_require__(718);
+	var _d3Color = __webpack_require__(719);
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -2327,7 +2352,7 @@
 
 /***/ },
 
-/***/ 706:
+/***/ 707:
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2337,9 +2362,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(707);
-	var clone = __webpack_require__(708);
-	var colorScale = __webpack_require__(713);
+	var at = __webpack_require__(708);
+	var clone = __webpack_require__(709);
+	var colorScale = __webpack_require__(714);
 
 	module.exports = createColormap;
 
@@ -2469,7 +2494,7 @@
 
 /***/ },
 
-/***/ 707:
+/***/ 708:
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2663,7 +2688,7 @@
 
 /***/ },
 
-/***/ 708:
+/***/ 709:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -2827,11 +2852,11 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(709).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(710).Buffer))
 
 /***/ },
 
-/***/ 709:
+/***/ 710:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -2844,9 +2869,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(710)
-	var ieee754 = __webpack_require__(711)
-	var isArray = __webpack_require__(712)
+	var base64 = __webpack_require__(711)
+	var ieee754 = __webpack_require__(712)
+	var isArray = __webpack_require__(713)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -4628,7 +4653,7 @@
 
 /***/ },
 
-/***/ 710:
+/***/ 711:
 /***/ function(module, exports) {
 
 	'use strict'
@@ -4749,7 +4774,7 @@
 
 /***/ },
 
-/***/ 711:
+/***/ 712:
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -4840,7 +4865,7 @@
 
 /***/ },
 
-/***/ 712:
+/***/ 713:
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -4852,7 +4877,7 @@
 
 /***/ },
 
-/***/ 713:
+/***/ 714:
 /***/ function(module, exports) {
 
 	module.exports={
@@ -4950,12 +4975,12 @@
 
 /***/ },
 
-/***/ 714:
+/***/ 715:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-scale/ Version 1.0.4. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(715), __webpack_require__(716), __webpack_require__(717), __webpack_require__(719), __webpack_require__(720), __webpack_require__(721), __webpack_require__(718)) :
+	   true ? factory(exports, __webpack_require__(716), __webpack_require__(717), __webpack_require__(718), __webpack_require__(720), __webpack_require__(721), __webpack_require__(722), __webpack_require__(719)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-array', 'd3-collection', 'd3-interpolate', 'd3-format', 'd3-time', 'd3-time-format', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3,global.d3,global.d3,global.d3,global.d3,global.d3,global.d3));
 	}(this, (function (exports,d3Array,d3Collection,d3Interpolate,d3Format,d3Time,d3TimeFormat,d3Color) { 'use strict';
@@ -5860,7 +5885,7 @@
 
 /***/ },
 
-/***/ 715:
+/***/ 716:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-array/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -6332,7 +6357,7 @@
 
 /***/ },
 
-/***/ 716:
+/***/ 717:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-collection/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -6556,12 +6581,12 @@
 
 /***/ },
 
-/***/ 717:
+/***/ 718:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-interpolate/ Version 1.1.2. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(718)) :
+	   true ? factory(exports, __webpack_require__(719)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, (function (exports,d3Color) { 'use strict';
@@ -7108,7 +7133,7 @@
 
 /***/ },
 
-/***/ 718:
+/***/ 719:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-color/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -7638,7 +7663,7 @@
 
 /***/ },
 
-/***/ 719:
+/***/ 720:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-format/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -7973,7 +7998,7 @@
 
 /***/ },
 
-/***/ 720:
+/***/ 721:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time/ Version 1.0.4. Copyright 2016 Mike Bostock.
@@ -8358,12 +8383,12 @@
 
 /***/ },
 
-/***/ 721:
+/***/ 722:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time-format/ Version 2.0.3. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(720)) :
+	   true ? factory(exports, __webpack_require__(721)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-time'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, (function (exports,d3Time) { 'use strict';
@@ -8953,7 +8978,7 @@
 
 /***/ },
 
-/***/ 722:
+/***/ 723:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8966,17 +8991,17 @@
 
 	exports.default = renderCrossSection;
 
-	var _binarysearch = __webpack_require__(696);
+	var _binarysearch = __webpack_require__(697);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _config = __webpack_require__(697);
+	var _config = __webpack_require__(698);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(698);
+	var _point = __webpack_require__(699);
 
-	var _colormaps = __webpack_require__(705);
+	var _colormaps = __webpack_require__(706);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
