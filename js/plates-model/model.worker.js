@@ -3,6 +3,7 @@ import renderTopView from './render-top-view';
 import renderCrossSection from './render-cross-section';
 
 let model = null;
+let newInput = null;
 let input = null;
 let topViewImgData = null;
 let crossSectionImgData = null;
@@ -26,16 +27,27 @@ function calcHotSpotsData() {
 }
 
 function workerFunction() {
-  const output = {};
+  // Note that it can be optimized later in case of need. We could compare newInput with old input values and decide
+  // which output values need to be recalculated. But for now it's fine to always rectalculate the whole output.
+  let recalcOutput = false;
+  if (newInput) {
+    input = newInput;
+    newInput = null;
+    recalcOutput = true;
+  }
   if (input.simEnabled) {
     model.step();
+    recalcOutput = true;
+  }
+  if (recalcOutput) {
+    const output = {};
     output.topViewImgData = calcTopViewImgData();
     output.crossSectionImgData = calcCrossSectionImgData();
     if (input.hotSpotsRendering) {
       output.hotSpots = calcHotSpotsData();
     }
+    postMessage({ type: 'output', output });
   }
-  postMessage({ type: 'output', output });
 }
 
 onmessage = function modelWorkerMsgHandler(event) {
@@ -44,9 +56,9 @@ onmessage = function modelWorkerMsgHandler(event) {
     model = loadModel(data.imageData, data.presetName);
     topViewImgData = data.topViewImgData;
     crossSectionImgData = data.crossSectionImgData;
-    input = data.input;
-    setInterval(workerFunction, 1);
+    newInput = data.input;
+    setInterval(workerFunction, 0);
   } else if (data.type === 'input') {
-    input = data.input;
+    newInput = data.input;
   }
 };

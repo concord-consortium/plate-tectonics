@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import Slider from 'material-ui/Slider';
 import Toggle from 'material-ui/Toggle';
-import RaisedButton from 'material-ui/RaisedButton';
 import { getURLParam } from '../utils';
 import getImgData from '../get-img-data';
 import presets from '../plates-model/presets';
@@ -163,7 +162,6 @@ export default class PlatesModel extends PureComponent {
             label="Simulation" labelPosition="right"
             toggled={simEnabled} onToggle={this.handleSimEnabledChange}
           />
-          <RaisedButton label="Simulation step" disabled={simEnabled} onClick={this.step} style={{ margin: '5px 0' }} />
           <Toggle
             label='"Hot spots" rendering' labelPosition="right"
             toggled={hotSpotsRendering} onToggle={this.handleHotSpotsRenderingChange}
