@@ -11,7 +11,7 @@ const COLORS = {
 };
 
 function normalizedHeight(val) {
-  return (val - config.minHeight) / (config.maxHeight - config.minHeight);
+  return (val - config.astenosphereBottom) / (config.maxHeight - config.astenosphereBottom);
 }
 
 export default function renderCrossSection(imageData, points, crossSectionY, mode = 'type') {
@@ -22,25 +22,29 @@ export default function renderCrossSection(imageData, points, crossSectionY, mod
   const canvHeight = imageData.height;
 
   const heightData = [];
-  const plate = [];
-  const type = [];
+  const bottom = [];
+  const crossSectionPoints = [];
   for (let x = 0; x < maxX; x += 1) {
     const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
     heightData.push(h);
-    const p = (points[x][crossSectionY] || []).map(point => point.plate.id);
-    plate.push(p);
-    const t = (points[x][crossSectionY] || []).map(point => point.type);
-    type.push(t);
+    const b = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.bottom));
+    bottom.push(b);
+    crossSectionPoints.push(points[x][crossSectionY]);
   }
   const waterLevel = canvHeight - canvHeight * normalizedHeight(config.waterLevel);
 
-  for (let x = 0; x < maxX; x += 1) {
-    for (let y = 0; y < canvHeight; y += 1) {
+  for (let y = 0; y < canvHeight; y += 1) {
+    for (let x = 0; x < maxX; x += 1) {
       const idx = (y * maxX + x) * 4;
       let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
         const pointIdx = bs.closest(heightData[x], y);
-        color = mode === 'type' ? COLORS[type[x][pointIdx]] : plateColor(plate[x][pointIdx]);
+        const p = crossSectionPoints[x][pointIdx];
+        color = mode === 'type' ? COLORS[p.type] : plateColor(p.plate.id);
+        if (y > bottom[x][pointIdx]) {
+          // Mantle.
+          color = [255, 35, 0];
+        }
       }
       imageData.data[idx] = color[0];
       imageData.data[idx + 1] = color[1];

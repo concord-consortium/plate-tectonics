@@ -154,7 +154,7 @@ export default class PlatesModel extends PureComponent {
         </div>
         <div>
           <div>
-            <canvas ref={(c) => { this.crossSection = c; }} width={modelWidth} height={100} />
+            <canvas ref={(c) => { this.crossSection = c; }} width={modelWidth} height={150} />
           </div>
         </div>
         <div>

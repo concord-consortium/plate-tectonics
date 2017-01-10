@@ -4,6 +4,9 @@ const DEFAULT_CONFIG = {
   wrappingBoundaries: true,
   minHeight: -1,
   maxHeight: 1,
+  // Points that are subducting will disappear at this height.
+  meltingHeight: -1.2,
+  astenosphereBottom: -2,
   waterLevel: 0,
   // Height (or thickness) of the new oceanic crust. In fact height of the oceanic ridge around divergent boundary.
   newOceanHeight: -0.3,
@@ -16,7 +19,7 @@ const DEFAULT_CONFIG = {
   // Elevation of the oceanic plate at the beginning of subduction.
   subductionHeight: -0.6,
   // Speed of subduction.
-  subductionRatio: 0.00015,
+  subductionRatio: 0.0003,
   // Strength of orogeny related to collision between continents.
   orogenyStrength: 40,
   // Strength of volcanic activity related to subduction.

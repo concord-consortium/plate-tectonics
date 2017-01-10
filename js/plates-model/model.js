@@ -1,6 +1,6 @@
 import Surface from './surface';
 import config from './config';
-import Point, { OCEAN, CONTINENT } from './point';
+import Point from './point';
 import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
 import { mod } from '../utils';
@@ -83,9 +83,9 @@ export default class Model {
         p2.alive = false;
       } else if (p1.type !== p2.type) {
         this.oceanContinentCollision(p1, p2);
-      } else if (p1.type === CONTINENT && p2.type === CONTINENT) {
+      } else if (p1.isContinent && p2.isContinent) {
         this.continentContinentCollision(p1, p2);
-      } else if (p1.type === OCEAN && p2.type === OCEAN) {
+      } else if (p1.isOcean && p2.isOcean) {
         this.oceanOceanCollision(p1, p2);
       }
     });
@@ -93,8 +93,8 @@ export default class Model {
 
   oceanContinentCollision(p1, p2) {
     // Ocean - continent collision.
-    const oceanPoint = p1.type === OCEAN ? p1 : p2;
-    const continentPoint = p1.type === CONTINENT ? p1 : p2;
+    const oceanPoint = p1.isOcean ? p1 : p2;
+    const continentPoint = p1.isContinent ? p1 : p2;
     oceanPoint.setupSubduction(continentPoint);
     if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.hotSpotAct) {
       const continentPlate = continentPoint.plate;
@@ -192,7 +192,7 @@ export default class Model {
     // Note that points are sorted and p1.height > p2.height.
     const subductingPoint = config.heightBasedSubduction ? p2 : subductingPlatePoint;
     const surfacePoint = subductingPoint === p1 ? p2 : p1;
-    if (surfacePoint.subduction) {
+    if (surfacePoint.isSubducting) {
       // If surface point is already subducting, ignore this type of collision. It could create weird effects
       // when non-height based subduction is enabled.
       return;
@@ -279,13 +279,13 @@ export default class Model {
       for (let y = 0; y < height; y += 1) {
         // If there's some point missing, create a new ocean crust and add it to the plate that
         // was in the same location before.
-        if (!surface.points[x][y] || surface.points[x][y][0].subduction) {
+        if (!surface.points[x][y] || surface.points[x][y][0].isSubducting) {
           const prevPoint = prevSurface.points[x][y] && prevSurface.points[x][y][0];
           if (prevPoint) {
             const plate = prevPoint.plate;
             // Don't set config.newOceanHeight immediately, so the ridge builds up its height slowly.
             const newHeight = Math.min(prevPoint.height + 0.03, config.newOceanHeight);
-            const newPoint = new Point({ x, y, type: OCEAN, height: newHeight, plate, cooling: true });
+            const newPoint = new Point({ x, y, height: newHeight, plate, cooling: true });
             plate.addPoint(newPoint);
             // Update surface object too, so prevSurface in the next step is valid!
             surface.setPoint(newPoint);

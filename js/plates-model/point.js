@@ -4,6 +4,10 @@ import PlatePoint from './plate-point';
 export const OCEAN = 0;
 export const CONTINENT = 1;
 
+const MIN_OCEAN_THICKNESS = 0.1;
+const SUBDUCTING_PLATE_THICKNESS = config.subductionHeight - config.minHeight;
+const OCEAN_THICKNESS_GROWTH = 0.005;
+
 let oceanFloorTexture = 0.05;
 function oceanFloorHeight() {
   // Add some random factor to the ocean floor height so there's visible texture and users can see that oceans
@@ -24,7 +28,6 @@ function subductionHeightChange(subductionVelocity, timeStep, subductionDist) {
 export default class Point extends PlatePoint {
   constructor({ x, y, plate, height, age = 0, cooling = false }) {
     super({ x, y, plate });
-    this.type = height > config.newOceanHeight ? CONTINENT : OCEAN;
     this.height = height;
     this.age = age;
     this.cooling = cooling;
@@ -42,20 +45,40 @@ export default class Point extends PlatePoint {
     this.hotSpotActTime = 0;
   }
 
-  get isOcean() {
-    return this.type === OCEAN;
-  }
-
   get isContinent() {
-    return this.type === CONTINENT;
+    return this.height > config.newOceanHeight;
   }
 
-  get subduction() {
+  get isOcean() {
+    return !this.isContinent;
+  }
+
+  get type() {
+    return this.isContinent ? CONTINENT : OCEAN;
+  }
+
+  get isSubducting() {
     return this.subductionDist !== null;
   }
 
-  get hasSubducted() {
-    return this.height <= config.minHeight;
+  get hasMelted() {
+    return this.height <= config.meltingHeight;
+  }
+
+  get thickness() {
+    if (this.isContinent) {
+      // Continents should just reach minHeight.
+      return this.height - config.minHeight;
+    }
+    // Ocean. When plate is subducting use constant thickness. If not, make sure it's going to the minHeight
+    // or is a bit thinner when ocean is still young.
+    const maxThickness = this.isSubducting ? SUBDUCTING_PLATE_THICKNESS : (this.height - config.minHeight);
+    return Math.min(maxThickness, this.age * OCEAN_THICKNESS_GROWTH + MIN_OCEAN_THICKNESS);
+  }
+
+  // Elevation / height of the bottom surface.
+  get bottom() {
+    return this.height - this.thickness;
   }
 
   get hotSpotAct() {
@@ -63,18 +86,18 @@ export default class Point extends PlatePoint {
   }
 
   get hotSpotAllowed() {
-    return this.hotSpotActTime < config.hotSpotActMaxTime && !this.subduction;
+    return this.hotSpotActTime < config.hotSpotActMaxTime && !this.isSubducting;
   }
 
   get volcanicActProbability() {
-    if (!this.subduction) return 0;
+    if (!this.isSubducting) return 0;
     const normalizedDist = (this.subductionDist - config.volcanicActMinDist) /
                            (config.volcanicActMaxDist - config.volcanicActMinDist);
     return Math.pow(Math.min(1 - normalizedDist, normalizedDist) / 0.5, 7);
   }
 
   setupSubduction(otherPoint) {
-    if (!this.subduction) {
+    if (!this.isSubducting) {
       this.subductionDist = 0;
     }
     this.height = Math.min(config.subductionHeight, this.height);
@@ -89,7 +112,7 @@ export default class Point extends PlatePoint {
   }
 
   update(timeStep) {
-    if (this.type === OCEAN && this.cooling) {
+    if (this.isOcean && this.cooling) {
       if (this.height > oceanFloorHeight()) {
         // Oceanic crust cools down and becomes denser.
         this.height -= (config.oceanicCrustCoolingRatio * timeStep * this.speed) / Math.max(Math.pow(this.age, 0.5), 2);
@@ -100,7 +123,7 @@ export default class Point extends PlatePoint {
 
     this.age += timeStep * this.speed;
 
-    if (this.subduction) {
+    if (this.isSubducting) {
       this.subductionDist += this.subductionVelocity * timeStep;
       this.height -= subductionHeightChange(this.subductionVelocity, timeStep, this.subductionDist);
     }
@@ -116,15 +139,11 @@ export default class Point extends PlatePoint {
       this.distFromHotSpotCenter = null;
     }
 
-    if (this.type === OCEAN && this.height > 0) {
-      this.type = CONTINENT;
-    }
-
     if (this.height > config.maxHeight) {
       this.height = config.maxHeight;
     }
 
-    if (this.hasSubducted || this.outOfBounds) {
+    if (this.hasMelted || this.outOfBounds) {
       this.alive = false;
     }
   }

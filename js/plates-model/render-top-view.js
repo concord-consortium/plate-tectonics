@@ -41,8 +41,8 @@ export default function renderTopView(imageData, points, mode = 'plates', bounda
     throw new Error('Data has to have the same dimensions as canvas');
   }
 
-  for (let x = 0; x < maxX; x += 1) {
-    for (let y = 0; y < maxY; y += 1) {
+  for (let y = 0; y < maxY; y += 1) {
+    for (let x = 0; x < maxX; x += 1) {
       let color = NO_PLATE_COL;
       if (points[x] && points[x][y]) {
         const boundary = boundaries && boundaryType(points, x, y);
