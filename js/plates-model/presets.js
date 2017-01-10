@@ -6,6 +6,7 @@ import islandsSrc from '../../data/islands.png';
 import islandCollisionSrc from '../../data/islandCollision.png';
 import continentCollisionSrc from '../../data/continentCollision.png';
 import oceanRidgeSrc from '../../data/oceanRidge.png';
+import subductionIssueSrc from '../../data/subductionIssue.png';
 
 export default {
   continentCollision: {
@@ -32,6 +33,20 @@ export default {
     img: islandCollisionSrc,
     init: (plates) => {
       plates[0].vx = 2;
+    },
+  },
+  subductionIssue1: {
+    img: subductionIssueSrc,
+    init: (plates) => {
+      plates[0].vx = 2;
+      plates[1].vx = 0;
+    },
+  },
+  subductionIssue2: {
+    img: subductionIssueSrc,
+    init: (plates) => {
+      plates[0].vx = 0;
+      plates[1].vx = -2;
     },
   },
   // test1-4 are implementation of initial Amy's ideas, described here:
