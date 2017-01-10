@@ -1,13 +1,8 @@
 import config from './config';
 import { elevationColor, plateColor, BOUNDARY_COL, NO_PLATE_COL } from './colormaps';
+import { angleBetween } from '../utils';
 
 const NEIGH_VEC = [{ x: -1, y: 0 }, { x: 0, y: -1 }];
-
-function angleBetween(vector1, vector2) {
-  let a = Math.atan2(vector2.y, vector2.x) - Math.atan2(vector1.y, vector1.x);
-  if (a < 0) a += 2 * Math.PI;
-  return Math.min(2 * Math.PI - a, a);
-}
 
 function boundaryType(points, x, y) {
   if (x === 0 || y === 0) return false;
@@ -22,9 +17,9 @@ function boundaryType(points, x, y) {
         const relSpeed = Math.sqrt(relVel.x * relVel.x + relVel.y * relVel.y);
         if (relSpeed > config.platesMergeSpeedDiff) {
           const angle = angleBetween(vec, relVel);
-          if (angle < Math.PI * 0.49) {
+          if (angle < Math.PI * 0.45) {
             result = 'convergent';
-          } else if (angle > Math.PI * 0.51) {
+          } else if (angle > Math.PI * 0.55) {
             result = 'divergent';
           } else {
             result = 'transform';

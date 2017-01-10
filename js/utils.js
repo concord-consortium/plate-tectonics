@@ -23,3 +23,19 @@ export function shuffle(a) {
 export function mod(v, n) {
   return ((v % n) + n) % n;
 }
+
+export function dot(v1, v2) {
+  return v1.x * v2.x + v1.y * v2.y;
+}
+
+export function lengthSq(v) {
+  return v.x * v.x + v.y * v.y;
+}
+
+export function length(v) {
+  return Math.sqrt(v.x * v.x + v.y * v.y);
+}
+
+export function angleBetween(v1, v2) {
+  return Math.acos(dot(v1, v2) / Math.sqrt(lengthSq(v1) * lengthSq(v2)));
+}
