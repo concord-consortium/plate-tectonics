@@ -47,15 +47,15 @@
 
 	'use strict';
 
-	var _loadModel = __webpack_require__(694);
+	var _loadModel = __webpack_require__(693);
 
 	var _loadModel2 = _interopRequireDefault(_loadModel);
 
-	var _renderTopView = __webpack_require__(705);
+	var _renderTopView = __webpack_require__(704);
 
 	var _renderTopView2 = _interopRequireDefault(_renderTopView);
 
-	var _renderCrossSection = __webpack_require__(723);
+	var _renderCrossSection = __webpack_require__(722);
 
 	var _renderCrossSection2 = _interopRequireDefault(_renderCrossSection);
 
@@ -64,27 +64,24 @@
 	var model = null;
 	var newInput = null;
 	var input = null;
-	var topViewImgData = null;
-	var crossSectionImgData = null;
 
 	function calcTopViewImgData() {
 	  var _input = input,
 	      platesRendering = _input.platesRendering,
 	      plateBoundariesRendering = _input.plateBoundariesRendering;
 
-	  var imgData = topViewImgData;
-	  (0, _renderTopView2.default)(imgData, model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
-	  return imgData;
+	  return (0, _renderTopView2.default)(model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
 	}
 
 	function calcCrossSectionImgData() {
 	  var _input2 = input,
 	      platesRendering = _input2.platesRendering,
-	      crossY = _input2.crossY;
+	      crossSectionPoint1 = _input2.crossSectionPoint1,
+	      crossSectionPoint2 = _input2.crossSectionPoint2;
 
-	  var imgData = crossSectionImgData;
-	  (0, _renderCrossSection2.default)(imgData, model.points, crossY, platesRendering ? 'plates' : 'type');
-	  return imgData;
+	  if (!crossSectionPoint1 || !crossSectionPoint2) return null;
+	  var renderingType = platesRendering ? 'plates' : 'type';
+	  return (0, _renderCrossSection2.default)(model.points, crossSectionPoint1, crossSectionPoint2, renderingType);
 	}
 
 	function calcHotSpotsData() {
@@ -121,8 +118,6 @@
 	  var data = event.data;
 	  if (data.type === 'load') {
 	    model = (0, _loadModel2.default)(data.imageData, data.presetName);
-	    topViewImgData = data.topViewImgData;
-	    crossSectionImgData = data.crossSectionImgData;
 	    newInput = data.input;
 	    setInterval(workerFunction, 0);
 	  } else if (data.type === 'input') {
@@ -132,7 +127,7 @@
 
 /***/ },
 
-/***/ 672:
+/***/ 668:
 /***/ function(module, exports) {
 
 	'use strict';
@@ -193,7 +188,7 @@
 
 /***/ },
 
-/***/ 674:
+/***/ 670:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -202,39 +197,39 @@
 	  value: true
 	});
 
-	var _test = __webpack_require__(675);
+	var _test = __webpack_require__(671);
 
 	var _test2 = _interopRequireDefault(_test);
 
-	var _test3 = __webpack_require__(676);
+	var _test3 = __webpack_require__(672);
 
 	var _test4 = _interopRequireDefault(_test3);
 
-	var _test5 = __webpack_require__(677);
+	var _test5 = __webpack_require__(673);
 
 	var _test6 = _interopRequireDefault(_test5);
 
-	var _test7 = __webpack_require__(678);
+	var _test7 = __webpack_require__(674);
 
 	var _test8 = _interopRequireDefault(_test7);
 
-	var _islands = __webpack_require__(679);
+	var _islands = __webpack_require__(675);
 
 	var _islands2 = _interopRequireDefault(_islands);
 
-	var _islandCollision = __webpack_require__(680);
+	var _islandCollision = __webpack_require__(676);
 
 	var _islandCollision2 = _interopRequireDefault(_islandCollision);
 
-	var _continentCollision = __webpack_require__(681);
+	var _continentCollision = __webpack_require__(677);
 
 	var _continentCollision2 = _interopRequireDefault(_continentCollision);
 
-	var _oceanRidge = __webpack_require__(682);
+	var _oceanRidge = __webpack_require__(678);
 
 	var _oceanRidge2 = _interopRequireDefault(_oceanRidge);
 
-	var _subductionIssue = __webpack_require__(683);
+	var _subductionIssue = __webpack_require__(679);
 
 	var _subductionIssue2 = _interopRequireDefault(_subductionIssue);
 
@@ -339,70 +334,70 @@
 
 /***/ },
 
-/***/ 675:
+/***/ 671:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "e30c9630c26810abe93055eed92a0180.png";
 
 /***/ },
 
-/***/ 676:
+/***/ 672:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "9b25e56ad97ec9fa271fc5bcb04269ef.png";
 
 /***/ },
 
-/***/ 677:
+/***/ 673:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "669a8322dc8ec6b46154af0184d3a2c0.png";
 
 /***/ },
 
-/***/ 678:
+/***/ 674:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "79832591eaf4fd8ae8a67196a2d5a028.png";
 
 /***/ },
 
-/***/ 679:
+/***/ 675:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "cccf24a30887faa57edd27e35ed145a6.png";
 
 /***/ },
 
-/***/ 680:
+/***/ 676:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "7dd1a724b0e862105e610eaa40177cad.png";
 
 /***/ },
 
-/***/ 681:
+/***/ 677:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "801be5086143e96c61c818514ad9b073.png";
 
 /***/ },
 
-/***/ 682:
+/***/ 678:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "f705cb9c926aa56e8801ed7acf1fb139.png";
 
 /***/ },
 
-/***/ 683:
+/***/ 679:
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "28daf24933fb0f34e7affc205deb1ce3.png";
 
 /***/ },
 
-/***/ 694:
+/***/ 693:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -412,15 +407,15 @@
 	});
 	exports.default = loadModel;
 
-	var _model = __webpack_require__(695);
+	var _model = __webpack_require__(694);
 
 	var _model2 = _interopRequireDefault(_model);
 
-	var _presets = __webpack_require__(674);
+	var _presets = __webpack_require__(670);
 
 	var _presets2 = _interopRequireDefault(_presets);
 
-	var _imgData2Plates = __webpack_require__(703);
+	var _imgData2Plates = __webpack_require__(702);
 
 	var _imgData2Plates2 = _interopRequireDefault(_imgData2Plates);
 
@@ -434,7 +429,7 @@
 
 /***/ },
 
-/***/ 695:
+/***/ 694:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -445,25 +440,25 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _surface = __webpack_require__(696);
+	var _surface = __webpack_require__(695);
 
 	var _surface2 = _interopRequireDefault(_surface);
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(699);
+	var _point = __webpack_require__(698);
 
 	var _point2 = _interopRequireDefault(_point);
 
-	var _hotSpot = __webpack_require__(701);
+	var _hotSpot = __webpack_require__(700);
 
 	var _hotSpot2 = _interopRequireDefault(_hotSpot);
 
-	var _continent = __webpack_require__(702);
+	var _continent = __webpack_require__(701);
 
-	var _utils = __webpack_require__(672);
+	var _utils = __webpack_require__(668);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -828,7 +823,7 @@
 
 /***/ },
 
-/***/ 696:
+/***/ 695:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -839,15 +834,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _binarysearch = __webpack_require__(697);
+	var _binarysearch = __webpack_require__(696);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _utils = __webpack_require__(672);
+	var _utils = __webpack_require__(668);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -994,7 +989,7 @@
 
 /***/ },
 
-/***/ 697:
+/***/ 696:
 /***/ function(module, exports) {
 
 	
@@ -1218,7 +1213,7 @@
 
 /***/ },
 
-/***/ 698:
+/***/ 697:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1227,7 +1222,7 @@
 	  value: true
 	});
 
-	var _utils = __webpack_require__(672);
+	var _utils = __webpack_require__(668);
 
 	var DEFAULT_CONFIG = {
 	  wrappingBoundaries: true,
@@ -1300,7 +1295,7 @@
 
 /***/ },
 
-/***/ 699:
+/***/ 698:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1312,11 +1307,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _platePoint = __webpack_require__(700);
+	var _platePoint = __webpack_require__(699);
 
 	var _platePoint2 = _interopRequireDefault(_platePoint);
 
@@ -1513,7 +1508,7 @@
 
 /***/ },
 
-/***/ 700:
+/***/ 699:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1524,11 +1519,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _utils = __webpack_require__(672);
+	var _utils = __webpack_require__(668);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1633,7 +1628,7 @@
 
 /***/ },
 
-/***/ 701:
+/***/ 700:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1644,11 +1639,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _platePoint = __webpack_require__(700);
+	var _platePoint = __webpack_require__(699);
 
 	var _platePoint2 = _interopRequireDefault(_platePoint);
 
@@ -1720,7 +1715,7 @@
 
 /***/ },
 
-/***/ 702:
+/***/ 701:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1805,7 +1800,7 @@
 
 /***/ },
 
-/***/ 703:
+/***/ 702:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1818,15 +1813,15 @@
 
 	exports.default = imgData2plates;
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _plate = __webpack_require__(704);
+	var _plate = __webpack_require__(703);
 
 	var _plate2 = _interopRequireDefault(_plate);
 
-	var _point = __webpack_require__(699);
+	var _point = __webpack_require__(698);
 
 	var _point2 = _interopRequireDefault(_point);
 
@@ -1935,7 +1930,7 @@
 
 /***/ },
 
-/***/ 704:
+/***/ 703:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2140,7 +2135,7 @@
 
 /***/ },
 
-/***/ 705:
+/***/ 704:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2150,13 +2145,13 @@
 	});
 	exports.default = renderTopView;
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _colormaps = __webpack_require__(706);
+	var _colormaps = __webpack_require__(705);
 
-	var _utils = __webpack_require__(672);
+	var _utils = __webpack_require__(668);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2191,16 +2186,13 @@
 	  return result;
 	}
 
-	function renderTopView(imageData, points) {
-	  var mode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'plates';
-	  var boundaries = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	function renderTopView(points) {
+	  var mode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'plates';
+	  var boundaries = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
 	  var maxX = points.length;
 	  var maxY = points[0].length;
-
-	  if (maxX !== imageData.width || maxY !== imageData.height) {
-	    throw new Error('Data has to have the same dimensions as canvas');
-	  }
+	  var imageData = new ImageData(maxX, maxY);
 
 	  for (var y = 0; y < maxY; y += 1) {
 	    for (var x = 0; x < maxX; x += 1) {
@@ -2223,11 +2215,12 @@
 	      imageData.data[dataIdx + 3] = 255;
 	    }
 	  }
+	  return imageData;
 	}
 
 /***/ },
 
-/***/ 706:
+/***/ 705:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2239,17 +2232,17 @@
 	exports.elevationColor = elevationColor;
 	exports.plateColor = plateColor;
 
-	var _colormap = __webpack_require__(707);
+	var _colormap = __webpack_require__(706);
 
 	var _colormap2 = _interopRequireDefault(_colormap);
 
-	var _d3Scale = __webpack_require__(715);
+	var _d3Scale = __webpack_require__(714);
 
-	var _d3Interpolate = __webpack_require__(718);
+	var _d3Interpolate = __webpack_require__(717);
 
-	var _d3Color = __webpack_require__(719);
+	var _d3Color = __webpack_require__(718);
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -2352,7 +2345,7 @@
 
 /***/ },
 
-/***/ 707:
+/***/ 706:
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2362,9 +2355,9 @@
 	 */
 	'use strict';
 
-	var at = __webpack_require__(708);
-	var clone = __webpack_require__(709);
-	var colorScale = __webpack_require__(714);
+	var at = __webpack_require__(707);
+	var clone = __webpack_require__(708);
+	var colorScale = __webpack_require__(713);
 
 	module.exports = createColormap;
 
@@ -2494,7 +2487,7 @@
 
 /***/ },
 
-/***/ 708:
+/***/ 707:
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2688,7 +2681,7 @@
 
 /***/ },
 
-/***/ 709:
+/***/ 708:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {var clone = (function() {
@@ -2852,11 +2845,11 @@
 	  module.exports = clone;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(710).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(709).Buffer))
 
 /***/ },
 
-/***/ 710:
+/***/ 709:
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -2869,9 +2862,9 @@
 
 	'use strict'
 
-	var base64 = __webpack_require__(711)
-	var ieee754 = __webpack_require__(712)
-	var isArray = __webpack_require__(713)
+	var base64 = __webpack_require__(710)
+	var ieee754 = __webpack_require__(711)
+	var isArray = __webpack_require__(712)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -4653,7 +4646,7 @@
 
 /***/ },
 
-/***/ 711:
+/***/ 710:
 /***/ function(module, exports) {
 
 	'use strict'
@@ -4774,7 +4767,7 @@
 
 /***/ },
 
-/***/ 712:
+/***/ 711:
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -4865,7 +4858,7 @@
 
 /***/ },
 
-/***/ 713:
+/***/ 712:
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -4877,7 +4870,7 @@
 
 /***/ },
 
-/***/ 714:
+/***/ 713:
 /***/ function(module, exports) {
 
 	module.exports={
@@ -4975,12 +4968,12 @@
 
 /***/ },
 
-/***/ 715:
+/***/ 714:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-scale/ Version 1.0.4. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(716), __webpack_require__(717), __webpack_require__(718), __webpack_require__(720), __webpack_require__(721), __webpack_require__(722), __webpack_require__(719)) :
+	   true ? factory(exports, __webpack_require__(715), __webpack_require__(716), __webpack_require__(717), __webpack_require__(719), __webpack_require__(720), __webpack_require__(721), __webpack_require__(718)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-array', 'd3-collection', 'd3-interpolate', 'd3-format', 'd3-time', 'd3-time-format', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3,global.d3,global.d3,global.d3,global.d3,global.d3,global.d3));
 	}(this, (function (exports,d3Array,d3Collection,d3Interpolate,d3Format,d3Time,d3TimeFormat,d3Color) { 'use strict';
@@ -5885,7 +5878,7 @@
 
 /***/ },
 
-/***/ 716:
+/***/ 715:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-array/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -6357,7 +6350,7 @@
 
 /***/ },
 
-/***/ 717:
+/***/ 716:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-collection/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -6581,12 +6574,12 @@
 
 /***/ },
 
-/***/ 718:
+/***/ 717:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-interpolate/ Version 1.1.2. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(719)) :
+	   true ? factory(exports, __webpack_require__(718)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, (function (exports,d3Color) { 'use strict';
@@ -7133,7 +7126,7 @@
 
 /***/ },
 
-/***/ 719:
+/***/ 718:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-color/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -7663,7 +7656,7 @@
 
 /***/ },
 
-/***/ 720:
+/***/ 719:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-format/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -7998,7 +7991,7 @@
 
 /***/ },
 
-/***/ 721:
+/***/ 720:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time/ Version 1.0.4. Copyright 2016 Mike Bostock.
@@ -8383,12 +8376,12 @@
 
 /***/ },
 
-/***/ 722:
+/***/ 721:
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time-format/ Version 2.0.3. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(721)) :
+	   true ? factory(exports, __webpack_require__(720)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-time'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, (function (exports,d3Time) { 'use strict';
@@ -8978,7 +8971,7 @@
 
 /***/ },
 
-/***/ 723:
+/***/ 722:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8991,17 +8984,17 @@
 
 	exports.default = renderCrossSection;
 
-	var _binarysearch = __webpack_require__(697);
+	var _binarysearch = __webpack_require__(696);
 
 	var _binarysearch2 = _interopRequireDefault(_binarysearch);
 
-	var _config = __webpack_require__(698);
+	var _config = __webpack_require__(697);
 
 	var _config2 = _interopRequireDefault(_config);
 
-	var _point = __webpack_require__(699);
+	var _point = __webpack_require__(698);
 
-	var _colormaps = __webpack_require__(706);
+	var _colormaps = __webpack_require__(705);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -9012,44 +9005,75 @@
 	  water: [2, 156, 212]
 	}, _defineProperty(_COLORS, _point.CONTINENT, [128, 128, 128]), _defineProperty(_COLORS, _point.OCEAN, [64, 64, 64]), _COLORS);
 
+	var HEIGHT = 150;
+
 	function normalizedHeight(val) {
 	  return (val - _config2.default.astenosphereBottom) / (_config2.default.maxHeight - _config2.default.astenosphereBottom);
 	}
 
-	function renderCrossSection(imageData, points, crossSectionY) {
+	// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+	function line(p0, p1) {
+	  var x0 = Math.round(p0.x);
+	  var y0 = Math.round(p0.y);
+	  var x1 = Math.round(p1.x);
+	  var y1 = Math.round(p1.y);
+	  var dx = Math.abs(x1 - x0);
+	  var dy = Math.abs(y1 - y0);
+	  var sx = x0 < x1 ? 1 : -1;
+	  var sy = y0 < y1 ? 1 : -1;
+	  var err = dx - dy;
+	  var result = [];
+
+	  while (x0 !== x1 || y0 !== y1) {
+	    result.push({ x: x0, y: y0 });
+	    var e2 = 2 * err;
+	    if (e2 > -dy) {
+	      err -= dy;
+	      x0 += sx;
+	    }
+	    if (e2 < dx) {
+	      err += dx;
+	      y0 += sy;
+	    }
+	  }
+	  result.push({ x: x0, y: y0 });
+	  return result;
+	}
+
+	function renderCrossSection(points, crossSectionPoint1, crossSectionPoint2) {
 	  var mode = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'type';
 
-	  var maxX = points.length;
-	  if (maxX !== imageData.width) {
-	    throw new Error('Data has to have the same width as canvas');
-	  }
-	  var canvHeight = imageData.height;
-
+	  var coords = line(crossSectionPoint1, crossSectionPoint2);
+	  var lineLength = coords.length;
 	  var heightData = [];
 	  var bottom = [];
 	  var crossSectionPoints = [];
-	  for (var x = 0; x < maxX; x += 1) {
-	    var h = (points[x][crossSectionY] || []).map(function (point) {
-	      return canvHeight - canvHeight * normalizedHeight(point.height);
+	  for (var i = 0; i < lineLength; i += 1) {
+	    var x = coords[i].x;
+	    var y = coords[i].y;
+	    var h = (points[x][y] || []).map(function (point) {
+	      return HEIGHT - HEIGHT * normalizedHeight(point.height);
 	    });
 	    heightData.push(h);
-	    var b = (points[x][crossSectionY] || []).map(function (point) {
-	      return canvHeight - canvHeight * normalizedHeight(point.bottom);
+	    var b = (points[x][y] || []).map(function (point) {
+	      return HEIGHT - HEIGHT * normalizedHeight(point.bottom);
 	    });
 	    bottom.push(b);
-	    crossSectionPoints.push(points[x][crossSectionY]);
+	    crossSectionPoints.push(points[x][y]);
 	  }
-	  var waterLevel = canvHeight - canvHeight * normalizedHeight(_config2.default.waterLevel);
+	  var waterLevel = HEIGHT - HEIGHT * normalizedHeight(_config2.default.waterLevel);
 
-	  for (var y = 0; y < canvHeight; y += 1) {
-	    for (var _x2 = 0; _x2 < maxX; _x2 += 1) {
-	      var idx = (y * maxX + _x2) * 4;
-	      var color = y < waterLevel ? COLORS.nothing : COLORS.water;
-	      if (y >= heightData[_x2][0]) {
-	        var pointIdx = _binarysearch2.default.closest(heightData[_x2], y);
+	  var imageData = new ImageData(lineLength, HEIGHT);
+
+	  for (var _y = 0; _y < HEIGHT; _y += 1) {
+	    for (var _x2 = 0; _x2 < lineLength; _x2 += 1) {
+	      var idx = (_y * lineLength + _x2) * 4;
+	      var color = _y < waterLevel ? COLORS.nothing : COLORS.water;
+	      if (_y >= heightData[_x2][0]) {
+	        var pointIdx = _binarysearch2.default.closest(heightData[_x2], _y);
 	        var p = crossSectionPoints[_x2][pointIdx];
 	        color = mode === 'type' ? COLORS[p.type] : (0, _colormaps.plateColor)(p.plate.id);
-	        if (y > bottom[_x2][pointIdx]) {
+	        if (_y > bottom[_x2][pointIdx]) {
 	          // Mantle.
 	          color = [255, 35, 0];
 	        }
@@ -9060,6 +9084,7 @@
 	      imageData.data[idx + 3] = 255;
 	    }
 	  }
+	  return imageData;
 	}
 
 /***/ }
