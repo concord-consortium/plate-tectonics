@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import Toggle from 'material-ui/Toggle';
+import RaisedButton from 'material-ui/RaisedButton';
 import { getURLParam } from '../utils';
 import getImgData from '../get-img-data';
 import presets from '../plates-model/presets';
@@ -14,10 +15,10 @@ export default class PlatesModel extends PureComponent {
       modelWidth: 512,
       modelHeight: 512,
       modelInput: {
+        targetStepIdx: Infinity, // it means that simulation will be running
         hotSpotsRendering: false,
         platesRendering: false,
         plateBoundariesRendering: true,
-        simEnabled: true,
         // Defines rendering of cross section.
         crossSectionPoint1: null,
         crossSectionPoint2: null,
@@ -32,6 +33,7 @@ export default class PlatesModel extends PureComponent {
     this.handlePlateBoundariesRenderingChange = this.handlePlateBoundariesRenderingChange.bind(this);
     this.handleSimEnabledChange = this.handleSimEnabledChange.bind(this);
     this.handleCrossSectionPointsChange = this.handleCrossSectionPointsChange.bind(this);
+    this.handleStepClicked = this.handleStepClicked.bind(this);
     this.renderModel = this.renderModel.bind(this);
   }
 
@@ -81,7 +83,7 @@ export default class PlatesModel extends PureComponent {
   }
 
   handleSimEnabledChange(event, value) {
-    this.setModelInput({ simEnabled: value });
+    this.setModelInput({ targetStepIdx: value ? Infinity : this.modelOutput.stepIdx });
   }
 
   handleCrossSectionYChange(event, value) {
@@ -102,6 +104,11 @@ export default class PlatesModel extends PureComponent {
 
   handleCrossSectionPointsChange(crossSectionPoint1, crossSectionPoint2) {
     this.setModelInput({ crossSectionPoint1, crossSectionPoint2 });
+  }
+
+  handleStepClicked() {
+    const { targetStepIdx } = this.state.modelInput;
+    this.setModelInput({ targetStepIdx: Math.max(targetStepIdx + 1, this.modelOutput.stepIdx + 1) });
   }
 
   handleModelOutput(output) {
@@ -134,8 +141,9 @@ export default class PlatesModel extends PureComponent {
 
   render() {
     const { modelHeight, modelWidth } = this.state;
-    const { simEnabled, hotSpotsRendering, platesRendering, plateBoundariesRendering,
+    const { targetStepIdx, hotSpotsRendering, platesRendering, plateBoundariesRendering,
             crossSectionPoint1, crossSectionPoint2 } = this.state.modelInput;
+    const simRunning = targetStepIdx === Infinity;
     return (
       <div className="plates-model">
         <div>
@@ -157,7 +165,10 @@ export default class PlatesModel extends PureComponent {
         <div>
           <Toggle
             label="Simulation" labelPosition="right"
-            toggled={simEnabled} onToggle={this.handleSimEnabledChange}
+            toggled={simRunning} onToggle={this.handleSimEnabledChange}
+          />
+          <RaisedButton
+            label="Simulation step" disabled={simRunning} onClick={this.handleStepClicked} style={{ margin: '5px 0' }}
           />
           <Toggle
             label='"Hot spots" rendering' labelPosition="right"

@@ -31,12 +31,13 @@ function workerFunction() {
     newInput = null;
     recalcOutput = true;
   }
-  if (input.simEnabled) {
+  if (model.stepIdx < input.targetStepIdx) {
     model.step();
     recalcOutput = true;
   }
   if (recalcOutput) {
     const output = {};
+    output.stepIdx = model.stepIdx;
     output.topViewImgData = calcTopViewImgData();
     output.crossSectionImgData = calcCrossSectionImgData();
     if (input.hotSpotsRendering) {
