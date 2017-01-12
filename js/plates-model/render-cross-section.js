@@ -10,32 +10,63 @@ const COLORS = {
   [OCEAN]: [64, 64, 64],
 };
 
+const HEIGHT = 150;
+
 function normalizedHeight(val) {
   return (val - config.astenosphereBottom) / (config.maxHeight - config.astenosphereBottom);
 }
 
-export default function renderCrossSection(imageData, points, crossSectionY, mode = 'type') {
-  const maxX = points.length;
-  if (maxX !== imageData.width) {
-    throw new Error('Data has to have the same width as canvas');
-  }
-  const canvHeight = imageData.height;
+// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+function line(p0, p1) {
+  let x0 = p0.x;
+  let y0 = p0.y;
+  const x1 = p1.x;
+  const y1 = p1.y;
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const sx = (x0 < x1) ? 1 : -1;
+  const sy = (y0 < y1) ? 1 : -1;
+  let err = dx - dy;
+  const result = [];
 
+  while (x0 !== x1 || y0 !== y1) {
+    result.push({ x: x0, y: y0 });
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x0 += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y0 += sy;
+    }
+  }
+  result.push({ x: x0, y: y0 });
+  return result;
+}
+
+export default function renderCrossSection(points, crossSectionPoint1, crossSectionPoint2, mode = 'type') {
+  const coords = line(crossSectionPoint1, crossSectionPoint2);
+  const lineLength = coords.length;
   const heightData = [];
   const bottom = [];
   const crossSectionPoints = [];
-  for (let x = 0; x < maxX; x += 1) {
-    const h = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.height));
+  for (let i = 0; i < lineLength; i += 1) {
+    const x = coords[i].x;
+    const y = coords[i].y;
+    const h = (points[x][y] || []).map(point => HEIGHT - HEIGHT * normalizedHeight(point.height));
     heightData.push(h);
-    const b = (points[x][crossSectionY] || []).map(point => canvHeight - canvHeight * normalizedHeight(point.bottom));
+    const b = (points[x][y] || []).map(point => HEIGHT - HEIGHT * normalizedHeight(point.bottom));
     bottom.push(b);
-    crossSectionPoints.push(points[x][crossSectionY]);
+    crossSectionPoints.push(points[x][y]);
   }
-  const waterLevel = canvHeight - canvHeight * normalizedHeight(config.waterLevel);
+  const waterLevel = HEIGHT - HEIGHT * normalizedHeight(config.waterLevel);
 
-  for (let y = 0; y < canvHeight; y += 1) {
-    for (let x = 0; x < maxX; x += 1) {
-      const idx = (y * maxX + x) * 4;
+  const imageData = new ImageData(lineLength, HEIGHT);
+
+  for (let y = 0; y < HEIGHT; y += 1) {
+    for (let x = 0; x < lineLength; x += 1) {
+      const idx = (y * lineLength + x) * 4;
       let color = y < waterLevel ? COLORS.nothing : COLORS.water;
       if (y >= heightData[x][0]) {
         const pointIdx = bs.closest(heightData[x], y);
@@ -52,4 +83,5 @@ export default function renderCrossSection(imageData, points, crossSectionY, mod
       imageData.data[idx + 3] = 255;
     }
   }
+  return imageData;
 }

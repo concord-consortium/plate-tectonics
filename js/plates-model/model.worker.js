@@ -6,7 +6,6 @@ let model = null;
 let newInput = null;
 let input = null;
 let topViewImgData = null;
-let crossSectionImgData = null;
 
 function calcTopViewImgData() {
   const { platesRendering, plateBoundariesRendering } = input;
@@ -16,10 +15,10 @@ function calcTopViewImgData() {
 }
 
 function calcCrossSectionImgData() {
-  const { platesRendering, crossY } = input;
-  const imgData = crossSectionImgData;
-  renderCrossSection(imgData, model.points, crossY, platesRendering ? 'plates' : 'type');
-  return imgData;
+  const { platesRendering, crossSectionPoint1, crossSectionPoint2 } = input;
+  if (!crossSectionPoint1 || !crossSectionPoint2) return null;
+  const renderingType = platesRendering ? 'plates' : 'type';
+  return renderCrossSection(model.points, crossSectionPoint1, crossSectionPoint2, renderingType);
 }
 
 function calcHotSpotsData() {
@@ -55,7 +54,6 @@ onmessage = function modelWorkerMsgHandler(event) {
   if (data.type === 'load') {
     model = loadModel(data.imageData, data.presetName);
     topViewImgData = data.topViewImgData;
-    crossSectionImgData = data.crossSectionImgData;
     newInput = data.input;
     setInterval(workerFunction, 0);
   } else if (data.type === 'input') {
