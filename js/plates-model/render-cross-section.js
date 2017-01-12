@@ -18,10 +18,10 @@ function normalizedHeight(val) {
 
 // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 function line(p0, p1) {
-  let x0 = p0.x;
-  let y0 = p0.y;
-  const x1 = p1.x;
-  const y1 = p1.y;
+  let x0 = Math.round(p0.x);
+  let y0 = Math.round(p0.y);
+  const x1 = Math.round(p1.x);
+  const y1 = Math.round(p1.y);
   const dx = Math.abs(x1 - x0);
   const dy = Math.abs(y1 - y0);
   const sx = (x0 < x1) ? 1 : -1;

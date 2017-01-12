@@ -9,7 +9,8 @@
     "no-console": [0],
     "no-underscore-dangle": [2, { "allowAfterThis": true }],
     "max-len": [2, 120],
-    "react/jsx-filename-extension": [1, { "extensions": [".js"] }]
+    "react/jsx-filename-extension": [1, { "extensions": [".js"] }],
+    "react/forbid-prop-types": [0]
   },
   "env": {
     "browser": true,

@@ -33,13 +33,10 @@ function boundaryType(points, x, y) {
   return result;
 }
 
-export default function renderTopView(imageData, points, mode = 'plates', boundaries = false) {
+export default function renderTopView(points, mode = 'plates', boundaries = false) {
   const maxX = points.length;
   const maxY = points[0].length;
-
-  if (maxX !== imageData.width || maxY !== imageData.height) {
-    throw new Error('Data has to have the same dimensions as canvas');
-  }
+  const imageData = new ImageData(maxX, maxY);
 
   for (let y = 0; y < maxY; y += 1) {
     for (let x = 0; x < maxX; x += 1) {
@@ -62,4 +59,5 @@ export default function renderTopView(imageData, points, mode = 'plates', bounda
       imageData.data[dataIdx + 3] = 255;
     }
   }
+  return imageData;
 }

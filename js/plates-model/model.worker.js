@@ -5,13 +5,10 @@ import renderCrossSection from './render-cross-section';
 let model = null;
 let newInput = null;
 let input = null;
-let topViewImgData = null;
 
 function calcTopViewImgData() {
   const { platesRendering, plateBoundariesRendering } = input;
-  const imgData = topViewImgData;
-  renderTopView(imgData, model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
-  return imgData;
+  return renderTopView(model.points, platesRendering ? 'plates' : 'height', plateBoundariesRendering);
 }
 
 function calcCrossSectionImgData() {
@@ -53,7 +50,6 @@ onmessage = function modelWorkerMsgHandler(event) {
   const data = event.data;
   if (data.type === 'load') {
     model = loadModel(data.imageData, data.presetName);
-    topViewImgData = data.topViewImgData;
     newInput = data.input;
     setInterval(workerFunction, 0);
   } else if (data.type === 'input') {
