@@ -2256,7 +2256,7 @@
 	  default: [16, 16, 16],
 	  convergent: [255, 38, 32],
 	  divergent: [255, 196, 0],
-	  transform: [79, 230, 75]
+	  transform: [126, 11, 128]
 	};
 
 	function d3ScaleToArray(d3Scale, shadesCount) {
