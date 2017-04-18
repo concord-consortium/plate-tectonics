@@ -1,12 +1,20 @@
 # Plate Tectonics model
 
-Index page listing all the examples:
+Latest **stable** version:
 
-https://concord-consortium.github.io/plate-tectonics/
+http://models-resources.concord.org/plate-tectonics/index.html
 
 A particular model can be loaded using `preset` URL parameter, e.g.:
 
-https://concord-consortium.github.io/plate-tectonics/?preset=continentCollision
+http://models-resources.concord.org/plate-tectonics/index.html?preset=continentCollision
+
+Latest **development** version:
+
+http://models-resources.concord.org/plate-tectonics/branch/master/index.html
+
+Old versions can be accessed via `/version/<tag>` path, e.g.:
+
+http://models-resources.concord.org/plate-tectonics/version/0.1.0/index.html
 
 ## Configuration
 
@@ -44,6 +52,10 @@ and open [http://localhost:8080/](http://localhost:8080/) or [http://localhost:8
 * Webpack parses URLs in CSS too, so it will either copy resources automatically to `/dist` or inline them in CSS file. That applies to images and fonts (take a look at webpack config).
 * All the styles are included by related components in JS files. Please make sure that those styles are scoped to the top-level component class, so we don't pollute the whole page. It's not very important right now, but might become important if this page becomes part of the larger UI. And I believe it's a good practice anyway. 
 * I would try to make sure that each component specifies all its necessary styles to look reasonably good and it doesn't depend on styles defined somewhere else (e.g. in parent components). Parent components or global styles could be used to theme components, but they should work just fine without them too.
+
+## Releases
+
+- [0.1.0 (Jan 12, 2017)](http://models-resources.concord.org/plate-tectonics/version/0.1.0/index.html)
 
 ## License 
 
