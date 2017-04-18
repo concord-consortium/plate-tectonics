@@ -56,6 +56,7 @@ export default {
     init: (plates) => {
       plates[1].vx = -1;
       plates[2].vx = 1;
+      plates[2].subductionIdx = 100;
       plates[3].vx = -1.3;
     },
   },
@@ -64,6 +65,7 @@ export default {
     init: (plates) => {
       plates[1].vx = -1;
       plates[2].vx = 1;
+      plates[2].subductionIdx = 100;
       plates[3].vx = -1.3;
     },
   },

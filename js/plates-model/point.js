@@ -13,7 +13,8 @@ function oceanFloorHeight() {
   // Add some random factor to the ocean floor height so there's visible texture and users can see that oceans
   // are moving.
   if (Math.random() < 0.00002) {
-    oceanFloorTexture *= -1;
+    if (oceanFloorTexture === 0.05) oceanFloorTexture = 0.1;
+    else oceanFloorTexture = 0.05;
   }
   return config.subductionHeight + oceanFloorTexture;
 }
@@ -47,6 +48,10 @@ export default class Point extends PlatePoint {
 
   get isContinent() {
     return this.height > config.newOceanHeight;
+  }
+
+  get isIsland() {
+    return this.continent && this.continent.size < this.plate.size * config.islandRatio;
   }
 
   get isOcean() {

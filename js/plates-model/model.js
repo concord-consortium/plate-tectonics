@@ -5,10 +5,11 @@ import HotSpot from './hot-spot';
 import { calcContinents } from './continent';
 import { mod } from '../utils';
 
-function isIsland(point) {
-  // Assume that land is an island if its size is smaller than X% of the whole plate area
-  // (defined by islandRatio value).
-  return point.continent.size < point.plate.size * config.islandRatio;
+function getSubductingPoint(p1, p2) {
+  if (p1.plate.subductionIdx !== p2.plate.subductionIdx) {
+    return p1.plate.subductionIdx < p2.plate.subductionIdx ? p1 : p2;
+  }
+  return p1.plate.id < p2.plate.id ? p1 : p2;
 }
 
 export default class Model {
@@ -95,6 +96,17 @@ export default class Model {
     // Ocean - continent collision.
     const oceanPoint = p1.isOcean ? p1 : p2;
     const continentPoint = p1.isContinent ? p1 : p2;
+    if (getSubductingPoint(p1, p2) === oceanPoint) {
+      // Ocean goes under continent, expected case. Setup subduction.
+      this.oceanContinentSubduction(oceanPoint, continentPoint);
+    } else {
+      // Continent should go under ocean, what is impossible.
+      // Instead simulate a collision between continent and ocean - plates will slow down and eventually merge.
+      this.continentCrustCollision(p1, p2, false);
+    }
+  }
+
+  oceanContinentSubduction(oceanPoint, continentPoint) {
     oceanPoint.setupSubduction(continentPoint);
     if (Math.random() < oceanPoint.volcanicActProbability && !continentPoint.hotSpotAct) {
       const continentPlate = continentPoint.plate;
@@ -110,16 +122,10 @@ export default class Model {
   }
 
   continentContinentCollision(p1, p2) {
-    // Make sure that colliding islands have their own plates. We don't want to modify speed of the ocean
-    // only because small islands are colliding.
-    if (isIsland(p1) && !p1.plate.continentOnly) {
-      const newPlate = p1.plate.extractContinent(p1.continent.points);
-      this.plates.push(newPlate);
-    }
-    if (isIsland(p2) && !p2.plate.continentOnly) {
-      const newPlate = p2.plate.extractContinent(p2.continent.points);
-      this.plates.push(newPlate);
-    }
+    this.continentCrustCollision(p1, p2, true);
+  }
+
+  continentCrustCollision(p1, p2, orogeny) {
     const pl1 = p1.plate;
     const pl2 = p2.plate;
     const finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
@@ -130,33 +136,40 @@ export default class Model {
     const pl2VyDiff = pl2.vy - finalVy;
     const pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
     const pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
-    // Make friction proportional to the continent size. It ensures that continents would pretty much overlap in the
-    // same amount, no matter what's the size of the surrounding plate.
-    const smallerContinentSize = Math.min(p1.continent.size, p2.continent.size);
+    let smallerContinentSize;
+    if (p1.continent && p2.continent) {
+      // Make friction proportional to the continent size. It ensures that continents would pretty much overlap in the
+      // same amount, no matter what's the size of the surrounding plate.
+      smallerContinentSize = Math.min(p1.continent.size, p2.continent.size);
+    } else {
+      smallerContinentSize = p1.continent && p1.continent.size || p2.continent && p2.continent.size;
+    }
     const k = Math.min(0.9, config.continentCollisionFriction / smallerContinentSize);
     pl1.vx -= k * pl1VxDiff;
     pl1.vy -= k * pl1VyDiff;
     pl2.vx -= k * pl2VxDiff;
     pl2.vy -= k * pl2VyDiff;
     if (Math.max(pl1Diff, pl2Diff) > config.platesMergeSpeedDiff) {
-      const newHotSpot1 = new HotSpot({
-        x: p1.x + Math.random() * 30 - 15,
-        y: p1.y + Math.random() * 30 - 15,
-        radius: Math.random() * 12 + 2,
-        strength: config.orogenyStrength,
-        lifeRatio: 0.1,
-        plate: pl1,
-      });
-      pl1.addHotSpot(newHotSpot1);
-      const newHotSpot2 = new HotSpot({
-        x: p1.x + Math.random() * 30 - 15,
-        y: p1.y + Math.random() * 30 - 15,
-        radius: Math.random() * 12 + 2,
-        strength: config.orogenyStrength,
-        lifeRatio: 0.1,
-        plate: pl2,
-      });
-      pl2.addHotSpot(newHotSpot2);
+      if (orogeny) {
+        const newHotSpot1 = new HotSpot({
+          x: p1.x + Math.random() * 30 - 15,
+          y: p1.y + Math.random() * 30 - 15,
+          radius: Math.random() * 12 + 2,
+          strength: config.orogenyStrength,
+          lifeRatio: 0.1,
+          plate: pl1,
+        });
+        pl1.addHotSpot(newHotSpot1);
+        const newHotSpot2 = new HotSpot({
+          x: p1.x + Math.random() * 30 - 15,
+          y: p1.y + Math.random() * 30 - 15,
+          radius: Math.random() * 12 + 2,
+          strength: config.orogenyStrength,
+          lifeRatio: 0.1,
+          plate: pl2,
+        });
+        pl2.addHotSpot(newHotSpot2);
+      }
       // Remove lower point.
       p2.alive = false;
     } else {
@@ -184,19 +197,13 @@ export default class Model {
   }
 
   oceanOceanCollision(p1, p2) {
-    // There are two methods to decide which points is going to subduct.
-    // If config.heightBasedSubduction === true, it will be always the higher point.
-    // Otherwise, every point from one plate will subduct, no matter what is the current height.
-    // It ensures consistent subduction across the whole boundary.
-    const subductingPlatePoint = p1.plate.id < p2.plate.id ? p1 : p2;
-    // Note that points are sorted and p1.height > p2.height.
-    const subductingPoint = config.heightBasedSubduction ? p2 : subductingPlatePoint;
+    const subductingPoint = getSubductingPoint(p1, p2);
     const surfacePoint = subductingPoint === p1 ? p2 : p1;
-    if (surfacePoint.isSubducting) {
-      // If surface point is already subducting, ignore this type of collision. It could create weird effects
-      // when non-height based subduction is enabled.
-      return;
-    }
+    // if (surfacePoint.isSubducting) {
+    //   // If surface point is already subducting, ignore this type of collision. It could create weird effects
+    //   // when non-height based subduction is enabled.
+    //   return;
+    // }
     subductingPoint.setupSubduction(surfacePoint);
     if (Math.random() < subductingPoint.volcanicActProbability && !surfacePoint.hotSpotAct) {
       const plate = surfacePoint.plate;

@@ -12,10 +12,6 @@ const DEFAULT_CONFIG = {
   newOceanHeight: -0.3,
   // When oceanic crust cools down, it sinks a bit.
   oceanicCrustCoolingRatio: 0.0333,
-  // If heightBasedSubduction === true, always the higher point will go above lower point.
-  // Otherwise, every point from one plate will subduct, no matter what is the current height.
-  // It ensures consistent subduction across the whole boundary.
-  heightBasedSubduction: false,
   // Elevation of the oceanic plate at the beginning of subduction.
   subductionHeight: -0.6,
   // Speed of subduction.
@@ -41,10 +37,6 @@ const DEFAULT_CONFIG = {
   // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
   // colliding with big continents will join them.
   mergePlateRatio: 0.05,
-  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
-  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
-  // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
-  islandRatio: 0.05,
   // Visual settings.
   elevationColormap: 'topo', // or 'heat', check colormaps.js
   plateColormap: 'default',
@@ -67,4 +59,5 @@ Object.keys(DEFAULT_CONFIG).forEach((key) => {
 });
 
 const finalConfig = Object.assign({}, DEFAULT_CONFIG, urlConfig);
+console.log(finalConfig);
 export default finalConfig;
