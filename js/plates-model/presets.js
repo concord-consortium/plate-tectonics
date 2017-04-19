@@ -1,4 +1,5 @@
 import test1Src from '../../data/test1.png';
+import test1RectSrc from '../../data/test1rect.png';
 import test2Src from '../../data/test2.png';
 import test3Src from '../../data/test3.png';
 import test4Src from '../../data/test4.png';
@@ -53,6 +54,15 @@ export default {
   // https://drive.google.com/open?id=0B4CijKAWlpBtVFpHVVRjQWh5LTQ
   test1: {
     img: test1Src,
+    init: (plates) => {
+      plates[1].vx = -1;
+      plates[2].vx = 1;
+      plates[2].subductionIdx = 100;
+      plates[3].vx = -1.3;
+    },
+  },
+  test1rect: {
+    img: test1RectSrc,
     init: (plates) => {
       plates[1].vx = -1;
       plates[2].vx = 1;

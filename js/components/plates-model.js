@@ -5,6 +5,8 @@ import { getURLParam } from '../utils';
 import getImgData from '../get-img-data';
 import presets from '../plates-model/presets';
 import TopView from './top-view';
+import GlobeView from './globe-view';
+import ParaboloidView from './paraboloid-view';
 
 import '../../css/plates-model.less';
 
@@ -68,6 +70,9 @@ export default class PlatesModel extends PureComponent {
         });
       });
     });
+    // Connect 3d globe view to the top view.
+    this.paraboloidView.setTexture(this.topView.canvas);
+    this.globeView.setTexture(this.topView.canvas);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -137,6 +142,8 @@ export default class PlatesModel extends PureComponent {
   renderModel() {
     this.renderTopView();
     this.renderCrossSection();
+    this.globeView.update();
+    this.paraboloidView.update();
   }
 
   render() {
@@ -153,6 +160,8 @@ export default class PlatesModel extends PureComponent {
               crossSectionPoint1={crossSectionPoint1} crossSectionPoint2={crossSectionPoint2}
               onCrossSectionPointsChange={this.handleCrossSectionPointsChange}
             />
+            <ParaboloidView ref={(c) => { this.paraboloidView = c; }} width={512} height={512} />
+            <GlobeView ref={(c) => { this.globeView = c; }} width={512} height={512} />
           </div>
         </div>
         <div>
