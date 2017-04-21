@@ -30,13 +30,17 @@ const DEFAULT_CONFIG = {
   // Volcano lifespan is proportional to this value and its diameter.
   hotSpotLifeLength: 0.5,
   // Controls how fast continents would slow down when they are colliding.
-  continentCollisionFriction: 6,
+  continentCollisionFriction: 4,
   // Plates are merged together when they are overlapping and the difference between their speed is smaller
   // than this value. Note that big plates are not merged, the model just makes sure that their velocity is the same.
-  platesMergeSpeedDiff: 0.3,
+  platesMergeSpeedDiff: 0.5,
   // Plates smaller than this value * model width * model size would be merged into other plates. E.g. small islands
   // colliding with big continents will join them.
   mergePlateRatio: 0.05,
+  // Controls whether given piece of land is treated as an island or continent. Islands are detached from its plates
+  // during collision with other island or continents. Continents are not and they will slow down the whole plate.
+  // Ratio equal to 0.1 means that land smaller than 0.1 * plate.size is treated as island.
+  islandRatio: 0.01,
   // Visual settings.
   elevationColormap: 'topo', // or 'heat', check colormaps.js
   plateColormap: 'default',

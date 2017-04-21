@@ -18,8 +18,10 @@ export default {
   oceanRidge: {
     img: oceanRidgeSrc,
     init: (plates) => {
+      plates[0].subductionIdx = 100;
       plates[1].vx = -1;
       plates[2].vx = 1;
+      plates[3].subductionIdx = 100;
     },
   },
   islands: {

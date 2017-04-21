@@ -5,7 +5,7 @@ function getPlateID() {
 }
 
 export default class Plate {
-  constructor({ x = 0, y = 0, vx = 0, vy = 0, maxX, maxY, pinned = false, subductionIdx = 0 }) {
+  constructor({ x = 0, y = 0, vx = 0, vy = 0, maxX, maxY, pinned = false, subductionIdx }) {
     this.id = getPlateID();
     this.x = x;
     this.y = y;
@@ -14,11 +14,9 @@ export default class Plate {
     this.maxX = maxX;
     this.maxY = maxY;
     this.pinned = pinned;
-    this.subductionIdx = subductionIdx;
+    this.subductionIdx = subductionIdx || this.id;
     this.points = [];
     this.hotSpots = [];
-    // It means that plate consist of a single continent. It's necessary when continents are colliding.
-    this.continentOnly = true;
   }
 
   set vx(v) {
@@ -37,6 +35,10 @@ export default class Plate {
     return this._vy;
   }
 
+  get speed() {
+    return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+  }
+
   set pinned(v) {
     this._pinned = v;
     if (v) {
@@ -53,12 +55,15 @@ export default class Plate {
     return this.points.length;
   }
 
+  get modelSize() {
+    return this.maxX * this.maxY;
+  }
+
   extractContinent(continentPoints) {
-    const { x, y, vx, vy, maxX, maxY } = this;
+    const { x, y, vx, vy, maxX, maxY, subductionIdx } = this;
     // Create a new plate.
-    const newPlate = new Plate({ x, y, vx, vy, maxX, maxY });
+    const newPlate = new Plate({ x, y, vx, vy, maxX, maxY, subductionIdx: subductionIdx + 0.01 });
     newPlate.points = continentPoints;
-    newPlate.continentOnly = true;
     continentPoints.forEach((p) => { p.plate = newPlate; });
     // Update our own point list.
     this.points = this.points.filter(p => p.plate === this);
@@ -87,9 +92,6 @@ export default class Plate {
 
   addPoint(p) {
     this.points.push(p);
-    if (this.continentOnly && p.isOcean) {
-      this.continentOnly = false;
-    }
   }
 
   move(timeStep) {

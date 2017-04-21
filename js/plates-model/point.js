@@ -51,11 +51,15 @@ export default class Point extends PlatePoint {
   }
 
   get isIsland() {
-    return this.continent && this.continent.size < this.plate.size * config.islandRatio;
+    return this.continent && this.continent.size < this.plate.modelSize * config.islandRatio;
   }
 
   get isOcean() {
     return !this.isContinent;
+  }
+
+  get continentOnly() {
+    return this.continent && this.continent.size > 0.75 * this.plate.size;
   }
 
   get type() {

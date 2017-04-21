@@ -6,10 +6,7 @@ import { calcContinents } from './continent';
 import { mod } from '../utils';
 
 function getSubductingPoint(p1, p2) {
-  if (p1.plate.subductionIdx !== p2.plate.subductionIdx) {
-    return p1.plate.subductionIdx < p2.plate.subductionIdx ? p1 : p2;
-  }
-  return p1.plate.id < p2.plate.id ? p1 : p2;
+  return p1.plate.subductionIdx < p2.plate.subductionIdx ? p1 : p2;
 }
 
 export default class Model {
@@ -21,6 +18,8 @@ export default class Model {
     this.prevSurface = null;
     this.surface = new Surface({ width, height, plates });
     this.stepIdx = 0;
+
+    global.model = this;
   }
 
   step() {
@@ -128,28 +127,27 @@ export default class Model {
   continentCrustCollision(p1, p2, orogeny) {
     const pl1 = p1.plate;
     const pl2 = p2.plate;
-    const finalVx = (pl1.size * pl1.vx + pl2.size * pl2.vx) / (pl1.size + pl2.size);
-    const finalVy = (pl1.size * pl1.vy + pl2.size * pl2.vy) / (pl1.size + pl2.size);
-    const pl1VxDiff = pl1.vx - finalVx;
-    const pl1VyDiff = pl1.vy - finalVy;
-    const pl2VxDiff = pl2.vx - finalVx;
-    const pl2VyDiff = pl2.vy - finalVy;
-    const pl1Diff = Math.sqrt(pl1VxDiff * pl1VxDiff + pl1VyDiff * pl1VyDiff);
-    const pl2Diff = Math.sqrt(pl2VxDiff * pl2VxDiff + pl2VyDiff * pl2VyDiff);
-    let smallerContinentSize;
-    if (p1.continent && p2.continent) {
-      // Make friction proportional to the continent size. It ensures that continents would pretty much overlap in the
-      // same amount, no matter what's the size of the surrounding plate.
-      smallerContinentSize = Math.min(p1.continent.size, p2.continent.size);
-    } else {
-      smallerContinentSize = p1.continent && p1.continent.size || p2.continent && p2.continent.size;
+    // Make sure that colliding islands have their own plates. We don't want to modify speed of the ocean
+    // only because small islands are colliding.
+    if (p1.isIsland && !p1.continentOnly) {
+      const newPlate = pl1.extractContinent(p1.continent.points);
+      pl2.merge(newPlate);
+      return;
     }
-    const k = Math.min(0.9, config.continentCollisionFriction / smallerContinentSize);
-    pl1.vx -= k * pl1VxDiff;
-    pl1.vy -= k * pl1VyDiff;
-    pl2.vx -= k * pl2VxDiff;
-    pl2.vy -= k * pl2VyDiff;
-    if (Math.max(pl1Diff, pl2Diff) > config.platesMergeSpeedDiff) {
+    if (p2.isIsland && !p2.continentOnly) {
+      const newPlate = pl2.extractContinent(p2.continent.points);
+      pl1.merge(newPlate);
+      return;
+    }
+    const k = config.continentCollisionFriction;
+    const pl1Size = p1.continent && p1.continent.size || pl1.size;
+    const pl2Size = p2.continent && p2.continent.size || pl2.size;
+    pl1.vx = Math.max(0, pl1.vx - k / pl1Size);
+    pl1.vy = Math.max(0, pl1.vy - k / pl1Size);
+    pl2.vx = Math.max(0, pl2.vx - k / pl2Size);
+    pl2.vy = Math.max(0, pl2.vy - k / pl2Size);
+    const diff = Math.sqrt(Math.pow(pl1.vx - pl2.vx, 2) + Math.pow(pl1.vy - pl2.vy, 2));
+    if (diff > config.platesMergeSpeedDiff) {
       if (orogeny) {
         const newHotSpot1 = new HotSpot({
           x: p1.x + Math.random() * 30 - 15,
@@ -173,26 +171,13 @@ export default class Model {
       // Remove lower point.
       p2.alive = false;
     } else {
-      const biggerPlate = pl1.size >= pl2.size ? pl1 : pl2;
-      const smallerPlate = pl1.size < pl2.size ? pl1 : pl2;
+      const biggerPlate = pl1.size >= pl2.size ? p1 : p2;
+      const smallerPlate = pl1.size < pl2.size ? p1 : p2;
       // Merge only smaller plates. Two big continents will be still divided, but their velocity be the same.
-      if (smallerPlate.size < this.size * config.mergePlateRatio) {
-        biggerPlate.merge(smallerPlate);
+      if (smallerPlate.isIsland) {
+        biggerPlate.plate.merge(smallerPlate.plate);
       }
-      smallerPlate.vx = finalVx;
-      smallerPlate.vy = finalVy;
-      biggerPlate.vx = finalVx;
-      biggerPlate.vy = finalVy;
-      // Make sure that plates have the same fractional part of the coordinates, e.g. both have X = 1.35, but not
-      // 1.35 and 1.78. It matters, as everything is casted on the grid where coordinates are integers. If fractional
-      // part of plate coords is different, plates can move to next cells at different time and some visual artifacts
-      // might be visible.
-      const xFracDiff = 0.5 * (mod(smallerPlate.x, 1) - mod(biggerPlate.x, 1));
-      const yFracDiff = 0.5 * (mod(smallerPlate.y, 1) - mod(biggerPlate.y, 1));
-      smallerPlate.x -= xFracDiff;
-      biggerPlate.x += xFracDiff;
-      smallerPlate.y -= yFracDiff;
-      biggerPlate.y += yFracDiff;
+      pl1.vx = pl2.vx = pl2.vx = pl2.vy = 0;
     }
   }
 
